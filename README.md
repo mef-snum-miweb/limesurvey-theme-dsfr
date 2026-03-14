@@ -849,6 +849,26 @@ dsfr/
 
 ---
 
+## 🐳 Développement avec Docker
+
+Ce thème fait partie de la suite [limesurvey-dsfr-suite](https://github.com/bmatge/limesurvey-dsfr-suite), qui fournit un environnement Docker complet pour le développement local et le déploiement en production.
+
+```bash
+# Cloner les repos au même niveau
+cd ~/GitHub
+git clone https://github.com/bmatge/limesurvey-dsfr-suite.git
+git clone https://github.com/bmatge/limesurvey-theme-dsfr.git
+git clone https://github.com/bmatge/limesurvey-email-dsfr.git
+git clone https://github.com/bmatge/limesurvey-conversation-albert.git
+
+# Lancer l'environnement de développement
+cd limesurvey-dsfr-suite
+docker compose -f docker-compose.dev.yml up -d
+# → http://localhost:8080 (admin / admin)
+```
+
+Les fichiers du thème sont montés en direct : toute modification est visible après un rafraîchissement du navigateur.
+
 ## 🔗 Ressources
 
 - [Système de Design de l'État (DSFR)](https://www.systeme-de-design.gouv.fr/)
