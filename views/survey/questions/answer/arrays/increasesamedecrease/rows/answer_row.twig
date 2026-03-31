@@ -30,7 +30,7 @@
     </th>
 
     <!-- Increase -->
-    <td class="answer_cell_I answer-item radio-item fr-text--center">
+    <td class="answer_cell_I answer-item radio-item fr-text--center" headers="answertext{{ myfname }} answer{{ basename }}-I">
         <input
             type="radio"
             name="{{ myfname }}"
@@ -44,7 +44,7 @@
     </td>
 
     <!-- Same -->
-    <td class="answer_cell_S answer-item radio-item fr-text--center">
+    <td class="answer_cell_S answer-item radio-item fr-text--center" headers="answertext{{ myfname }} answer{{ basename }}-S">
         <input
             type="radio"
             name="{{ myfname }}"
@@ -58,7 +58,7 @@
     </td>
 
     <!-- Decrease -->
-    <td class="answer_cell_D answer-item radio-item fr-text--center">
+    <td class="answer_cell_D answer-item radio-item fr-text--center" headers="answertext{{ myfname }} answer{{ basename }}-D">
         <input
             type="radio"
             name="{{ myfname }}"
@@ -73,7 +73,7 @@
 
     <!-- No Answer -->
     {% if no_answer %}
-        <td class="answer_cell_ answer-item noanswer-item radio-item fr-text--center">
+        <td class="answer_cell_ answer-item noanswer-item radio-item fr-text--center" headers="answertext{{ myfname }} answer{{ basename }}-">
             <input
                 type="radio"
                 name="{{ myfname }}"
