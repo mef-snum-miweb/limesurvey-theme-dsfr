@@ -39,7 +39,7 @@
                         {% endif %}
                     {% endfor %}
                 </span>
-                <span class="fr-sr-only">{{ value }} {% if value > 1 %}{{ gT('stars') }}{% else %}{{ gT('star') }}{% endif %}</span>
+                <span class="fr-sr-only">{{ value }} {% if value > 1 %}{{ t.stars }}{% else %}{{ t.star }}{% endif %}</span>
             </label>
         {% elseif displayMode == 2 %}
             {# Emoji mode: hide radio, show only emoji centered #}

@@ -49,7 +49,7 @@
                     class="sortable-choice sortable-list list-group"
                     role="listbox"
                     aria-labelledby="ranking-choice-title-{{qId}}"
-                    aria-roledescription="{{ gT('Available choices list') }}">
+                    aria-roledescription="{{ t.available_choices }}">
                     {% for ansrow in answers %}
                         <li id="javatbd{{rankingName}}{{ansrow.code}}"
                             class="ls-choice list-group-item answer-item sortable-item grabable sortable-enable fr-mb-2w"
@@ -58,8 +58,8 @@
                             tabindex="0"
                             role="option"
                             aria-selected="false"
-                            aria-roledescription="{{ gT('Movable element') }}"
-                            aria-label="{{ processString(ansrow.answer) }} - {{ gT('Press Enter to add to ranking') }}">
+                            aria-roledescription="{{ t.movable_element }}"
+                            aria-label="{{ processString(ansrow.answer) }} - {{ t.press_enter_to_rank }}">
                             <span class="ranking-item-text">{{ processString(ansrow.answer) }}</span>
                             <span class="grabable selector__dragHandle float-end" aria-hidden="true">
                                 <svg width="9" height="14" viewBox="0 0 9 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -79,7 +79,7 @@
                     class="sortable-rank sortable-list list-group"
                     role="listbox"
                     aria-labelledby="ranking-rank-title-{{qId}}"
-                    aria-roledescription="{{ gT('Ranking list, use buttons or Alt+Arrow keys to reorder') }}">
+                    aria-roledescription="{{ t.ranking_instructions }}">
                     <li class="d-none ls-remove"></li>
                 </ul>
             </div>
@@ -105,7 +105,7 @@ try{
 {{ registerPackage('question-ranking') }}
 {{ registerScript(
     'RankingQuestionTranslate'~qId,
-    'LSvar.lang.rankhelp="' ~ gT("Double-click or drag-and-drop items in the left list to move them to the right - your highest ranking item should be on the top right, moving through to your lowest ranking item.") ~ '";', 'POS_BEGIN')
+    'LSvar.lang.rankhelp="' ~ t.ranking_help ~ '";', 'POS_BEGIN')
 }}
 {{ registerScript( 'RankingQuestion'~qId, script, 'POS_POSTSCRIPT') }}
 

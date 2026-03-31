@@ -15,7 +15,7 @@
 <!-- answer -->
 <div class="fr-table fr-table--bordered" role="group" aria-labelledby="ls-question-text-{{ basename }}">
     <table class="{{ coreClass }}">
-        <caption class="fr-sr-only">{{ gT('Response matrix') }}</caption>
+        <caption class="fr-sr-only">{{ t.response_matrix }}</caption>
         <tbody>
             {% for aRow in aRows %}
                 {% include 'survey/questions/answer/arrays/array/dropdown/rows/answer_row.twig' with aRow %}

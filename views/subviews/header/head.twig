@@ -159,7 +159,7 @@
                 {%- endif -%}
             {%- endfor -%}
             {%- if _titleCurrentStep > 0 -%}
-                {{ gT('Step') }} {{ _titleCurrentStep }} {{ gT('of') }} {{ _titleTotalSteps }} - {{ _titleCurrentText }} - {{ processString(aSurveyInfo.surveyls_title,1) }}
+                {{ t.step }} {{ _titleCurrentStep }} {{ t.of }} {{ _titleTotalSteps }} - {{ _titleCurrentText }} - {{ processString(aSurveyInfo.surveyls_title,1) }}
             {%- else -%}
                 {{ processString(aSurveyInfo.surveyls_title,1) }}
             {%- endif -%}

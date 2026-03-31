@@ -42,16 +42,16 @@ For the survey navigator ("Next", "Back", etc.), see: navigation/navigator.twig
                                             data-fr-opened="false"
                                             aria-controls="header-menu"
                                             id="header-menu-btn"
-                                            title="{{ gT("Menu") }}">
-                                        {{ gT("Menu") }}
+                                            title="{{ t.menu }}">
+                                        {{ t.menu }}
                                     </button>
                                 </div>
                             {% endif %}
                         </div>
                         <div class="fr-header__service">
                             <a href="{{ aSurveyInfo.surveyUrl }}"
-                               title="{{ gT("Accueil") }} - {{ aSurveyInfo.name }} - {{ gT("République Française") }}"
-                               aria-label="{{ gT("Accueil") }} - {{ aSurveyInfo.name }} - {{ gT("République Française") }}">
+                               title="{{ t.home }} - {{ aSurveyInfo.name }} - {{ t.french_republic }}"
+                               aria-label="{{ t.home }} - {{ aSurveyInfo.name }} - {{ t.french_republic }}">
                                 <p class="fr-header__service-title">
                                     {% if aSurveyInfo.options.header_title %}
                                         {{ aSurveyInfo.options.header_title|raw }}
@@ -74,8 +74,8 @@ For the survey navigator ("Next", "Back", etc.), see: navigation/navigator.twig
                                             data-fr-opened="false"
                                             aria-controls="question-index-modal"
                                             class="fr-btn--team fr-btn"
-                                            title="{{ gT("Liste des étapes") }}">
-                                        {{ gT("Liste des étapes") }}
+                                            title="{{ t.steps_list }}">
+                                        {{ t.steps_list }}
                                     </button>
                                 {% endif %}
 
@@ -85,8 +85,8 @@ For the survey navigator ("Next", "Back", etc.), see: navigation/navigator.twig
                                             type="button"
                                             aria-controls="fr-theme-modal"
                                             data-fr-opened="false"
-                                            title="{{ gT("Paramètres d'affichage") }}">
-                                        {{ gT("Paramètres d'affichage") }}
+                                            title="{{ t.display_settings }}">
+                                        {{ t.display_settings }}
                                     </button>
                                 </div>
 
@@ -96,7 +96,7 @@ For the survey navigator ("Next", "Back", etc.), see: navigation/navigator.twig
                                         <div class="fr-nav__item">
                                             <button aria-controls="translate-collapse"
                                                     aria-expanded="false"
-                                                    title="{{ gT("Select a language") }}"
+                                                    title="{{ t.select_language }}"
                                                     type="button"
                                                     class="fr-translate__btn fr-btn">
                                                 {{ aLCD.sSelected|upper }}<span class="fr-hidden-lg">&nbsp;- {{ gT(aLCD.aListLang[aLCD.sSelected]) }}</span>
@@ -141,8 +141,8 @@ For the survey navigator ("Next", "Back", etc.), see: navigation/navigator.twig
                                     data-fr-opened="false"
                                     aria-controls="question-index-modal"
                                     class="fr-btn--team fr-btn"
-                                    title="{{ gT("Liste des étapes") }}">
-                                {{ gT("Liste des étapes") }}
+                                    title="{{ t.steps_list }}">
+                                {{ t.steps_list }}
                             </button>
                         {% endif %}
 
@@ -151,8 +151,8 @@ For the survey navigator ("Next", "Back", etc.), see: navigation/navigator.twig
                                 type="button"
                                 aria-controls="fr-theme-modal"
                                 data-fr-opened="false"
-                                title="{{ gT("Paramètres d'affichage") }}">
-                            {{ gT("Paramètres d'affichage") }}
+                                title="{{ t.display_settings }}">
+                            {{ t.display_settings }}
                         </button>
 
                         {% if aSurveyInfo.alanguageChanger.show %}
@@ -161,7 +161,7 @@ For the survey navigator ("Next", "Back", etc.), see: navigation/navigator.twig
                                 <div class="fr-nav__item">
                                     <button aria-controls="translate-collapse-mobile"
                                             aria-expanded="false"
-                                            title="{{ gT("Select a language") }}"
+                                            title="{{ t.select_language }}"
                                             type="button"
                                             class="fr-translate__btn fr-btn">
                                         {{ aLCD.sSelected|upper }}<span class="fr-hidden-lg">&nbsp;- {{ gT(aLCD.aListLang[aLCD.sSelected]) }}</span>

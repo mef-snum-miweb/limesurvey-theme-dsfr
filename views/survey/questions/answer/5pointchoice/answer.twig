@@ -10,7 +10,7 @@
 
 <!-- 5-Point Choice DSFR -->
 <fieldset class="fr-fieldset {{coreClass|replace({'visually-hidden': ''})}}" aria-labelledby="ls-question-text-{{name}}" data-display-mode="{{ slider_rating|default(0) }}">
-    <legend class="fr-fieldset__legend fr-sr-only">{{ gT('Please choose one of the following options') }}</legend>
+    <legend class="fr-fieldset__legend fr-sr-only">{{ t.choose_option }}</legend>
     <div class="fr-fieldset__content">
         {% if slider_rating|default(0) == 1 %}
             {# Star rating mode: special structure for progressive fill #}
@@ -18,7 +18,7 @@
                 {# Generate stars in normal order with explicit data-star attribute for CSS targeting #}
                 {% for aRow in aRows %}
                     {% if aRow.value != "" %}
-                        {% set starLabel = aRow.value ~ ' ' ~ (aRow.value > 1 ? gT('stars') : gT('star')) %}
+                        {% set starLabel = aRow.value ~ ' ' ~ (aRow.value > 1 ? t.stars : t.star) %}
                         <div class="fr-fieldset__element fr-fieldset__element--inline">
                             <!-- radio-item et answer-item requis pour em_javascript.js -->
                             <div class="star-rating-item radio-item answer-item" data-star="{{aRow.value}}">

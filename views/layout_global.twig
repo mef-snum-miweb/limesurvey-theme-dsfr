@@ -67,6 +67,9 @@
     NOTE: Feel free to ask for functions, variables, etc, that you feel are missing - https://bugs.limesurvey.org/my_view_page.php
 #}
 
+{# Traductions centralisées du thème — rend {{ t.cle }} disponible partout #}
+{% include './subviews/translations.twig' %}
+
 <!DOCTYPE html>
 <html lang="{{ aSurveyInfo.languagecode }}" dir="{{ aSurveyInfo.dir }}" class="{{ aSurveyInfo.languagecode }} dir-{{ aSurveyInfo.dir }} {{ aSurveyInfo.class.html }}" {{ aSurveyInfo.attr.html }} data-fr-theme="{{ aSurveyInfo.options.dsfr_theme ? aSurveyInfo.options.dsfr_theme : 'light' }}">
     {% block head %}
@@ -77,13 +80,13 @@
 
         {# DSFR Skip Links for accessibility #}
         <div class="fr-skiplinks">
-            <nav class="fr-container" role="navigation" aria-label="{{ gT('Accès rapide') }}">
+            <nav class="fr-container" role="navigation" aria-label="{{ t.quick_access }}">
                 <ul class="fr-skiplinks__list">
                     <li>
-                        <a class="fr-link" href="#main-content">{{ gT('Contenu') }}</a>
+                        <a class="fr-link" href="#main-content">{{ t.content }}</a>
                     </li>
                     <li>
-                        <a class="fr-link" href="#footer">{{ gT('Pied de page') }}</a>
+                        <a class="fr-link" href="#footer">{{ t.footer }}</a>
                     </li>
                 </ul>
             </nav>

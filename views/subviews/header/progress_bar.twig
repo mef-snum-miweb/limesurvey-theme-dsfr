@@ -3,35 +3,8 @@
     Stepper DSFR officiel avec données de l'index des questions
 
     Structure conforme : https://www.systeme-de-design.gouv.fr/composants-et-modeles/composants/indicateur-d-etapes/
+    Traductions : utilise {{ t }} depuis translations.twig
 #}
-
-{# Traductions personnalisées pour le stepper DSFR #}
-{% set stepperLang = {
-    'fr': {
-        'step': 'Étape',
-        'of': 'sur',
-        'nextStep': 'Étape suivante :'
-    },
-    'en': {
-        'step': 'Step',
-        'of': 'of',
-        'nextStep': 'Next step:'
-    },
-    'es': {
-        'step': 'Paso',
-        'of': 'de',
-        'nextStep': 'Siguiente paso:'
-    },
-    'de': {
-        'step': 'Schritt',
-        'of': 'von',
-        'nextStep': 'Nächster Schritt:'
-    }
-} %}
-
-{# Détecter la langue active (fallback: français) #}
-{% set currentLang = aSurveyInfo.alanguageChanger.datas.sSelected|default('fr') %}
-{% set lang = stepperLang[currentLang]|default(stepperLang.fr) %}
 
 {% if aSurveyInfo.showprogress == 'Y' and aSurveyInfo.format != 'A' and not aSurveyInfo.aCompleted and aSurveyInfo.aQuestionIndex.items %}
     <!-- DSFR Stepper -->
@@ -59,7 +32,7 @@
         {# Fallback si pas trouvé #}
         {% if currentStepIndex == 0 %}
             {% set currentStepIndex = 1 %}
-            {% set currentStepText = aSurveyInfo.groupname ? aSurveyInfo.groupname : gT("Current step") %}
+            {% set currentStepText = aSurveyInfo.groupname ? aSurveyInfo.groupname : t.current_step %}
         {% endif %}
 
         <div class="fr-stepper"
@@ -67,10 +40,10 @@
              aria-valuenow="{{ currentStepIndex }}"
              aria-valuemin="1"
              aria-valuemax="{{ totalSteps }}"
-             aria-label="{{ lang.step }} {{ currentStepIndex }} {{ lang.of }} {{ totalSteps }}">
+             aria-label="{{ t.step }} {{ currentStepIndex }} {{ t.of }} {{ totalSteps }}">
             <h2 class="fr-stepper__title">
                 {{ currentStepText }}
-                <span class="fr-stepper__state">{{ lang.step }} {{ currentStepIndex }} {{ lang.of }} {{ totalSteps }}</span>
+                <span class="fr-stepper__state">{{ t.step }} {{ currentStepIndex }} {{ t.of }} {{ totalSteps }}</span>
             </h2>
             <div class="fr-stepper__steps"
                  data-fr-current-step="{{ currentStepIndex }}"
@@ -79,7 +52,7 @@
             </div>
             {% if nextStepText %}
                 <p class="fr-stepper__details">
-                    <span class="fr-text--bold">{{ lang.nextStep }}</span> {{ nextStepText }}
+                    <span class="fr-text--bold">{{ t.next_step }}</span> {{ nextStepText }}
                 </p>
             {% endif %}
         </div>

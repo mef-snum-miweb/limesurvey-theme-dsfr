@@ -17,20 +17,20 @@ Note: Utilise gT() avec textes français par défaut (fallback si traductions in
                 <div class="fr-modal__body">
                     <div class="fr-modal__header">
                         <button aria-controls="fr-theme-modal"
-                                title="{{ gT("Fermer") }}"
+                                title="{{ t.close }}"
                                 type="button"
                                 class="fr-btn--close fr-btn">
-                            {{ gT("Fermer") }}
+                            {{ t.close }}
                         </button>
                     </div>
                     <div class="fr-modal__content">
                         <h2 id="fr-theme-modal-title" class="fr-modal__title">
-                            {{ gT("Paramètres d'affichage") }}
+                            {{ t.display_settings }}
                         </h2>
                         <div id="fr-display" class="fr-display">
                             <fieldset class="fr-fieldset" id="display-fieldset">
                                 <legend class="fr-fieldset__legend--regular fr-fieldset__legend" id="display-fieldset-legend">
-                                    {{ gT("Choisissez un thème pour personnaliser l'apparence du site.") }}
+                                    {{ t.choose_theme }}
                                 </legend>
                                 <div class="fr-fieldset__element">
                                     <div class="fr-radio-group fr-radio-rich">
@@ -39,7 +39,7 @@ Note: Utilise gT() avec textes français par défaut (fallback si traductions in
                                                id="fr-radios-theme-light"
                                                name="fr-radios-theme">
                                         <label class="fr-label" for="fr-radios-theme-light">
-                                            {{ gT("Thème clair") }}
+                                            {{ t.light_theme }}
                                         </label>
                                         <div class="fr-radio-rich__pictogram">
                                             <svg aria-hidden="true" class="fr-artwork" viewBox="0 0 80 80" width="80px" height="80px">
@@ -57,7 +57,7 @@ Note: Utilise gT() avec textes français par défaut (fallback si traductions in
                                                id="fr-radios-theme-dark"
                                                name="fr-radios-theme">
                                         <label class="fr-label" for="fr-radios-theme-dark">
-                                            {{ gT("Thème sombre") }}
+                                            {{ t.dark_theme }}
                                         </label>
                                         <div class="fr-radio-rich__pictogram">
                                             <svg aria-hidden="true" class="fr-artwork" viewBox="0 0 80 80" width="80px" height="80px">
@@ -76,8 +76,8 @@ Note: Utilise gT() avec textes français par défaut (fallback si traductions in
                                                name="fr-radios-theme"
                                                checked>
                                         <label class="fr-label" for="fr-radios-theme-system">
-                                            {{ gT("Système") }}
-                                            <span class="fr-hint-text">{{ gT("Utilise les paramètres système") }}</span>
+                                            {{ t.system_theme }}
+                                            <span class="fr-hint-text">{{ t.system_theme_hint }}</span>
                                         </label>
                                         <div class="fr-radio-rich__pictogram">
                                             <svg aria-hidden="true" class="fr-artwork" viewBox="0 0 80 80" width="80px" height="80px">
