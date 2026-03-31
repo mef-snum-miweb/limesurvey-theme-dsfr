@@ -1075,23 +1075,60 @@ console.log('%c\n' +
      * validateAndUpdateState, handlers radio/checkbox, validations numériques, etc.
      */
     function initAriaInvalidSync() {
+        // Synchronise aria-invalid sur les champs de formulaire en fonction
+        // des classes d'erreur, que l'erreur soit sur le champ lui-même
+        // (input.error, .fr-input--error) ou sur un conteneur parent
+        // (.question-container.input-error, .fr-input-group--error).
+
+        function syncAriaInvalidInContainer(container, hasError) {
+            var fields = container.querySelectorAll('input, textarea, select');
+            fields.forEach(function(field) {
+                // Ignorer les champs cachés (hidden, disabled, java*)
+                if (field.type === 'hidden' || field.id && field.id.indexOf('java') === 0) return;
+                if (hasError) {
+                    field.setAttribute('aria-invalid', 'true');
+                } else {
+                    field.removeAttribute('aria-invalid');
+                }
+            });
+        }
+
         // 1. Traiter les champs déjà en erreur au chargement
+        // Champs individuels en erreur
         document.querySelectorAll('.fr-input--error, input.error, textarea.error, select.error').forEach(function(input) {
             input.setAttribute('aria-invalid', 'true');
         });
+        // Conteneurs en erreur (radio, checkbox, tableaux, etc.)
+        document.querySelectorAll('.question-container.input-error, .fr-input-group--error').forEach(function(container) {
+            syncAriaInvalidInContainer(container, true);
+        });
 
-        // 2. Observer les changements de classe sur tous les inputs/textarea/select
+        // 2. Observer les changements de classe sur les champs ET les conteneurs
         var observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') return;
                 var el = mutation.target;
-                if (!el.matches('input, textarea, select')) return;
 
-                var hasError = el.classList.contains('fr-input--error') || el.classList.contains('error');
-                if (hasError) {
-                    el.setAttribute('aria-invalid', 'true');
-                } else {
-                    el.removeAttribute('aria-invalid');
+                // Cas 1 : changement directement sur un champ de formulaire
+                if (el.matches('input, textarea, select')) {
+                    var hasError = el.classList.contains('fr-input--error') || el.classList.contains('error');
+                    if (hasError) {
+                        el.setAttribute('aria-invalid', 'true');
+                    } else {
+                        el.removeAttribute('aria-invalid');
+                    }
+                }
+
+                // Cas 2 : changement sur un conteneur de question
+                if (el.classList && el.classList.contains('question-container')) {
+                    var containerError = el.classList.contains('input-error');
+                    syncAriaInvalidInContainer(el, containerError);
+                }
+
+                // Cas 3 : changement sur un fr-input-group (radios, checkboxes)
+                if (el.classList && el.classList.contains('fr-input-group')) {
+                    var groupError = el.classList.contains('fr-input-group--error');
+                    syncAriaInvalidInContainer(el, groupError);
                 }
             });
         });
