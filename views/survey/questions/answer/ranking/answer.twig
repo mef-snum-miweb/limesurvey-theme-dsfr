@@ -5,6 +5,7 @@
  *
  * This template uses the vanilla LimeSurvey ranking functionality
  * with DSFR CSS styling applied on top
+ * Enhanced with accessible keyboard navigation and screen reader support
  *
  * @var $sSelects       Hidden select elements for session persistence
  * @var $name           Question name
@@ -35,23 +36,33 @@
         {{sSelects|raw}}
     </ul>
 
+    <!-- Live region for screen reader announcements -->
+    <div class="fr-sr-only" aria-live="polite" aria-atomic="true" id="ranking-live-{{qId}}"></div>
+
     <!-- Visible ranking interface with DSFR styling -->
-    <div class="ls-no-js-hidden answers-list{{ samechoiceheight ? ' list-samechoiceheight': '' }} {{ samelistheight ? ' list-samelistheight': '' }}" aria-hidden="true">
+    <div class="ls-no-js-hidden answers-list{{ samechoiceheight ? ' list-samechoiceheight': '' }} {{ samelistheight ? ' list-samelistheight': '' }}">
         <div class="fr-grid-row fr-grid-row--gutters">
             <!-- Available choices (left column) -->
             <div class="fr-col-12 fr-col-md-6 ranking-available-items">
-                <h4 class="sortable-subtitle sortable-rank-subtitle fr-h6 fr-mb-2w">{{choice_title}}</h4>
-                <ul id="sortable-choice-{{qId}}" class="sortable-choice sortable-list list-group" role="list">
+                <h4 id="ranking-choice-title-{{qId}}" class="sortable-subtitle sortable-rank-subtitle fr-h6 fr-mb-2w">{{choice_title}}</h4>
+                <ul id="sortable-choice-{{qId}}"
+                    class="sortable-choice sortable-list list-group"
+                    role="listbox"
+                    aria-labelledby="ranking-choice-title-{{qId}}"
+                    aria-roledescription="{{ gT('Available choices list') }}">
                     {% for ansrow in answers %}
                         <li id="javatbd{{rankingName}}{{ansrow.code}}"
                             class="ls-choice list-group-item answer-item sortable-item grabable sortable-enable fr-mb-2w"
                             data-value="{{ansrow.code}}"
+                            data-label="{{ processString(ansrow.answer) }}"
                             tabindex="0"
-                            role="button"
-                            aria-label="{{ processString(ansrow.answer) }} - {{ gT('Press Enter or Space to move to ranked list, or use drag and drop') }}">
-                            {{ processString(ansrow.answer) }}
+                            role="option"
+                            aria-selected="false"
+                            aria-roledescription="{{ gT('Movable element') }}"
+                            aria-label="{{ processString(ansrow.answer) }} - {{ gT('Press Enter to add to ranking') }}">
+                            <span class="ranking-item-text">{{ processString(ansrow.answer) }}</span>
                             <span class="grabable selector__dragHandle float-end" aria-hidden="true">
-                                <svg class="" width="9" height="14" viewBox="0 0 9 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <svg width="9" height="14" viewBox="0 0 9 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path fill-rule="evenodd" clip-rule="evenodd" d="M0.4646 0.125H3.24762V2.625H0.4646V0.125ZM6.03064 0.125H8.81366V2.625H6.03064V0.125ZM0.4646 5.75H3.24762V8.25H0.4646V5.75ZM6.03064 5.75H8.81366V8.25H6.03064V5.75ZM0.4646 11.375H3.24762V13.875H0.4646V11.375ZM6.03064 11.375H8.81366V13.875H6.03064V11.375Z" fill="currentColor"/>
                                 </svg>
                             </span>
@@ -63,8 +74,12 @@
 
             <!-- Ranked choices (right column) -->
             <div class="fr-col-12 fr-col-md-6 ranking-sorted-items">
-                <h4 class="sortable-subtitle sortable-rank-subtitle fr-h6 fr-mb-2w">{{rank_title}}</h4>
-                <ul id="sortable-rank-{{qId}}" class="sortable-rank sortable-list list-group" role="list" aria-label="{{rank_title}}">
+                <h4 id="ranking-rank-title-{{qId}}" class="sortable-subtitle sortable-rank-subtitle fr-h6 fr-mb-2w">{{rank_title}}</h4>
+                <ul id="sortable-rank-{{qId}}"
+                    class="sortable-rank sortable-list list-group"
+                    role="listbox"
+                    aria-labelledby="ranking-rank-title-{{qId}}"
+                    aria-roledescription="{{ gT('Ranking list, use buttons or Alt+Arrow keys to reorder') }}">
                     <li class="d-none ls-remove"></li>
                 </ul>
             </div>

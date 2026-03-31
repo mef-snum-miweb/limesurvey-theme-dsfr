@@ -457,13 +457,46 @@ console.log('%c\n' +
 
         // Trouver le point d'insertion : juste avant les questions
 
+        // Contenu HTML commun de la mention
+        const noticeHTML = '<p class="fr-text--sm" style="color: var(--text-mention-grey);"><span class="fr-icon-error-warning-line" aria-hidden="true" style="margin-right: 0.5rem;"></span>Les champs marqués d\'un <span style="color: var(--text-default-error); font-weight: 700;" aria-hidden="true">*</span> sont obligatoires</p>';
+
+        // Stratégie 0a: Page anti-bot - insérer dans la colonne centrée avant le titre
+        const antibotContainer = document.querySelector('#antibot-challenge-container');
+        if (antibotContainer) {
+            const centeredCol = antibotContainer.querySelector('.fr-mx-auto, .fr-col-md-8');
+            if (centeredCol) {
+                const notice = document.createElement('div');
+                notice.id = 'required-fields-notice';
+                notice.className = 'fr-mb-2w';
+                notice.innerHTML = noticeHTML;
+                centeredCol.insertBefore(notice, centeredCol.firstChild);
+                return;
+            }
+        }
+
+        // Stratégie 0b: Page de bienvenue (welcome) - insérer dans le conteneur avant le titre
+        // Cherche le conteneur welcome par id dynamique ou par structure
+        const welcomeContainer = document.querySelector('#welcome-page-wrapper .fr-container, [id*="welcome"] .fr-col-12, [class*="welcomecontainer"]');
+        if (welcomeContainer) {
+            const innerCol = welcomeContainer.querySelector('.fr-col-12') || welcomeContainer;
+            const firstTitle = innerCol.querySelector('h1, h2');
+            if (firstTitle) {
+                const notice = document.createElement('div');
+                notice.id = 'required-fields-notice';
+                notice.className = 'fr-mb-2w';
+                notice.innerHTML = noticeHTML;
+                innerCol.insertBefore(notice, firstTitle);
+                return;
+            }
+        }
+
         // Stratégie 1: Page de sauvegarde - insérer avant le fr-callout dans la grille
         const saveMessage = document.querySelector('.save-message');
         if (saveMessage) {
             const notice = document.createElement('div');
             notice.id = 'required-fields-notice';
             notice.className = 'fr-mb-2w';
-            notice.innerHTML = '<p class="fr-text--sm" style="color: var(--text-mention-grey);"><span class="fr-icon-error-warning-line" aria-hidden="true" style="margin-right: 0.5rem;"></span>Les champs marqués d\'un <span style="color: var(--text-default-error); font-weight: 700;" aria-hidden="true">*</span> sont obligatoires</p>';
+            notice.innerHTML = noticeHTML;
 
             // Insérer avant le .save-message (fr-callout)
             saveMessage.parentElement.insertBefore(notice, saveMessage);
@@ -476,7 +509,7 @@ console.log('%c\n' +
             const notice = document.createElement('div');
             notice.id = 'required-fields-notice';
             notice.className = 'fr-container fr-my-2w';
-            notice.innerHTML = '<p class="fr-text--sm" style="color: var(--text-mention-grey);"><span class="fr-icon-error-warning-line" aria-hidden="true" style="margin-right: 0.5rem;"></span>Les champs marqués d\'un <span style="color: var(--text-default-error); font-weight: 700;" aria-hidden="true">*</span> sont obligatoires</p>';
+            notice.innerHTML = noticeHTML;
 
             const formParent = captchaForm.parentElement;
             if (formParent) {
@@ -489,7 +522,7 @@ console.log('%c\n' +
         const notice = document.createElement('div');
         notice.id = 'required-fields-notice';
         notice.className = 'fr-my-3w';
-        notice.innerHTML = '<p class="fr-text--sm" style="color: var(--text-mention-grey);"><span class="fr-icon-error-warning-line" aria-hidden="true" style="margin-right: 0.5rem;"></span>Les champs marqués d\'un <span style="color: var(--text-default-error); font-weight: 700;" aria-hidden="true">*</span> sont obligatoires</p>';
+        notice.innerHTML = noticeHTML;
 
         // Stratégie 3: Pages de questions - Insérer juste avant la première question
         // dans le premier groupe (après nom/description du groupe)
@@ -1745,20 +1778,21 @@ console.log('%c\n' +
                         // Marquer que cette question a eu une erreur
                         question.dataset.hadError = 'true';
                     } else {
-                        // Format valide → succès
+                        // Format valide → retirer les erreurs de format
                         this.classList.remove('fr-input--error');
                         inputGroup.classList.remove('fr-input-group--error');
 
-                        // Retirer le message d'erreur
+                        // Retirer le message d'erreur de format
                         const errorMsg = messagesGroup.querySelector('.fr-message--error');
                         if (errorMsg) {
                             errorMsg.remove();
-                            // Marquer que cette question a eu une erreur
                             question.dataset.hadError = 'true';
                         }
 
-                        // Ajouter le message de succès UNIQUEMENT si la question a eu une erreur auparavant
-                        if (question.dataset.hadError === 'true') {
+                        // Si pas de contrainte de somme, afficher "Merci" immédiatement
+                        // Sinon, on attend le setTimeout qui vérifiera la somme
+                        var hasSumConstraint = !!question.querySelector('.dynamic-total');
+                        if (!hasSumConstraint && question.dataset.hadError === 'true') {
                             this.classList.add('fr-input--valid');
                             inputGroup.classList.add('fr-input-group--valid');
 
@@ -1772,66 +1806,124 @@ console.log('%c\n' +
                         }
                     }
 
-                    // Vérifier si tous les champs de la question sont valides
+                    // Vérifier l'ensemble : formats + somme (après recalcul EM)
                     setTimeout(function() {
-                        const allInputs = question.querySelectorAll('input.numeric[data-number="1"]');
-                        let allValid = true;
+                        var allInputs = question.querySelectorAll('input.numeric[data-number="1"]');
+                        var allFormatValid = true;
+                        var allFilled = true;
 
                         allInputs.forEach(function(inp) {
-                            const val = inp.value ? inp.value.trim() : '';
-                            const isValid = val !== '' && (/^-?\d+([.,]\d*)?$/.test(val) || /^-?\d*[.,]\d+$/.test(val));
-                            if (!isValid) {
-                                allValid = false;
+                            var val = inp.value ? inp.value.trim() : '';
+                            if (val === '') {
+                                allFilled = false;
+                                allFormatValid = false;
+                            } else {
+                                var isValid = /^-?\d+([.,]\d*)?$/.test(val) || /^-?\d*[.,]\d+$/.test(val);
+                                if (!isValid) allFormatValid = false;
                             }
                         });
 
-                        const dsfrErrorMsg = question.querySelector('.fr-message--error');
+                        // Vérifier la contrainte de somme en calculant nous-mêmes
+                        var totalEl = question.querySelector('.dynamic-total');
+                        var hasSumConstraint = false;
+                        var isSumValid = true;
 
-                        if (allValid) {
-                            // Tous les champs sont valides → succès
+                        if (totalEl) {
+                            // Chercher le message de contrainte de somme (vmsg_*_sum_range-dsfr)
+                            var qId = totalEl.id ? totalEl.id.replace('totalvalue_', '') : null;
+                            var sumRangeMsg = qId ? document.getElementById('vmsg_' + qId + '_sum_range-dsfr') : null;
+
+                            if (sumRangeMsg) {
+                                hasSumConstraint = true;
+                                // Parser les limites depuis le texte "entre X et Y"
+                                var rangeMatch = sumRangeMsg.textContent.match(/(\d+)\s+.+\s+(\d+)/);
+                                if (rangeMatch) {
+                                    var minSum = parseFloat(rangeMatch[1]);
+                                    var maxSum = parseFloat(rangeMatch[2]);
+
+                                    // Calculer la somme des champs remplis
+                                    var currentSum = 0;
+                                    allInputs.forEach(function(inp) {
+                                        var val = inp.value ? inp.value.trim().replace(',', '.') : '';
+                                        if (val !== '' && !isNaN(parseFloat(val))) {
+                                            currentSum += parseFloat(val);
+                                        }
+                                    });
+
+                                    isSumValid = currentSum >= minSum && currentSum <= maxSum;
+                                }
+                            }
+                        }
+
+                        if (allFormatValid && allFilled && isSumValid) {
+                            // Tout est OK → succès global
                             question.classList.remove('input-error', 'fr-input-group--error');
                             question.classList.add('input-valid');
 
-                            // Retirer fr-input-group--error de TOUS les inputs maintenant valides
-                            allInputs.forEach(function(inp) {
-                                const val = inp.value ? inp.value.trim() : '';
-                                const isValid = val !== '' && (/^-?\d+([.,]\d*)?$/.test(val) || /^-?\d*[.,]\d+$/.test(val));
-                                if (isValid) {
-                                    const grp = inp.closest('.fr-input-group');
+                            // Afficher "Merci" sur chaque champ (y compris ceux en attente de la somme)
+                            if (question.dataset.hadError === 'true') {
+                                allInputs.forEach(function(inp) {
+                                    var grp = inp.closest('.fr-input-group');
                                     if (grp) {
                                         grp.classList.remove('fr-input-group--error');
+                                        grp.classList.add('fr-input-group--valid');
                                         inp.classList.remove('fr-input--error');
+                                        inp.classList.add('fr-input--valid');
+                                        var msgs = grp.querySelector('.fr-messages-group');
+                                        if (msgs) {
+                                            var vMsg = msgs.querySelector('.fr-message--valid');
+                                            if (!vMsg) {
+                                                vMsg = document.createElement('p');
+                                                vMsg.className = 'fr-message fr-message--valid';
+                                                msgs.appendChild(vMsg);
+                                            }
+                                            vMsg.textContent = 'Merci d\'avoir répondu';
+                                        }
+                                    }
+                                });
+                            }
+
+                            // Retirer les messages d'erreur globaux
+                            var dsfrErrorMsg = question.querySelector('.question-valid-container .fr-message--error');
+                            if (dsfrErrorMsg) dsfrErrorMsg.remove();
+
+                            if (typeof updateErrorSummary === 'function') {
+                                setTimeout(updateErrorSummary, 50);
+                            }
+
+                        } else if (allFormatValid && hasSumConstraint && !isSumValid) {
+                            // Formats OK mais somme hors limites
+                            question.classList.remove('input-valid');
+                            question.classList.add('input-error');
+
+                            // Retirer les "Merci" per-field (la somme n'est pas bonne)
+                            allInputs.forEach(function(inp) {
+                                var grp = inp.closest('.fr-input-group');
+                                if (grp) {
+                                    grp.classList.remove('fr-input-group--error', 'fr-input-group--valid');
+                                    inp.classList.remove('fr-input--error', 'fr-input--valid');
+                                    var msgs = grp.querySelector('.fr-messages-group');
+                                    if (msgs) {
+                                        var vMsg = msgs.querySelector('.fr-message--valid');
+                                        if (vMsg) vMsg.remove();
+                                        var eMsg = msgs.querySelector('.fr-message--error');
+                                        if (eMsg) eMsg.remove();
                                     }
                                 }
                             });
 
-                            // Retirer le message d'erreur global
-                            if (dsfrErrorMsg) {
-                                dsfrErrorMsg.remove();
-                            }
+                            // Marquer hadError pour pouvoir afficher "Merci" plus tard
+                            question.dataset.hadError = 'true';
 
-                            // Mettre à jour le récapitulatif
-                            if (typeof updateErrorSummary === 'function') {
-                                setTimeout(updateErrorSummary, 50);
-                            }
-                        } else {
-                            // Il reste des champs invalides → erreur
+                        } else if (!allFormatValid) {
+                            // Erreurs de format sur certains champs
                             question.classList.add('input-error');
                             question.classList.remove('input-valid');
 
-                            // S'assurer que le message d'erreur global est présent
-                            if (!dsfrErrorMsg) {
-                                const validContainer = question.querySelector('.question-valid-container');
-                                if (validContainer) {
-                                    const newErrorMsg = document.createElement('p');
-                                    newErrorMsg.className = 'fr-message fr-message--error';
-                                    newErrorMsg.textContent = 'Veuillez compléter toutes les parties.';
-                                    newErrorMsg.setAttribute('role', 'alert');
-                                    validContainer.appendChild(newErrorMsg);
-                                }
-                            }
+                            // S'assurer que les champs invalides affichent l'erreur
+                            // (déjà géré dans le handler synchrone ci-dessus)
                         }
-                    }, 50);
+                    }, 200);
                 });
             });
         });
@@ -1846,6 +1938,146 @@ console.log('%c\n' +
 
     // Réinitialiser après chargement AJAX
     document.addEventListener('limesurvey:questionsLoaded', handleNumericMultiValidation);
+
+    // === Validation de la somme (min/max) pour les questions "Multiples entrées numériques" ===
+
+    /**
+     * Observe le totalvalue_* des questions numeric-multi pour détecter
+     * quand l'Expression Manager de LimeSurvey bascule la classe ls-em-error
+     * (somme hors limites) et synchronise l'état avec les messages DSFR.
+     */
+    function observeNumericMultiSumValidation() {
+        var numericMultiQuestions = document.querySelectorAll('.question-container.numeric-multi');
+        console.log('[DSFR SumValidation] Questions numeric-multi trouvées:', numericMultiQuestions.length);
+
+        numericMultiQuestions.forEach(function(question) {
+            var totalEl = question.querySelector('.dynamic-total');
+            console.log('[DSFR SumValidation] totalEl:', totalEl ? totalEl.id : 'NON TROUVÉ');
+            if (!totalEl) return;
+
+            var qId = totalEl.id ? totalEl.id.replace('totalvalue_', '') : null;
+            console.log('[DSFR SumValidation] qId:', qId);
+            if (!qId) return;
+
+            var sumRangeMsgId = 'vmsg_' + qId + '_sum_range-dsfr';
+            var sumRangeMsg = document.getElementById(sumRangeMsgId);
+            console.log('[DSFR SumValidation] sumRangeMsg (' + sumRangeMsgId + '):', sumRangeMsg ? sumRangeMsg.textContent : 'NON TROUVÉ');
+            // Aussi chercher sans le suffixe -dsfr (si transformValidationMessages n'a pas encore tourné)
+            if (!sumRangeMsg) {
+                sumRangeMsg = document.getElementById('vmsg_' + qId + '_sum_range');
+                console.log('[DSFR SumValidation] fallback vmsg_' + qId + '_sum_range:', sumRangeMsg ? sumRangeMsg.textContent : 'NON TROUVÉ');
+            }
+            if (!sumRangeMsg) return;
+
+            if (totalEl.dataset.dsfrSumObserver) return;
+            totalEl.dataset.dsfrSumObserver = 'true';
+
+            // Parser les limites depuis le texte du message (ex: "entre 3 et 10")
+            var rangeMatch = sumRangeMsg.textContent.match(/(\d+)\s+.+\s+(\d+)/);
+            console.log('[DSFR SumValidation] rangeMatch:', rangeMatch);
+            if (!rangeMatch) return;
+            var minSum = parseFloat(rangeMatch[1]);
+            var maxSum = parseFloat(rangeMatch[2]);
+
+            var totalRow = totalEl.closest('.ls-group-total');
+
+            function checkSumAndUpdate() {
+                // Calculer la somme depuis les inputs
+                var allInputs = question.querySelectorAll('input.numeric[data-number="1"]');
+                var currentSum = 0;
+                var anyFilled = false;
+                allInputs.forEach(function(inp) {
+                    var val = inp.value ? inp.value.trim().replace(',', '.') : '';
+                    if (val !== '' && !isNaN(parseFloat(val))) {
+                        currentSum += parseFloat(val);
+                        anyFilled = true;
+                    }
+                });
+
+                var isSumError = anyFilled && (currentSum < minSum || currentSum > maxSum);
+
+                if (isSumError) {
+                    // Somme hors limites → erreur
+                    sumRangeMsg.classList.remove('fr-message--info', 'fr-message--valid');
+                    sumRangeMsg.classList.add('fr-message--error');
+                    sumRangeMsg.setAttribute('role', 'alert');
+
+                    // Afficher l'erreur sous le Total
+                    if (totalRow) {
+                        var totalErrMsg = totalRow.querySelector('.sum-range-error');
+                        if (!totalErrMsg) {
+                            totalErrMsg = document.createElement('p');
+                            totalErrMsg.className = 'fr-message fr-message--error sum-range-error';
+                            totalErrMsg.setAttribute('role', 'alert');
+                            totalErrMsg.textContent = sumRangeMsg.textContent;
+                            var totalInputGroup = totalRow.querySelector('.ls-input-group');
+                            if (totalInputGroup) {
+                                totalInputGroup.appendChild(totalErrMsg);
+                            } else {
+                                totalRow.appendChild(totalErrMsg);
+                            }
+                        }
+                    }
+
+                    question.classList.remove('input-valid');
+                    question.classList.add('input-error');
+
+                    // Retirer les "Merci" per-field
+                    allInputs.forEach(function(inp) {
+                        var grp = inp.closest('.fr-input-group');
+                        if (grp) {
+                            grp.classList.remove('fr-input-group--valid');
+                            inp.classList.remove('fr-input--valid');
+                            var msgs = grp.querySelector('.fr-messages-group');
+                            if (msgs) {
+                                var vMsg = msgs.querySelector('.fr-message--valid');
+                                if (vMsg) vMsg.remove();
+                            }
+                        }
+                    });
+
+                    question.dataset.hadError = 'true';
+
+                } else {
+                    // Somme OK → info
+                    sumRangeMsg.classList.remove('fr-message--error');
+                    sumRangeMsg.classList.add('fr-message--info');
+                    sumRangeMsg.removeAttribute('role');
+
+                    if (totalRow) {
+                        var totalErrMsg = totalRow.querySelector('.sum-range-error');
+                        if (totalErrMsg) totalErrMsg.remove();
+                    }
+                }
+            }
+
+            // Vérification initiale
+            checkSumAndUpdate();
+
+            // Observer les changements sur les inputs de la question
+            var allInputs = question.querySelectorAll('input.numeric[data-number="1"]');
+            allInputs.forEach(function(inp) {
+                inp.addEventListener('input', function() {
+                    // Laisser le temps au handler principal de s'exécuter
+                    setTimeout(checkSumAndUpdate, 250);
+                });
+            });
+        });
+    }
+
+    // Initialiser l'observation de la somme
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(observeNumericMultiSumValidation, 200);
+        });
+    } else {
+        setTimeout(observeNumericMultiSumValidation, 200);
+    }
+
+    // Réinitialiser après chargement AJAX
+    document.addEventListener('limesurvey:questionsLoaded', function() {
+        setTimeout(observeNumericMultiSumValidation, 200);
+    });
 
     // === Validation DSFR pour les questions simples (radio, select, date) ===
 
@@ -2411,6 +2643,515 @@ console.log('%c\n' +
 
     // Réexécuter si contenu AJAX chargé (questions conditionnelles, etc.)
     document.addEventListener('limesurvey:questionsLoaded', enableImageLazyLoading);
+
+})();
+
+/* ============================================
+   RANKING QUESTIONS - Accessibilité clavier et lecteurs d'écran
+   ============================================ */
+
+(function() {
+    'use strict';
+
+    /**
+     * AccessibleRanking
+     *
+     * Enrichit les questions de classement (Type R) avec :
+     * - Navigation clavier (Enter/Space pour déplacer, Alt+Flèches pour réordonner)
+     * - Boutons de contrôle visibles (Monter / Descendre / Retirer)
+     * - Annonces aria-live pour les lecteurs d'écran
+     * - Numérotation des rangs
+     *
+     * Ce module se greffe par-dessus le vanilla RankingQuestion de LimeSurvey
+     * sans le modifier, en utilisant un MutationObserver pour réagir aux
+     * changements DOM effectués par SortableJS.
+     */
+
+    // ---- Helpers ----
+
+    /**
+     * Récupère le label textuel d'un item de ranking
+     */
+    function getItemLabel(item) {
+        var textSpan = item.querySelector('.ranking-item-text');
+        if (textSpan) return textSpan.textContent.trim();
+        return item.dataset.label || item.textContent.trim();
+    }
+
+    /**
+     * Annonce un message via la région aria-live
+     */
+    function announce(qId, message) {
+        var liveRegion = document.getElementById('ranking-live-' + qId);
+        if (!liveRegion) return;
+        // Vider puis remplir pour forcer l'annonce même si le texte est identique
+        liveRegion.textContent = '';
+        setTimeout(function() {
+            liveRegion.textContent = message;
+        }, 50);
+    }
+
+    /**
+     * Déclenche la mise à jour des selects cachés via le mécanisme vanilla.
+     * Le vanilla ranking.js écoute les événements onSort de Sortable
+     * et met à jour les selects via updateDragDropRank().
+     * On simule un changement en déclenchant l'événement change sur les selects.
+     */
+    function syncHiddenSelects(qId) {
+        var questionEl = document.getElementById('question' + qId);
+        if (!questionEl) return;
+
+        var rankedItems = document.querySelectorAll('#sortable-rank-' + qId + ' li:not(.ls-remove):not(.d-none)');
+        var selects = questionEl.querySelectorAll('.select-list .select-item select');
+
+        // Réinitialiser tous les selects
+        selects.forEach(function(select) {
+            select.value = '';
+        });
+
+        // Remplir dans l'ordre du classement
+        rankedItems.forEach(function(item, index) {
+            if (index < selects.length) {
+                var oldVal = selects[index].value;
+                selects[index].value = item.dataset.value;
+                if (oldVal !== item.dataset.value) {
+                    // Déclencher change via jQuery avec source:'dragdrop' pour que :
+                    // 1. L'expression manager de LimeSurvey se mette à jour
+                    // 2. Le vanilla ranking.js ne relance PAS loadDragDropRank()
+                    //    (il vérifie data.source != 'dragdrop' avant de le faire)
+                    // Important : ne PAS utiliser dispatchEvent natif car jQuery 1.x/2.x
+                    // pourrait l'intercepter sans le data.source, déclenchant loadDragDropRank.
+                    if (typeof $ !== 'undefined') {
+                        $(selects[index]).trigger('change', { source: 'dragdrop' });
+                    }
+                }
+            }
+        });
+
+        // Mettre à jour les champs de relevance
+        var rankingName = questionEl.querySelector('.ranking-question-dsfr')
+            ? questionEl.querySelector('.ranking-question-dsfr').dataset.rankingName
+            : null;
+        if (!rankingName) {
+            // Chercher dans le conteneur lui-même
+            var container = questionEl.querySelector('[data-ranking-name]');
+            if (container) rankingName = container.dataset.rankingName;
+        }
+        if (rankingName) {
+            var relevanceInputs = document.querySelectorAll('[id^="relevance' + rankingName + '"]');
+            relevanceInputs.forEach(function(input) {
+                input.value = '0';
+            });
+            rankedItems.forEach(function(item, index) {
+                var relInput = document.getElementById('relevance' + rankingName + (index + 1));
+                if (relInput) {
+                    relInput.value = '1';
+                }
+            });
+        }
+    }
+
+    // ---- Boutons de contrôle ----
+
+    /**
+     * Crée les boutons Monter / Descendre / Retirer pour un item classé
+     */
+    function createControlButtons(item, qId) {
+        // Ne pas ajouter de boutons en double
+        if (item.querySelector('.ranking-controls')) return;
+
+        var label = getItemLabel(item);
+        var controls = document.createElement('span');
+        controls.className = 'ranking-controls';
+        controls.setAttribute('role', 'group');
+        controls.setAttribute('aria-label', 'Actions pour ' + label);
+
+        // Bouton Monter
+        var btnUp = document.createElement('button');
+        btnUp.type = 'button';
+        btnUp.className = 'fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-arrow-up-line ranking-btn-up';
+        btnUp.setAttribute('aria-label', 'Monter ' + label);
+        btnUp.setAttribute('title', 'Monter');
+        btnUp.textContent = 'Monter';
+
+        // Bouton Descendre
+        var btnDown = document.createElement('button');
+        btnDown.type = 'button';
+        btnDown.className = 'fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-arrow-down-line ranking-btn-down';
+        btnDown.setAttribute('aria-label', 'Descendre ' + label);
+        btnDown.setAttribute('title', 'Descendre');
+        btnDown.textContent = 'Descendre';
+
+        // Bouton Retirer
+        var btnRemove = document.createElement('button');
+        btnRemove.type = 'button';
+        btnRemove.className = 'fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-close-line ranking-btn-remove';
+        btnRemove.setAttribute('aria-label', 'Retirer ' + label + ' du classement');
+        btnRemove.setAttribute('title', 'Retirer');
+        btnRemove.textContent = 'Retirer';
+
+        controls.appendChild(btnUp);
+        controls.appendChild(btnDown);
+        controls.appendChild(btnRemove);
+        item.appendChild(controls);
+
+        // ---- Event handlers pour les boutons ----
+
+        btnUp.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            moveItemUp(item, qId);
+        });
+
+        btnDown.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            moveItemDown(item, qId);
+        });
+
+        btnRemove.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            removeItemFromRank(item, qId);
+        });
+    }
+
+    /**
+     * Met à jour l'état enabled/disabled des boutons Monter/Descendre
+     */
+    function updateControlButtonStates(qId) {
+        var rankList = document.getElementById('sortable-rank-' + qId);
+        if (!rankList) return;
+
+        var items = rankList.querySelectorAll('li:not(.ls-remove):not(.d-none)');
+        items.forEach(function(item, index) {
+            var btnUp = item.querySelector('.ranking-btn-up');
+            var btnDown = item.querySelector('.ranking-btn-down');
+            if (btnUp) {
+                btnUp.disabled = (index === 0);
+            }
+            if (btnDown) {
+                btnDown.disabled = (index === items.length - 1);
+            }
+        });
+    }
+
+    // ---- Numérotation des rangs ----
+
+    /**
+     * Ajoute ou met à jour le badge de numérotation sur les items classés
+     */
+    function updateRankNumbers(qId) {
+        var rankList = document.getElementById('sortable-rank-' + qId);
+        if (!rankList) return;
+
+        var items = rankList.querySelectorAll('li:not(.ls-remove):not(.d-none)');
+        var total = items.length;
+
+        items.forEach(function(item, index) {
+            var rank = index + 1;
+            var badge = item.querySelector('.ranking-rank-badge');
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 'ranking-rank-badge';
+                badge.setAttribute('aria-hidden', 'true');
+                item.insertBefore(badge, item.firstChild);
+            }
+            badge.textContent = '#' + rank;
+
+            // Mettre à jour l'aria-label de l'item
+            var label = getItemLabel(item);
+            item.setAttribute('aria-label', label + ' - Rang ' + rank + ' sur ' + total + '. Entrée pour retirer, Alt+Flèches pour réordonner');
+        });
+
+        // Retirer les badges des items dans la liste des choix
+        var choiceList = document.getElementById('sortable-choice-' + qId);
+        if (choiceList) {
+            choiceList.querySelectorAll('.ranking-rank-badge').forEach(function(badge) {
+                badge.remove();
+            });
+            // Remettre l'aria-label initial pour les items dans la choice list
+            choiceList.querySelectorAll('li:not(.ls-remove):not(.d-none)').forEach(function(item) {
+                var label = getItemLabel(item);
+                item.setAttribute('aria-label', label + ' - Appuyez sur Entrée pour ajouter au classement');
+                item.setAttribute('aria-selected', 'false');
+            });
+        }
+
+        // Marquer aria-selected sur les items classés
+        items.forEach(function(item) {
+            item.setAttribute('aria-selected', 'true');
+        });
+    }
+
+    // ---- Actions de déplacement ----
+
+    /**
+     * Déplace un item de la choice list vers la ranked list
+     */
+    function addItemToRank(item, qId) {
+        var maxAnswers = parseInt(document.querySelector('[data-ranking-qid="' + qId + '"]').dataset.maxAnswers) || 0;
+        var rankList = document.getElementById('sortable-rank-' + qId);
+        var currentCount = rankList.querySelectorAll('li:not(.ls-remove):not(.d-none)').length;
+
+        if (maxAnswers > 0 && currentCount >= maxAnswers) {
+            announce(qId, 'Nombre maximum de réponses atteint');
+            return;
+        }
+
+        rankList.appendChild(item);
+
+        var label = getItemLabel(item);
+        var newPos = rankList.querySelectorAll('li:not(.ls-remove):not(.d-none)').length;
+        announce(qId, label + ' ajouté au classement en position ' + newPos);
+
+        syncHiddenSelects(qId);
+        refreshAllItems(qId);
+
+        // Focus sur l'item suivant dans la choice list ou sur l'item déplacé
+        var choiceList = document.getElementById('sortable-choice-' + qId);
+        var nextItem = choiceList.querySelector('li:not(.ls-remove):not(.d-none):not(.ls-irrelevant)');
+        if (nextItem) {
+            nextItem.focus();
+        } else {
+            item.focus();
+        }
+    }
+
+    /**
+     * Retire un item de la ranked list et le remet dans la choice list
+     */
+    function removeItemFromRank(item, qId) {
+        var choiceList = document.getElementById('sortable-choice-' + qId);
+        var rankList = document.getElementById('sortable-rank-' + qId);
+
+        // Trouver l'item suivant dans le classement avant de retirer
+        var items = Array.from(rankList.querySelectorAll('li:not(.ls-remove):not(.d-none)'));
+        var currentIndex = items.indexOf(item);
+        var nextFocusItem = items[currentIndex + 1] || items[currentIndex - 1];
+
+        // Remettre l'item dans la choice list.
+        // Note : le vanilla ranking.js supprime les .ls-remove au init (ligne 70),
+        // donc on ne peut pas s'en servir comme repère. On fait appendChild.
+        choiceList.appendChild(item);
+
+        var label = getItemLabel(item);
+        announce(qId, label + ' retiré du classement');
+
+        syncHiddenSelects(qId);
+        refreshAllItems(qId);
+
+        // Focus sur l'item suivant dans le classement ou sur l'item retiré
+        if (nextFocusItem) {
+            nextFocusItem.focus();
+        } else {
+            item.focus();
+        }
+    }
+
+    /**
+     * Monte un item d'un rang dans la ranked list
+     */
+    function moveItemUp(item, qId) {
+        var prev = item.previousElementSibling;
+        while (prev && (prev.classList.contains('ls-remove') || prev.classList.contains('d-none'))) {
+            prev = prev.previousElementSibling;
+        }
+        if (!prev) return;
+
+        item.parentNode.insertBefore(item, prev);
+
+        var label = getItemLabel(item);
+        var items = item.parentNode.querySelectorAll('li:not(.ls-remove):not(.d-none)');
+        var newPos = Array.from(items).indexOf(item) + 1;
+        announce(qId, label + ' déplacé en position ' + newPos);
+
+        syncHiddenSelects(qId);
+        refreshAllItems(qId);
+        item.focus();
+    }
+
+    /**
+     * Descend un item d'un rang dans la ranked list
+     */
+    function moveItemDown(item, qId) {
+        var next = item.nextElementSibling;
+        while (next && (next.classList.contains('ls-remove') || next.classList.contains('d-none'))) {
+            next = next.nextElementSibling;
+        }
+        if (!next) return;
+
+        // insertBefore le suivant du suivant (= insérer après next)
+        item.parentNode.insertBefore(item, next.nextSibling);
+
+        var label = getItemLabel(item);
+        var items = item.parentNode.querySelectorAll('li:not(.ls-remove):not(.d-none)');
+        var newPos = Array.from(items).indexOf(item) + 1;
+        announce(qId, label + ' déplacé en position ' + newPos);
+
+        syncHiddenSelects(qId);
+        refreshAllItems(qId);
+        item.focus();
+    }
+
+    // ---- Mise à jour globale ----
+
+    /**
+     * Rafraîchit les boutons, numéros et états de tous les items d'une question.
+     * Protégé par _isInternalUpdate pour éviter les boucles MutationObserver.
+     */
+    function refreshAllItems(qId) {
+        var rankList = document.getElementById('sortable-rank-' + qId);
+        if (!rankList) return;
+
+        _isInternalUpdate = true;
+
+        try {
+            // Ajouter les boutons de contrôle sur les items classés
+            rankList.querySelectorAll('li:not(.ls-remove):not(.d-none)').forEach(function(item) {
+                createControlButtons(item, qId);
+            });
+
+            // Retirer les boutons de contrôle des items dans la choice list
+            var choiceList = document.getElementById('sortable-choice-' + qId);
+            if (choiceList) {
+                choiceList.querySelectorAll('.ranking-controls').forEach(function(ctrl) {
+                    ctrl.remove();
+                });
+            }
+
+            updateControlButtonStates(qId);
+            updateRankNumbers(qId);
+        } finally {
+            _isInternalUpdate = false;
+        }
+    }
+
+    // ---- Navigation clavier ----
+
+    /**
+     * Bind les événements clavier sur une question de ranking
+     */
+    function bindKeyboardEvents(qId) {
+        var choiceList = document.getElementById('sortable-choice-' + qId);
+        var rankList = document.getElementById('sortable-rank-' + qId);
+
+        if (!choiceList || !rankList) return;
+
+        // Enter/Space dans la choice list → ajouter au classement
+        choiceList.addEventListener('keydown', function(e) {
+            var item = e.target.closest('li:not(.ls-remove):not(.d-none)');
+            if (!item) return;
+
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                addItemToRank(item, qId);
+            }
+        });
+
+        // Clavier dans la ranked list
+        rankList.addEventListener('keydown', function(e) {
+            var item = e.target.closest('li:not(.ls-remove):not(.d-none)');
+            if (!item) return;
+
+            // Ne pas interférer si le focus est sur un bouton
+            if (e.target.tagName === 'BUTTON') return;
+
+            if (e.key === 'Enter' || e.key === ' ') {
+                // Enter/Space → retirer du classement
+                e.preventDefault();
+                removeItemFromRank(item, qId);
+            } else if (e.key === 'ArrowUp' && e.altKey) {
+                // Alt+↑ → monter
+                e.preventDefault();
+                moveItemUp(item, qId);
+            } else if (e.key === 'ArrowDown' && e.altKey) {
+                // Alt+↓ → descendre
+                e.preventDefault();
+                moveItemDown(item, qId);
+            }
+        });
+    }
+
+    // ---- Observation DOM ----
+
+    /**
+     * Observe les mutations sur les listes pour réagir aux déplacements
+     * effectués par le drag-and-drop vanilla (SortableJS).
+     *
+     * On utilise un flag _isInternalUpdate pour éviter les boucles infinies :
+     * nos propres modifications DOM (injection de boutons, badges) déclencheraient
+     * le MutationObserver qui rappellerait refreshAllItems, etc.
+     */
+    var _isInternalUpdate = false;
+
+    function observeRankingLists(qId) {
+        var rankList = document.getElementById('sortable-rank-' + qId);
+        var choiceList = document.getElementById('sortable-choice-' + qId);
+
+        if (!rankList || !choiceList) return;
+
+        var observer = new MutationObserver(function(mutations) {
+            // Ignorer les mutations déclenchées par nos propres mises à jour
+            if (_isInternalUpdate) return;
+
+            var hasChildChange = mutations.some(function(m) {
+                return m.type === 'childList' && (m.addedNodes.length > 0 || m.removedNodes.length > 0);
+            });
+            if (hasChildChange) {
+                refreshAllItems(qId);
+            }
+        });
+
+        observer.observe(rankList, { childList: true });
+        observer.observe(choiceList, { childList: true });
+    }
+
+    // ---- Initialisation ----
+
+    /**
+     * Initialise le module AccessibleRanking pour une question donnée
+     */
+    function initAccessibleRanking(qId) {
+        bindKeyboardEvents(qId);
+        observeRankingLists(qId);
+        // Initialisation initiale (les items pré-classés depuis la session)
+        refreshAllItems(qId);
+    }
+
+    /**
+     * Détecte et initialise toutes les questions ranking de la page
+     */
+    function initAllRankingQuestions() {
+        var questions = document.querySelectorAll('.ranking-question-dsfr[data-ranking-qid]');
+        questions.forEach(function(q) {
+            var qId = q.dataset.rankingQid;
+            if (qId && !q.dataset.accessibleRankingInit) {
+                q.dataset.accessibleRankingInit = 'true';
+                // Laisser le temps au vanilla ranking.js de s'initialiser d'abord
+                setTimeout(function() {
+                    initAccessibleRanking(qId);
+                }, 200);
+            }
+        });
+    }
+
+    // Lancer au chargement du DOM
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAllRankingQuestions);
+    } else {
+        initAllRankingQuestions();
+    }
+
+    // Réexécuter après navigation AJAX (pjax) et chargement de questions
+    document.addEventListener('limesurvey:questionsLoaded', function() {
+        setTimeout(initAllRankingQuestions, 300);
+    });
+    if (typeof $ !== 'undefined') {
+        $(document).on('pjax:complete', function() {
+            setTimeout(initAllRankingQuestions, 300);
+        });
+    }
 
 })();
 
