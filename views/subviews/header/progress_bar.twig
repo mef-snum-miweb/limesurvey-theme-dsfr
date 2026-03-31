@@ -62,7 +62,12 @@
             {% set currentStepText = aSurveyInfo.groupname ? aSurveyInfo.groupname : gT("Current step") %}
         {% endif %}
 
-        <div class="fr-stepper">
+        <div class="fr-stepper"
+             role="progressbar"
+             aria-valuenow="{{ currentStepIndex }}"
+             aria-valuemin="1"
+             aria-valuemax="{{ totalSteps }}"
+             aria-label="{{ lang.step }} {{ currentStepIndex }} {{ lang.of }} {{ totalSteps }}">
             <h2 class="fr-stepper__title">
                 {{ currentStepText }}
                 <span class="fr-stepper__state">{{ lang.step }} {{ currentStepIndex }} {{ lang.of }} {{ totalSteps }}</span>

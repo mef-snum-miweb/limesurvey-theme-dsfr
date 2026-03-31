@@ -10,6 +10,7 @@
 
 <!-- 5-Point Choice DSFR -->
 <fieldset class="fr-fieldset {{coreClass|replace({'visually-hidden': ''})}}" aria-labelledby="ls-question-text-{{name}}" data-display-mode="{{ slider_rating|default(0) }}">
+    <legend class="fr-fieldset__legend fr-sr-only">{{ gT('Please choose one of the following options') }}</legend>
     <div class="fr-fieldset__content">
         {% if slider_rating|default(0) == 1 %}
             {# Star rating mode: special structure for progressive fill #}

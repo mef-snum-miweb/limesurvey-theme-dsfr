@@ -1066,12 +1066,50 @@ console.log('%c\n' +
         });
     }
 
+    // === RGAA 11.10 — Synchronisation aria-invalid avec les classes d'erreur ===
+
+    /**
+     * MutationObserver global qui synchronise aria-invalid="true" sur les inputs
+     * chaque fois que la classe fr-input--error ou error est ajoutée/retirée.
+     * Couvre tous les cas : transformErrorsToDsfr, handleMultipleShortTextErrors,
+     * validateAndUpdateState, handlers radio/checkbox, validations numériques, etc.
+     */
+    function initAriaInvalidSync() {
+        // 1. Traiter les champs déjà en erreur au chargement
+        document.querySelectorAll('.fr-input--error, input.error, textarea.error, select.error').forEach(function(input) {
+            input.setAttribute('aria-invalid', 'true');
+        });
+
+        // 2. Observer les changements de classe sur tous les inputs/textarea/select
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type !== 'attributes' || mutation.attributeName !== 'class') return;
+                var el = mutation.target;
+                if (!el.matches('input, textarea, select')) return;
+
+                var hasError = el.classList.contains('fr-input--error') || el.classList.contains('error');
+                if (hasError) {
+                    el.setAttribute('aria-invalid', 'true');
+                } else {
+                    el.removeAttribute('aria-invalid');
+                }
+            });
+        });
+
+        observer.observe(document.body, {
+            attributes: true,
+            attributeFilter: ['class'],
+            subtree: true
+        });
+    }
+
     // Initialiser la transformation des erreurs au chargement
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function() {
             transformErrorsToDsfr();
             handleMultipleShortTextErrors();
             observeErrorChanges();
+            initAriaInvalidSync();
             // Créer le récapitulatif si des erreurs sont déjà présentes au chargement
             setTimeout(createErrorSummary, 100);
         });
@@ -1079,6 +1117,7 @@ console.log('%c\n' +
         transformErrorsToDsfr();
         handleMultipleShortTextErrors();
         observeErrorChanges();
+        initAriaInvalidSync();
         // Créer le récapitulatif si des erreurs sont déjà présentes au chargement
         setTimeout(createErrorSummary, 100);
     }
@@ -2571,6 +2610,99 @@ console.log('%c\n' +
         });
     }
 
+    // === RGAA 7.1 — Notification lecteurs d'écran pour questions conditionnelles ===
+
+    /**
+     * Observe les changements de visibilité des questions conditionnelles
+     * et annonce l'apparition/disparition via une aria-live region.
+     *
+     * LimeSurvey masque/affiche les questions via style.display ou la classe
+     * "ls-irrelevant"/"ls-hidden". Ce MutationObserver détecte ces changements
+     * et met à jour une live region pour informer les lecteurs d'écran.
+     */
+    function initConditionalVisibilityNotifier() {
+        // Créer la live region (une seule pour toute la page)
+        var liveRegion = document.getElementById('conditional-live-region');
+        if (!liveRegion) {
+            liveRegion = document.createElement('div');
+            liveRegion.id = 'conditional-live-region';
+            liveRegion.className = 'fr-sr-only';
+            liveRegion.setAttribute('aria-live', 'polite');
+            liveRegion.setAttribute('aria-atomic', 'true');
+            document.body.appendChild(liveRegion);
+        }
+
+        // Récupérer le texte d'une question pour l'annonce
+        function getQuestionLabel(questionEl) {
+            var titleEl = questionEl.querySelector('[id^="ls-question-text-"]');
+            if (titleEl) {
+                var text = titleEl.textContent.trim();
+                return text.length > 80 ? text.substring(0, 80) + '…' : text;
+            }
+            return 'Une question';
+        }
+
+        // Timer pour regrouper les annonces (éviter le spam)
+        var announceTimer = null;
+        var pendingAnnouncements = [];
+
+        function scheduleAnnouncement(message) {
+            pendingAnnouncements.push(message);
+            if (announceTimer) clearTimeout(announceTimer);
+            announceTimer = setTimeout(function() {
+                liveRegion.textContent = pendingAnnouncements.join('. ');
+                pendingAnnouncements = [];
+                // Vider après un délai pour permettre une nouvelle annonce
+                setTimeout(function() { liveRegion.textContent = ''; }, 3000);
+            }, 300);
+        }
+
+        // Observer les changements de style et de classe sur les questions conditionnelles
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                var el = mutation.target;
+                // Ne traiter que les conteneurs de questions conditionnelles
+                if (!el.classList || !el.classList.contains('question-container')) return;
+                if (!el.hasAttribute('data-relevance')) return;
+
+                if (mutation.type === 'attributes') {
+                    var isHidden = el.style.display === 'none' ||
+                                   el.classList.contains('ls-irrelevant') ||
+                                   el.classList.contains('ls-hidden') ||
+                                   el.classList.contains('d-none');
+
+                    var wasHidden = el.dataset.conditionalWasHidden === 'true';
+
+                    if (isHidden && !wasHidden) {
+                        // Question vient d'être masquée
+                        el.dataset.conditionalWasHidden = 'true';
+                    } else if (!isHidden && wasHidden) {
+                        // Question vient d'apparaître
+                        el.dataset.conditionalWasHidden = 'false';
+                        var label = getQuestionLabel(el);
+                        scheduleAnnouncement('Nouvelle question affichée : ' + label);
+                    }
+                }
+            });
+        });
+
+        // Observer toutes les questions conditionnelles
+        var conditionalQuestions = document.querySelectorAll('[data-relevance]');
+        conditionalQuestions.forEach(function(q) {
+            // Initialiser l'état courant
+            var isCurrentlyHidden = q.style.display === 'none' ||
+                                    q.classList.contains('ls-irrelevant') ||
+                                    q.classList.contains('ls-hidden') ||
+                                    q.classList.contains('d-none');
+            q.dataset.conditionalWasHidden = isCurrentlyHidden ? 'true' : 'false';
+
+            observer.observe(q, {
+                attributes: true,
+                attributeFilter: ['style', 'class']
+            });
+        });
+    }
+
     // === INITIALISATION des questions conditionnelles ===
 
     // Attendre que le DOM soit chargé
@@ -2578,11 +2710,13 @@ console.log('%c\n' +
         document.addEventListener('DOMContentLoaded', function() {
             initConditionalQuestionsAria();
             setupConditionalQuestionsObserver();
+            initConditionalVisibilityNotifier();
         });
     } else {
         // DOM déjà chargé
         initConditionalQuestionsAria();
         setupConditionalQuestionsObserver();
+        initConditionalVisibilityNotifier();
     }
 
 })();

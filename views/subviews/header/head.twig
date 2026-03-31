@@ -148,7 +148,24 @@
     {{ aSurveyInfo.metas }}
 
     <title>
-        {{ processString(aSurveyInfo.surveyls_title,1) }}
+        {%- if aSurveyInfo.aQuestionIndex.items is defined and aSurveyInfo.aQuestionIndex.items|length > 0 -%}
+            {%- set _titleCurrentStep = 0 -%}
+            {%- set _titleCurrentText = '' -%}
+            {%- set _titleTotalSteps = aSurveyInfo.aQuestionIndex.items|length -%}
+            {%- for index, item in aSurveyInfo.aQuestionIndex.items -%}
+                {%- if attribute(item.stepStatus, 'index-item-current') is defined and attribute(item.stepStatus, 'index-item-current') == true -%}
+                    {%- set _titleCurrentStep = index + 1 -%}
+                    {%- set _titleCurrentText = item.text -%}
+                {%- endif -%}
+            {%- endfor -%}
+            {%- if _titleCurrentStep > 0 -%}
+                {{ gT('Step') }} {{ _titleCurrentStep }} {{ gT('of') }} {{ _titleTotalSteps }} - {{ _titleCurrentText }} - {{ processString(aSurveyInfo.surveyls_title,1) }}
+            {%- else -%}
+                {{ processString(aSurveyInfo.surveyls_title,1) }}
+            {%- endif -%}
+        {%- else -%}
+            {{ processString(aSurveyInfo.surveyls_title,1) }}
+        {%- endif -%}
     </title>
     {% if(imageSrc('./files/favicon.ico')) %}
         <link rel="shortcut icon" href="{{ imageSrc('./files/favicon.ico') }}" />
