@@ -29,8 +29,7 @@
 <!-- Array Dual Scale (Type 1) - DSFR -->
 <div role="group" aria-labelledby="ls-question-text-{{ basename }}">
     <div class="fr-table fr-table--bordered" data-fr-js-table="true">
-        <table class="{{ coreClass }}">
-            <caption class="fr-sr-only">{{ t.dual_scale_matrix }}</caption>
+        <table class="{{ coreClass }}" aria-label="{{ t.dual_scale_matrix }}">
             <colgroup class="col-responses">
                 <col class="answertext" style="width: {{ answerwidth }}%;" />
                 {% for code, label in labelans0 %}
