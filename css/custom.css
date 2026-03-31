@@ -551,10 +551,125 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
     background-color: var(--background-alt-grey);
 }
 
+/* Numeric multi : erreur de somme sous le Total */
+.ls-group-total .sum-range-error {
+    margin-top: 0.25rem;
+}
+
 /* Ranking columns spacing */
 .ranking-available-items,
 .ranking-sorted-items {
     min-height: 100px;
+}
+
+/* ---- Ranking : Accessible controls ---- */
+
+/* Layout des items classés : badge + texte + boutons côte à côte */
+.sortable-rank .list-group-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sortable-rank .ranking-item-text {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Le drag handle passe en flex dans la ranked list (float ne fonctionne pas en flex) */
+.sortable-rank .selector__dragHandle {
+    float: none;
+    flex-shrink: 0;
+}
+
+/* La choice list garde aussi un layout flex pour le handle */
+.sortable-choice .list-group-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sortable-choice .ranking-item-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.sortable-choice .selector__dragHandle {
+    float: none;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+/* Badge de numérotation du rang */
+.ranking-rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    height: 1.5rem;
+    padding: 0 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-inverted-blue-france);
+    background-color: var(--background-action-high-blue-france);
+    border-radius: 0.25rem;
+    flex-shrink: 0;
+}
+
+/* Groupe de boutons de contrôle */
+.ranking-controls {
+    display: inline-flex;
+    gap: 0.25rem;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+/* Boutons de contrôle : cible tactile 32x32 minimum (WCAG) */
+.ranking-controls .fr-btn {
+    min-width: 2rem;
+    min-height: 2rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1;
+}
+
+/* Masquer le texte des boutons, garder les icônes */
+.ranking-controls .fr-btn {
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+/* Les icônes DSFR sont en ::before, on garde le texte pour l'accessibilité mais masqué visuellement */
+.ranking-controls .fr-btn.fr-icon-arrow-up-line,
+.ranking-controls .fr-btn.fr-icon-arrow-down-line,
+.ranking-controls .fr-btn.fr-icon-close-line {
+    font-size: 0;
+}
+
+.ranking-controls .fr-btn.fr-icon-arrow-up-line::before,
+.ranking-controls .fr-btn.fr-icon-arrow-down-line::before,
+.ranking-controls .fr-btn.fr-icon-close-line::before {
+    font-size: 1rem;
+}
+
+/* Focus visible renforcé sur les boutons */
+.ranking-controls .fr-btn:focus-visible {
+    outline: 2px solid var(--border-action-high-blue-france);
+    outline-offset: 2px;
+}
+
+/* État désactivé des boutons monter/descendre aux extrémités */
+.ranking-controls .fr-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* État visuel pour le déplacement clavier (Alt+Flèches) */
+.ranking-keyboard-moving {
+    border-color: var(--border-action-high-blue-france) !important;
+    background-color: var(--background-action-low-blue-france-hover) !important;
+    box-shadow: 0 0 0 2px var(--border-action-high-blue-france);
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
 }
 
 /* Hide elements in no-JS mode */
