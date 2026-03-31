@@ -2689,6 +2689,11 @@ console.log('%c\n' +
         // Observer toutes les questions conditionnelles
         var conditionalQuestions = document.querySelectorAll('[data-relevance]');
         conditionalQuestions.forEach(function(q) {
+            // Ajouter aria-live="polite" sur chaque conteneur conditionnel (RGAA 7.4.1)
+            if (!q.hasAttribute('aria-live')) {
+                q.setAttribute('aria-live', 'polite');
+            }
+
             // Initialiser l'état courant
             var isCurrentlyHidden = q.style.display === 'none' ||
                                     q.classList.contains('ls-irrelevant') ||
