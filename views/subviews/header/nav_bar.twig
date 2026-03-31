@@ -127,7 +127,7 @@ For the survey navigator ("Next", "Back", etc.), see: navigation/navigator.twig
         </div>
 
         {% if ShowMenu %}
-            <div class="fr-header__menu fr-modal" id="header-menu" aria-labelledby="header-menu-btn">
+            <div class="fr-header__menu fr-modal" id="header-menu" role="dialog" aria-modal="true" aria-labelledby="header-menu-btn">
                 <div class="fr-container">
                     <button aria-controls="header-menu"
                             title="{{ gT("Close") }}"

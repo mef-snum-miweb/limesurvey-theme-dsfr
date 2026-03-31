@@ -47,7 +47,7 @@
                 {% for ansrow in aSubQuestions %}
                     <tr id="javatbd{{ ansrow.myfname }}" class="answers-list radio-list {% if ansrow.odd %}ls-odd{% else %}ls-even{% endif %}{% if ansrow.mandatoryviolation %} ls-error-mandatory {% endif %}">
                         <!-- Answer text (actual question) -->
-                        <th id="answertext{{ ansrow.myfname }}" class="answertext fr-text--bold{% if ansrow.mandatoryviolation %} fr-error-text{% endif %}">
+                        <th scope="row" id="answertext{{ ansrow.myfname }}" class="answertext fr-text--bold{% if ansrow.mandatoryviolation %} fr-error-text{% endif %}">
                             {{ processString(ansrow.question) }}
                             {# Value for expression manager javascript (use id) ; no need to submit #}
                             {{ C.Html.hiddenField("java"~ansrow.myfid0, ansrow.sActualAnswer0, ({

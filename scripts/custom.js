@@ -3653,3 +3653,149 @@ function updateRepeatHeading(answers) {
     window.DSFRSanitizeRTEContent = sanitizeRTEContent;
 
 })();
+
+/* ============================================
+   TABLEAUX — Correction accessibilité post-rendu (RGAA 5.5, 5.6)
+   ============================================ */
+
+(function() {
+    'use strict';
+
+    /**
+     * Corrige l'accessibilité des tableaux dont le HTML est généré par le core PHP
+     * (5point, 10point, yesnouncertain, multiflexi, texts).
+     *
+     * - RGAA 5.5 : ajoute scope="row" sur les <th> de ligne qui n'en ont pas
+     * - RGAA 5.6 : ajoute l'attribut headers sur les <td> des tableaux à double entrée
+     */
+    function fixTableAccessibility() {
+        // Cibler tous les tableaux de questions LimeSurvey
+        var tables = document.querySelectorAll('.ls-answers table, .ls-table-wrapper table, .fr-table table');
+
+        tables.forEach(function(table) {
+            // --- RGAA 5.5 : scope="row" sur les th de tbody ---
+            var tbodyRows = table.querySelectorAll('tbody tr');
+            tbodyRows.forEach(function(tr) {
+                var th = tr.querySelector('th');
+                if (th && !th.hasAttribute('scope')) {
+                    th.setAttribute('scope', 'row');
+                }
+            });
+
+            // --- RGAA 5.5 : scope="col" sur les th de thead ---
+            var theadThs = table.querySelectorAll('thead th');
+            theadThs.forEach(function(th) {
+                if (!th.hasAttribute('scope')) {
+                    th.setAttribute('scope', 'col');
+                }
+            });
+
+            // --- RGAA 5.6 : headers sur les td des tableaux à double entrée ---
+            // Un tableau à double entrée a des th en colonne ET en ligne
+            var hasColHeaders = table.querySelectorAll('thead th[id]').length > 0;
+            var hasRowHeaders = table.querySelectorAll('tbody th[id]').length > 0;
+
+            if (hasColHeaders && hasRowHeaders) {
+                // Collecter les id des th de colonne (dans l'ordre)
+                var colHeaderIds = [];
+                var headerRow = table.querySelector('thead tr:last-child');
+                if (headerRow) {
+                    var thIndex = 0;
+                    headerRow.querySelectorAll('th').forEach(function(th) {
+                        if (th.id) {
+                            colHeaderIds[thIndex] = th.id;
+                        }
+                        thIndex++;
+                    });
+                }
+
+                // Pour chaque ligne du tbody, associer les td à leurs headers
+                tbodyRows.forEach(function(tr) {
+                    var rowTh = tr.querySelector('th[id]');
+                    if (!rowTh) return;
+
+                    var rowHeaderId = rowTh.id;
+                    var cellIndex = 0;
+
+                    tr.querySelectorAll('td, th').forEach(function(cell) {
+                        if (cell.tagName === 'TH') {
+                            cellIndex++;
+                            return;
+                        }
+                        // Ne pas écraser les headers existants
+                        if (!cell.hasAttribute('headers') && colHeaderIds[cellIndex]) {
+                            cell.setAttribute('headers', rowHeaderId + ' ' + colHeaderIds[cellIndex]);
+                        }
+                        cellIndex++;
+                    });
+                });
+            }
+
+            // --- Cas des tableaux sans id sur les th : en ajouter ---
+            // Pour les tableaux générés par le core PHP (5point, 10point, yesnouncertain)
+            var needsIds = false;
+            var allTheadThs = table.querySelectorAll('thead th');
+            var allTbodyThs = table.querySelectorAll('tbody th');
+
+            // Vérifier s'il y a des th sans id
+            allTheadThs.forEach(function(th) {
+                if (!th.id && th.textContent.trim()) needsIds = true;
+            });
+            allTbodyThs.forEach(function(th) {
+                if (!th.id && th.textContent.trim()) needsIds = true;
+            });
+
+            if (needsIds) {
+                // Générer un préfixe unique basé sur la position du tableau
+                var tableId = table.id || 'tbl-' + Math.random().toString(36).substr(2, 6);
+
+                // Ajouter des id sur les th de colonne
+                var colIds = [];
+                allTheadThs.forEach(function(th, i) {
+                    if (!th.id && th.textContent.trim()) {
+                        th.id = tableId + '-col-' + i;
+                    }
+                    colIds[i] = th.id || null;
+                });
+
+                // Ajouter des id sur les th de ligne et headers sur les td
+                tbodyRows.forEach(function(tr) {
+                    var th = tr.querySelector('th');
+                    if (!th) return;
+
+                    if (!th.id && th.textContent.trim()) {
+                        var rowName = tr.id || 'row-' + Math.random().toString(36).substr(2, 6);
+                        th.id = tableId + '-' + rowName;
+                    }
+
+                    if (!th.id) return;
+
+                    var cellIndex = 0;
+                    tr.querySelectorAll('td, th').forEach(function(cell) {
+                        if (cell.tagName === 'TH') {
+                            cellIndex++;
+                            return;
+                        }
+                        if (!cell.hasAttribute('headers') && colIds[cellIndex]) {
+                            cell.setAttribute('headers', th.id + ' ' + colIds[cellIndex]);
+                        }
+                        cellIndex++;
+                    });
+                });
+            }
+        });
+    }
+
+    // Lancer au chargement
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fixTableAccessibility);
+    } else {
+        fixTableAccessibility();
+    }
+
+    // Relancer après navigation AJAX
+    document.addEventListener('limesurvey:questionsLoaded', function() {
+        setTimeout(fixTableAccessibility, 200);
+    });
+
+})();
