@@ -15,7 +15,7 @@
 <!-- answer -->
 <input type='hidden' name='{{ name }}' value='{{ value }}' />
 <fieldset class="fr-fieldset {{ coreClass }}" aria-labelledby="ls-question-text-{{ basename }}">
-    <legend class="fr-fieldset__legend fr-sr-only">{{ t.select_one_or_more_comments }}</legend>
+    <legend class="fr-fieldset__legend fr-sr-only">{{ t.select_one_or_more_comments|default('Sélectionnez une ou plusieurs réponses et ajoutez des commentaires') }}</legend>
     <div class="fr-fieldset__content">
         {% for aRow in aRows %}
             {% set rowTemplate = aRow.other ? './survey/questions/answer/multiplechoice_with_comments/rows/answer_row_other.twig' : './survey/questions/answer/multiplechoice_with_comments/rows/answer_row.twig' %}

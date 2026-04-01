@@ -15,7 +15,7 @@
 {{ sTimer }}
 <fieldset class="fr-fieldset {{ coreClass }}" aria-labelledby="ls-question-text-{{ name }}">
     <legend class="fr-sr-only" id="ls-question-text-{{ name }}-legend">
-        {{ t.choose_option }}
+        {{ t.choose_option|default('Veuillez choisir l\'une des options suivantes') }}
     </legend>
     <div class="fr-fieldset__content">
         {{ sRows }}

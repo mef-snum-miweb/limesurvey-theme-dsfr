@@ -19,7 +19,7 @@
 <!-- answer -->
 <input type="hidden" name="MULTI{{name}}" value="{{anscount}}" />
 <fieldset class="fr-fieldset {{coreClass}}" aria-labelledby="ls-question-text-{{name}}"{% if columnCount > 1 %} data-column-count={{columnCount}}{% endif %}>
-    <legend class="fr-fieldset__legend fr-sr-only">{{ t.select_one_or_more }}</legend>
+    <legend class="fr-fieldset__legend fr-sr-only">{{ t.select_one_or_more|default('Sélectionnez une ou plusieurs réponses') }}</legend>
     <div class="fr-fieldset__content{% if columnCount > 1 %} ls-columns ls-columns-{{ columnCount }}{% endif %}">
         {% for aRow in aRows %}
             {% set rowTemplate = aRow.other ? './survey/questions/answer/multiplechoice/rows/answer_row_other.twig' : './survey/questions/answer/multiplechoice/rows/answer_row.twig' %}

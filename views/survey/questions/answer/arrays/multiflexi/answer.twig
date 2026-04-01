@@ -20,7 +20,7 @@
 <!-- Array Multi-Flexi (Type :) - DSFR -->
 <div role="group" aria-labelledby="ls-question-text-{{ basename }}">
     <div class="fr-table fr-table--bordered" data-fr-js-table="true">
-        <table class="{{ coreClass }} {{ extraclass }}" style="table-layout: fixed;" aria-label="{{ t.multiflexi_matrix }}">
+        <table class="{{ coreClass }} {{ extraclass }}" style="table-layout: fixed;" aria-label="{{ t.multiflexi_matrix|default('Matrice de réponses multi-flexible') }}">
             <colgroup class="col-responses">
                 <!-- Column for answer label -->
                 <col class="answertext" style="width: {{ answerwidth }}%;" />

@@ -14,7 +14,7 @@
 <!-- Array Dropdown - DSFR -->
 <!-- answer -->
 <div class="fr-table fr-table--bordered" role="group" aria-labelledby="ls-question-text-{{ basename }}">
-    <table class="{{ coreClass }}" aria-label="{{ t.response_matrix }}">
+    <table class="{{ coreClass }}" aria-label="{{ t.response_matrix|default('Matrice de réponses') }}">
         <tbody>
             {% for aRow in aRows %}
                 {% include 'survey/questions/answer/arrays/array/dropdown/rows/answer_row.twig' with aRow %}

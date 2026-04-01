@@ -343,7 +343,8 @@ console.log('%c\n' +
         const requiredFields = document.querySelectorAll('input[required], textarea[required], select[required], input[aria-required="true"], textarea[aria-required="true"], select[aria-required="true"]');
 
         // Méthode B: Classe .mandatory sur les questions (pages LimeSurvey)
-        const mandatoryQuestions = document.querySelectorAll('.mandatory.question-container, .mandatory[id^="question"]');
+        // Inclut aussi les questions dont le h3 a mandatory-question (ajouté par le Twig)
+        const mandatoryQuestions = document.querySelectorAll('.mandatory.question-container, .mandatory[id^="question"], .question-container:has(.mandatory-question)');
 
         // Méthode C: Badges "Obligatoire"
         const mandatoryBadges = document.querySelectorAll('.fr-badge[aria-label*="Mandatory"], .fr-badge[aria-label*="Obligatoire"]');
@@ -407,9 +408,8 @@ console.log('%c\n' +
 
             if (!questionLabel) return;
 
-            // Vérifier si pas déjà traité (classe marqueur) ou si déjà marqué comme mandatory-question
+            // Vérifier si pas déjà traité (classe marqueur ou astérisque déjà présent)
             const alreadyHasAsterisk = questionLabel.classList.contains('asterisk-injected') ||
-                                       questionLabel.classList.contains('mandatory-question') ||
                                        questionLabel.querySelector('.required-asterisk') ||
                                        questionLabel.querySelector('.asterisk');
 

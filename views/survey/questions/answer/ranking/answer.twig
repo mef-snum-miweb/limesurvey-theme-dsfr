@@ -49,7 +49,7 @@
                     class="sortable-choice sortable-list list-group"
                     role="listbox"
                     aria-labelledby="ranking-choice-title-{{qId}}"
-                    aria-roledescription="{{ t.available_choices }}">
+                    aria-roledescription="{{ t.available_choices|default('Choix disponibles') }}">
                     {% for ansrow in answers %}
                         <li id="javatbd{{rankingName}}{{ansrow.code}}"
                             class="ls-choice list-group-item answer-item sortable-item grabable sortable-enable fr-mb-2w"
@@ -58,8 +58,8 @@
                             tabindex="0"
                             role="option"
                             aria-selected="false"
-                            aria-roledescription="{{ t.movable_element }}"
-                            aria-label="{{ processString(ansrow.answer) }} - {{ t.press_enter_to_rank }}">
+                            aria-roledescription="{{ t.movable_element|default('Élément déplaçable') }}"
+                            aria-label="{{ processString(ansrow.answer) }} - {{ t.press_enter_to_rank|default('Appuyez sur Entrée pour ajouter au classement') }}">
                             <span class="ranking-item-text">{{ processString(ansrow.answer) }}</span>
                             <span class="grabable selector__dragHandle float-end" aria-hidden="true">
                                 <svg width="9" height="14" viewBox="0 0 9 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -79,7 +79,7 @@
                     class="sortable-rank sortable-list list-group"
                     role="listbox"
                     aria-labelledby="ranking-rank-title-{{qId}}"
-                    aria-roledescription="{{ t.ranking_instructions }}">
+                    aria-roledescription="{{ t.ranking_instructions|default('Utilisez les boutons ou Alt+Flèches pour réordonner') }}">
                     <li class="d-none ls-remove"></li>
                 </ul>
             </div>
@@ -105,7 +105,7 @@ try{
 {{ registerPackage('question-ranking') }}
 {{ registerScript(
     'RankingQuestionTranslate'~qId,
-    'LSvar.lang.rankhelp="' ~ t.ranking_help ~ '";', 'POS_BEGIN')
+    'LSvar.lang.rankhelp="' ~ t.ranking_help|default('Glissez-déposez ou utilisez les boutons pour classer les éléments') ~ '";', 'POS_BEGIN')
 }}
 {{ registerScript( 'RankingQuestion'~qId, script, 'POS_POSTSCRIPT') }}
 

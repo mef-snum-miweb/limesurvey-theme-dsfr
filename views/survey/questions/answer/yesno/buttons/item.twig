@@ -6,7 +6,7 @@
 
 <!-- Yes/No DSFR Rich -->
 <fieldset class="fr-fieldset" aria-labelledby="ls-question-text-{{ basename }}">
-    <legend class="fr-fieldset__legend fr-sr-only">{{ t.choose_option }}</legend>
+    <legend class="fr-fieldset__legend fr-sr-only">{{ t.choose_option|default('Veuillez choisir l\'une des options suivantes') }}</legend>
     <div class="fr-fieldset__element fr-fieldset__element--inline radio-item answer-item">
         <div class="fr-radio-group fr-radio-rich">
             <input type="radio" name="{{ name }}" id="answer{{ name }}Y" value="Y" {{ yChecked }}>
