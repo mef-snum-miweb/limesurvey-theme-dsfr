@@ -42,8 +42,18 @@
                 <span class="fr-sr-only">{{ value }} {% if value > 1 %}{{ t.stars|default('étoiles') }}{% else %}{{ t.star|default('étoile') }}{% endif %}</span>
             </label>
         {% elseif displayMode == 2 %}
-            {# Emoji mode: hide radio, show only emoji centered #}
-            <label class="fr-label fr-label--emoji-rating" for="answer{{id}}">
+            {# Emoji mode: hide radio, show only emoji centered.
+               RGAA 13.5 — title obligatoire sur l'élément portant un contenu
+               cryptique (emoji). Rendu en tooltip natif au survol souris.
+               Le sr-only enrichi couvre les AT qui ne lisent pas toujours title. #}
+            {% set emojiLabel = '' %}
+            {% if value == 1 %}{% set emojiLabel = t.emoji_rating_1|default('Très insatisfait') %}
+            {% elseif value == 2 %}{% set emojiLabel = t.emoji_rating_2|default('Insatisfait') %}
+            {% elseif value == 3 %}{% set emojiLabel = t.emoji_rating_3|default('Neutre') %}
+            {% elseif value == 4 %}{% set emojiLabel = t.emoji_rating_4|default('Satisfait') %}
+            {% elseif value == 5 %}{% set emojiLabel = t.emoji_rating_5|default('Très satisfait') %}
+            {% endif %}
+            <label class="fr-label fr-label--emoji-rating" for="answer{{id}}" title="{{ emojiLabel }}">
                 <span class="emoji-icon" aria-hidden="true">
                     {% if value == 1 %}😞{% endif %}
                     {% if value == 2 %}🙁{% endif %}
@@ -51,7 +61,7 @@
                     {% if value == 4 %}🙂{% endif %}
                     {% if value == 5 %}😊{% endif %}
                 </span>
-                <span class="fr-sr-only">{{ value }}</span>
+                <span class="fr-sr-only">{{ value }} - {{ emojiLabel }}</span>
             </label>
         {% else %}
             {# Normal mode: just the number #}
