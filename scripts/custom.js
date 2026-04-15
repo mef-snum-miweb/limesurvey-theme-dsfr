@@ -2956,6 +2956,49 @@ console.log('%c\n' +
     // ---- Helpers ----
 
     /**
+     * i18n minimal pour le module ranking.
+     *
+     * Détecte la langue de la page via <html lang="..">. Si non préfixée par "en"
+     * (détection simple sur les 2 premiers caractères), renvoie la version française.
+     * Gère l'interpolation d'un label via le placeholder %s.
+     *
+     * Les clés restent ajoutables au fil de l'eau pour couvrir les chaînes actuellement
+     * hardcodées dans le module.
+     */
+    var RANKING_I18N_FR = {
+        ranking_actions_for:  'Actions pour %s',
+        ranking_add:          'Ajouter au classement',
+        ranking_add_aria:     'Ajouter %s au classement',
+        ranking_up:           'Monter',
+        ranking_up_aria:      'Monter %s',
+        ranking_down:         'Descendre',
+        ranking_down_aria:    'Descendre %s',
+        ranking_remove:       'Retirer',
+        ranking_remove_aria:  'Retirer %s du classement'
+    };
+    var RANKING_I18N_EN = {
+        ranking_actions_for:  'Actions for %s',
+        ranking_add:          'Add to ranking',
+        ranking_add_aria:     'Add %s to ranking',
+        ranking_up:           'Move up',
+        ranking_up_aria:      'Move %s up',
+        ranking_down:         'Move down',
+        ranking_down_aria:    'Move %s down',
+        ranking_remove:       'Remove',
+        ranking_remove_aria:  'Remove %s from ranking'
+    };
+
+    function tRanking(key, label) {
+        var lang = (document.documentElement.lang || 'fr').toLowerCase().substring(0, 2);
+        var dict = (lang === 'en') ? RANKING_I18N_EN : RANKING_I18N_FR;
+        var str = dict[key] || RANKING_I18N_FR[key] || key;
+        if (typeof label !== 'undefined') {
+            str = str.replace('%s', label);
+        }
+        return str;
+    }
+
+    /**
      * Récupère le label textuel d'un item de ranking
      */
     function getItemLabel(item) {
@@ -3050,31 +3093,31 @@ console.log('%c\n' +
         var controls = document.createElement('span');
         controls.className = 'ranking-controls';
         controls.setAttribute('role', 'group');
-        controls.setAttribute('aria-label', 'Actions pour ' + label);
+        controls.setAttribute('aria-label', tRanking('ranking_actions_for', label));
 
         // Bouton Monter
         var btnUp = document.createElement('button');
         btnUp.type = 'button';
         btnUp.className = 'fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-arrow-up-line ranking-btn-up';
-        btnUp.setAttribute('aria-label', 'Monter ' + label);
-        btnUp.setAttribute('title', 'Monter');
-        btnUp.textContent = 'Monter';
+        btnUp.setAttribute('aria-label', tRanking('ranking_up_aria', label));
+        btnUp.setAttribute('title', tRanking('ranking_up'));
+        btnUp.textContent = tRanking('ranking_up');
 
         // Bouton Descendre
         var btnDown = document.createElement('button');
         btnDown.type = 'button';
         btnDown.className = 'fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-arrow-down-line ranking-btn-down';
-        btnDown.setAttribute('aria-label', 'Descendre ' + label);
-        btnDown.setAttribute('title', 'Descendre');
-        btnDown.textContent = 'Descendre';
+        btnDown.setAttribute('aria-label', tRanking('ranking_down_aria', label));
+        btnDown.setAttribute('title', tRanking('ranking_down'));
+        btnDown.textContent = tRanking('ranking_down');
 
         // Bouton Retirer
         var btnRemove = document.createElement('button');
         btnRemove.type = 'button';
         btnRemove.className = 'fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-close-line ranking-btn-remove';
-        btnRemove.setAttribute('aria-label', 'Retirer ' + label + ' du classement');
-        btnRemove.setAttribute('title', 'Retirer');
-        btnRemove.textContent = 'Retirer';
+        btnRemove.setAttribute('aria-label', tRanking('ranking_remove_aria', label));
+        btnRemove.setAttribute('title', tRanking('ranking_remove'));
+        btnRemove.textContent = tRanking('ranking_remove');
 
         controls.appendChild(btnUp);
         controls.appendChild(btnDown);
@@ -3119,6 +3162,60 @@ console.log('%c\n' +
             if (btnDown) {
                 btnDown.disabled = (index === items.length - 1);
             }
+        });
+    }
+
+    /**
+     * RGAA 13.1 — Alternative au drag-and-drop pour la colonne "choix disponibles".
+     *
+     * Crée un bouton "Ajouter au classement" (flèche droite) sur chaque item de la
+     * choice list. Le bouton déclenche addItemToRank(item, qId), strictement
+     * équivalent à la touche Entrée du clavier.
+     */
+    function createChoiceControlButtons(item, qId) {
+        // Ne pas ajouter de bouton en double
+        if (item.querySelector('.ranking-choice-controls')) return;
+
+        var label = getItemLabel(item);
+        var controls = document.createElement('span');
+        controls.className = 'ranking-choice-controls';
+        controls.setAttribute('role', 'group');
+        controls.setAttribute('aria-label', tRanking('ranking_actions_for', label));
+
+        var btnAdd = document.createElement('button');
+        btnAdd.type = 'button';
+        btnAdd.className = 'fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-arrow-right-line ranking-btn-add';
+        btnAdd.setAttribute('aria-label', tRanking('ranking_add_aria', label));
+        btnAdd.setAttribute('title', tRanking('ranking_add'));
+        btnAdd.textContent = tRanking('ranking_add');
+
+        controls.appendChild(btnAdd);
+        item.appendChild(controls);
+
+        btnAdd.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            addItemToRank(item, qId);
+        });
+    }
+
+    /**
+     * Désactive les boutons "Ajouter" de la choice list lorsque le classement
+     * a atteint sa limite max_answers (si définie).
+     */
+    function updateChoiceControlButtonStates(qId) {
+        var container = document.querySelector('[data-ranking-qid="' + qId + '"]');
+        if (!container) return;
+        var maxAnswers = parseInt(container.dataset.maxAnswers) || 0;
+        var rankList = document.getElementById('sortable-rank-' + qId);
+        var choiceList = document.getElementById('sortable-choice-' + qId);
+        if (!rankList || !choiceList) return;
+
+        var rankedCount = rankList.querySelectorAll('li:not(.ls-remove):not(.d-none)').length;
+        var isFull = (maxAnswers > 0 && rankedCount >= maxAnswers);
+
+        choiceList.querySelectorAll('.ranking-btn-add').forEach(function(btn) {
+            btn.disabled = isFull;
         });
     }
 
@@ -3293,20 +3390,33 @@ console.log('%c\n' +
         _isInternalUpdate = true;
 
         try {
-            // Ajouter les boutons de contrôle sur les items classés
+            // Retirer les éventuels boutons "Ajouter au classement" laissés sur un item
+            // qui vient de passer de la choice list à la ranked list (drag-and-drop ou clavier)
+            rankList.querySelectorAll('.ranking-choice-controls').forEach(function(ctrl) {
+                ctrl.remove();
+            });
+
+            // Ajouter les boutons de contrôle Monter/Descendre/Retirer sur les items classés
             rankList.querySelectorAll('li:not(.ls-remove):not(.d-none)').forEach(function(item) {
                 createControlButtons(item, qId);
             });
 
-            // Retirer les boutons de contrôle des items dans la choice list
             var choiceList = document.getElementById('sortable-choice-' + qId);
             if (choiceList) {
+                // Retirer les boutons de contrôle "classés" des items revenus dans la choice list
+                // (un item retiré du classement conserve son wrapper .ranking-controls jusqu'ici)
                 choiceList.querySelectorAll('.ranking-controls').forEach(function(ctrl) {
                     ctrl.remove();
+                });
+                // RGAA 13.1 — alternative drag-and-drop : ajouter le bouton "Ajouter
+                // au classement" sur chaque item de la choice list
+                choiceList.querySelectorAll('li:not(.ls-remove):not(.d-none)').forEach(function(item) {
+                    createChoiceControlButtons(item, qId);
                 });
             }
 
             updateControlButtonStates(qId);
+            updateChoiceControlButtonStates(qId);
             updateRankNumbers(qId);
         } finally {
             _isInternalUpdate = false;

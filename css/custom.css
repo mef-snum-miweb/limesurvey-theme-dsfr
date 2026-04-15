@@ -616,8 +616,9 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
     flex-shrink: 0;
 }
 
-/* Groupe de boutons de contrôle */
-.ranking-controls {
+/* Groupe de boutons de contrôle (colonne classée ET colonne choix) */
+.ranking-controls,
+.ranking-choice-controls {
     display: inline-flex;
     gap: 0.25rem;
     flex-shrink: 0;
@@ -625,16 +626,13 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
 }
 
 /* Boutons de contrôle : cible tactile 32x32 minimum (WCAG) */
-.ranking-controls .fr-btn {
+.ranking-controls .fr-btn,
+.ranking-choice-controls .fr-btn {
     min-width: 2rem;
     min-height: 2rem;
     padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
     line-height: 1;
-}
-
-/* Masquer le texte des boutons, garder les icônes */
-.ranking-controls .fr-btn {
     overflow: hidden;
     white-space: nowrap;
 }
@@ -642,24 +640,28 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
 /* Les icônes DSFR sont en ::before, on garde le texte pour l'accessibilité mais masqué visuellement */
 .ranking-controls .fr-btn.fr-icon-arrow-up-line,
 .ranking-controls .fr-btn.fr-icon-arrow-down-line,
-.ranking-controls .fr-btn.fr-icon-close-line {
+.ranking-controls .fr-btn.fr-icon-close-line,
+.ranking-choice-controls .fr-btn.fr-icon-arrow-right-line {
     font-size: 0;
 }
 
 .ranking-controls .fr-btn.fr-icon-arrow-up-line::before,
 .ranking-controls .fr-btn.fr-icon-arrow-down-line::before,
-.ranking-controls .fr-btn.fr-icon-close-line::before {
+.ranking-controls .fr-btn.fr-icon-close-line::before,
+.ranking-choice-controls .fr-btn.fr-icon-arrow-right-line::before {
     font-size: 1rem;
 }
 
 /* Focus visible renforcé sur les boutons */
-.ranking-controls .fr-btn:focus-visible {
+.ranking-controls .fr-btn:focus-visible,
+.ranking-choice-controls .fr-btn:focus-visible {
     outline: 2px solid var(--border-action-high-blue-france);
     outline-offset: 2px;
 }
 
-/* État désactivé des boutons monter/descendre aux extrémités */
-.ranking-controls .fr-btn:disabled {
+/* État désactivé des boutons aux extrémités ou quand max atteint */
+.ranking-controls .fr-btn:disabled,
+.ranking-choice-controls .fr-btn:disabled {
     opacity: 0.3;
     cursor: not-allowed;
 }

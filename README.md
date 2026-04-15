@@ -66,7 +66,7 @@ Des issues supplémentaires couvrent des critères identifiés lors des correcti
 | **5.7** | Tableau double échelle : association headers/cellules | [#26](../../issues/26) |
 | **8.7** | Changement de langue du placeholder (cases à cocher) | ✅ [#27](../../issues/27) |
 | **9.3** | Liste ordonnée : utiliser `ol` au lieu de `ul` (classement) | ✅ [#29](../../issues/29) |
-| **13.1** | Classement : alternative au drag and drop | [#28](../../issues/28) |
+| **13.1** | Classement : alternative au drag and drop | ✅ [#28](../../issues/28) |
 
 ---
 
