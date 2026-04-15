@@ -14,7 +14,9 @@ For the survey navigator ("Next", "Back", etc.), see: navigation/navigator.twig
     %}
 
     <!-- DSFR Header -->
-    <header role="banner" class="fr-header" id="survey-header">
+    {# tabindex=-1 : permet au header de recevoir le focus programmatique
+       depuis le lien d'évitement "Navigation" (RGAA 12.6). #}
+    <header role="banner" class="fr-header" id="survey-header" tabindex="-1">
         <div class="fr-header__body">
             <div class="fr-container">
                 <div class="fr-header__body-row">
@@ -72,7 +74,7 @@ For the survey navigator ("Next", "Back", etc.), see: navigation/navigator.twig
                         <div class="fr-header__tools">
                             <nav class="fr-header__tools-links"
                                  role="navigation"
-                                 aria-label="{{ gT("Main navigation") }}">
+                                 aria-label="{{ t.main_navigation }}">
                                 {# Boutons d'outils groupés dans fr-btns-group pour stacking
                                    vertical DSFR natif (cf. pattern officiel header-menu.ejs). #}
                                 <ul class="fr-btns-group">
@@ -152,7 +154,7 @@ For the survey navigator ("Next", "Back", etc.), see: navigation/navigator.twig
                     </button>
                     <nav class="fr-header__menu-links"
                          role="navigation"
-                         aria-label="{{ gT("Main navigation") }}">
+                         aria-label="{{ t.main_navigation }}">
                         {# Boutons d'outils groupés dans fr-btns-group pour stacking
                            vertical DSFR natif (cf. pattern officiel header-menu.ejs). #}
                         <ul class="fr-btns-group">

@@ -52,7 +52,7 @@ Les non-conformités sont suivies sous forme d'issues avec le label [`RGAA`](../
 | **11.2** | Étiquettes de champs non pertinentes | [#21](../../issues/21), [#22](../../issues/22) |
 | **11.10** | Contrôle de saisie non pertinent | [#19](../../issues/19) |
 | **11.11** | Contrôle de saisie non accompagné de suggestions | [#20](../../issues/20) |
-| **12.6** | Zones de regroupement non atteignables ou évitables | [#12](../../issues/12) |
+| **12.6** | Zones de regroupement non atteignables ou évitables | ✅ [#12](../../issues/12) |
 | **12.9** | Pièges au clavier dans la navigation | [#24](../../issues/24) |
 | **13.5** | Contenus cryptiques sans alternative | [#23](../../issues/23) |
 

@@ -78,6 +78,7 @@
         'current_step': 'Étape courante',
         'survey_navigation': 'Navigation dans le questionnaire',
         'quick_access': 'Accès rapide',
+        'main_navigation': 'Navigation principale',
         'content': 'Contenu',
         'footer': 'Pied de page',
         'close': 'Fermer',
@@ -166,6 +167,7 @@
         'current_step': 'Current step',
         'survey_navigation': 'Survey navigation',
         'quick_access': 'Quick access',
+        'main_navigation': 'Main navigation',
         'content': 'Content',
         'footer': 'Footer',
         'close': 'Close',
@@ -262,6 +264,9 @@
         <div class="fr-skiplinks">
             <nav class="fr-container" role="navigation" aria-label="{{ t.quick_access }}">
                 <ul class="fr-skiplinks__list">
+                    <li>
+                        <a class="fr-link" href="#survey-header">{{ t.main_navigation }}</a>
+                    </li>
                     <li>
                         <a class="fr-link" href="#main-content">{{ t.content }}</a>
                     </li>
