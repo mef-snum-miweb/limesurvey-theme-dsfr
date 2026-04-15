@@ -55,7 +55,7 @@ _Aucun._
 
 ## Établissement de cette déclaration d'accessibilité
 
-Cette déclaration a été établie le _(date à compléter)_, sur la base de la version du thème correspondant au commit [`dcef02d`](https://github.com/bmatge/limesurvey-theme-dsfr/commit/dcef02d) — état du thème au moment de la publication de la déclaration. Les corrections apportées postérieurement à cette version sont tracées via le label [`RGAA`](https://github.com/bmatge/limesurvey-theme-dsfr/labels/RGAA) et le milestone [Conformité RGAA 4.1](https://github.com/bmatge/limesurvey-theme-dsfr/milestone/1).
+Cette déclaration a été établie le **15 avril 2026**, sur la base de la version du thème correspondant au commit [`dcef02d`](https://github.com/bmatge/limesurvey-theme-dsfr/commit/dcef02d) — état du thème au moment de la publication de la déclaration. Les corrections apportées postérieurement à cette version sont tracées via le label [`RGAA`](https://github.com/bmatge/limesurvey-theme-dsfr/labels/RGAA) et le milestone [Conformité RGAA 4.1](https://github.com/bmatge/limesurvey-theme-dsfr/milestone/1).
 
 ### Environnement de test
 
