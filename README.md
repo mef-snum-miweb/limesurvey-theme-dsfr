@@ -31,13 +31,13 @@ Ce thème a fait l'objet d'un audit RGAA 4.1 réalisé par [Spécinov](https://w
 
 👉 **Déclaration complète** : [`DECLARATION_RGAA.md`](DECLARATION_RGAA.md)
 
-Les non-conformités sont suivies sous forme d'issues avec le label [`RGAA`](../../labels/RGAA). Un ticket de suivi global existe : [#30 — Plan de correction accessibilité](../../issues/30).
+Les non-conformités sont suivies sous forme d'issues avec le label [`RGAA`](../../labels/RGAA) et regroupées dans le milestone [Conformité RGAA 4.1](../../milestone/1).
 
 ### Critères non conformes et issues associées
 
 | Critère RGAA | Intitulé | Issue(s) |
 |---|---|---|
-| **1.3** | Images porteuses d'information sans alternative textuelle pertinente | [#7](../../issues/7) |
+| **1.3** | Images porteuses d'information sans alternative textuelle pertinente | ✅ [#7](../../issues/7) |
 | **1.4** | CAPTCHA : alternative textuelle n'identifiant pas nature/fonction | [#8](../../issues/8) |
 | **1.5** | CAPTCHA : absence de solution d'accès alternatif | [#8](../../issues/8) |
 | **7.1** | Scripts non compatibles avec les technologies d'assistance | [#9](../../issues/9) |

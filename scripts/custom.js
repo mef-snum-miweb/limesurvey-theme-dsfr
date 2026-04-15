@@ -263,6 +263,9 @@ console.log('%c\n' +
 
             captchaImage.onload = function() {
                 captchaImage.style.opacity = '1';
+                if (typeof window.__lsDsfrFixCaptchaAlt === 'function') {
+                    window.__lsDsfrFixCaptchaAlt();
+                }
             };
 
             captchaImage.onerror = function() {

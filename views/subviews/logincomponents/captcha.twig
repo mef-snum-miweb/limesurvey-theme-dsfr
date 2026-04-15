@@ -51,13 +51,17 @@
                         </span>
                     </legend>
                     <div class="fr-fieldset__content">
-                        <!-- Image du captcha agrandie -->
-                        <div class='{{ aSurveyInfo.class.maincolformdivbdivdivdiv }} fr-captcha fr-mb-3w' {{ aSurveyInfo.attr.maincolformdivbdivdivdiv }} style="text-align: center;">
+                        <!-- Image du captcha agrandie et centrée -->
+                        {# RGAA 1.3 — alt pertinent pour l'image CAPTCHA générée par le core.
+                           L'image <img> provient de renderCaptcha() (Yii CCaptcha) donc on ne
+                           peut pas contrôler son attribut alt côté Twig. On stocke le texte
+                           traduit dans data-alt-text (réutilisation de la chaîne gT de la
+                           légende, garantie traduite), un IIFE plus bas l'applique au
+                           chargement et après chaque reload. #}
+                        <div class='{{ aSurveyInfo.class.maincolformdivbdivdivdiv }} fr-captcha fr-mb-3w' {{ aSurveyInfo.attr.maincolformdivbdivdivdiv }} style="text-align: center;" data-alt-text="{{ gT("Please solve the following equation:")|replace({':':''})|trim }}">
                             {# see: LS_Twig_Extension::renderCaptcha() in application/core/LS_Twig_Extension.php #}
-                            <div style="display: inline-block; width: 100%; max-width: 500px;">
-                                <div style="width: 100%; transform: scale(1.5); transform-origin: center; margin: 2rem 0;">
-                                    {{ renderCaptcha().renderOut() }}
-                                </div>
+                            <div style="display: inline-block; transform: scale(1.5); transform-origin: center; margin: 2rem 0;">
+                                {{ renderCaptcha().renderOut() }}
                             </div>
                             <div class="fr-mt-2w">
                                 <button type="button" class="fr-btn fr-btn--sm fr-btn--tertiary" id="reloadCaptcha" title="{{ gT("Reload captcha") }}" aria-label="{{ gT("Reload captcha") }}">
@@ -88,6 +92,26 @@
                 </fieldset>
             </div>
 
+            {# RGAA 1.3 — applique un alt pertinent à l'image CAPTCHA (cf. data-alt-text plus haut) #}
+            <script>
+            (function() {
+                function fixCaptchaAlt() {
+                    var container = document.querySelector('.fr-captcha');
+                    if (!container) return;
+                    var img = container.querySelector('img');
+                    if (!img) return;
+                    var altText = container.getAttribute('data-alt-text');
+                    if (altText) img.setAttribute('alt', altText);
+                }
+                window.__lsDsfrFixCaptchaAlt = fixCaptchaAlt;
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', fixCaptchaAlt);
+                } else {
+                    fixCaptchaAlt();
+                }
+            })();
+            </script>
+
             {# Force captcha reload after error to prevent reusing same captcha #}
             {% if not empty(aSurveyInfo.aForm.aEnterErrors) %}
             <script>
@@ -106,6 +130,9 @@
                                 newSrc += (newSrc.indexOf('?') > -1 ? '&' : '?') + 'v=' + Date.now();
                             }
                             captchaImage.src = newSrc;
+                            if (typeof window.__lsDsfrFixCaptchaAlt === 'function') {
+                                window.__lsDsfrFixCaptchaAlt();
+                            }
                         }
                     }
                     // Clear the input field
