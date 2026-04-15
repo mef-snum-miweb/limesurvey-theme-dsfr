@@ -461,7 +461,10 @@ console.log('%c\n' +
         // Trouver le point d'insertion : juste avant les questions
 
         // Contenu HTML commun de la mention
-        const noticeHTML = '<p class="fr-text--sm" style="color: var(--text-mention-grey);"><span class="fr-icon-error-warning-line" aria-hidden="true" style="margin-right: 0.5rem;"></span>Les champs marqués d\'un <span style="color: var(--text-default-error); font-weight: 700;" aria-hidden="true">*</span> sont obligatoires</p>';
+        // RGAA 10.8 — l'astérisque fait partie intégrante de la phrase,
+        // il ne doit PAS être masqué aux technologies d'assistance.
+        // Seule l'icône décorative reste aria-hidden.
+        const noticeHTML = '<p class="fr-text--sm" style="color: var(--text-mention-grey);"><span class="fr-icon-error-warning-line" aria-hidden="true" style="margin-right: 0.5rem;"></span>Les champs marqués d\'un <span style="color: var(--text-default-error); font-weight: 700;">*</span> sont obligatoires</p>';
 
         // Stratégie 0a: Page anti-bot - insérer dans la colonne centrée avant le titre
         const antibotContainer = document.querySelector('#antibot-challenge-container');
