@@ -44,7 +44,7 @@ Les non-conformités sont suivies sous forme d'issues avec le label [`RGAA`](../
 | **7.4** | Changements de contexte non signalés ou contrôlables | [#18](../../issues/18) |
 | **7.5** | Messages de statut non correctement restitués | [#17](../../issues/17) |
 | **8.9** | Balises utilisées à des fins de présentation | [#16](../../issues/16) |
-| **9.1** | Information non structurée par des titres appropriés | [#10](../../issues/10) |
+| **9.1** | Information non structurée par des titres appropriés | ✅ [#10](../../issues/10) |
 | **9.2** | Structure du document non cohérente | [#11](../../issues/11) |
 | **10.1** | Feuilles de styles non utilisées pour contrôler la présentation | [#15](../../issues/15) |
 | **10.8** | Contenus cachés non correctement ignorés par les technologies d'assistance | [#14](../../issues/14) |

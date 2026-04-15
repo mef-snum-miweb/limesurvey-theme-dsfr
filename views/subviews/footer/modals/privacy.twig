@@ -16,32 +16,32 @@
                         </button>
                     </div>
                     <div class="fr-modal__content">
-                        <h1 id="privacy-modal-title" class="fr-modal__title">
+                        <h2 id="privacy-modal-title" class="fr-modal__title">
                             {{ gT("Politique de confidentialité") }}
-                        </h1>
+                        </h2>
 
                         {% if aSurveyInfo.datasecurity_notice %}
                             {{ aSurveyInfo.datasecurity_notice|raw }}
                         {% elseif aSurveyInfo.options.privacy_content %}
                             {{ aSurveyInfo.options.privacy_content|raw }}
                         {% else %}
-                            <h2>Responsable du traitement</h2>
+                            <h3>Responsable du traitement</h3>
                             <p>{{ aSurveyInfo.options.data_controller|default('[Rensigner cette information dans les options du thème]') }}</p>
 
-                            <h2>Données collectées</h2>
+                            <h3>Données collectées</h3>
                             <p>Les données suivantes sont collectées :</p>
                             <ul>
                                 <li>Réponses aux questions du questionnaire</li>
                                 <li>Données techniques de connexion (si applicable)</li>
                             </ul>
 
-                            <h2>Finalité</h2>
+                            <h3>Finalité</h3>
                             <p>Les données collectées servent uniquement à {{ aSurveyInfo.options.survey_purpose|default('[Rensigner cette information dans les options du thème]') }}.</p>
 
-                            <h2>Conservation</h2>
+                            <h3>Conservation</h3>
                             <p>Les données sont conservées pendant {{ aSurveyInfo.options.data_retention|default('[Rensigner cette information dans les options du thème]') }} puis supprimées.</p>
 
-                            <h2>Vos droits</h2>
+                            <h3>Vos droits</h3>
                             <p>Conformément au RGPD, vous disposez d'un droit d'accès, de rectification et de suppression de vos données.</p>
                             {% if aSurveyInfo.options.contact_email %}
                             <p>Contact : <a href="mailto:{{ aSurveyInfo.options.contact_email }}">{{ aSurveyInfo.options.contact_email }}</a></p>

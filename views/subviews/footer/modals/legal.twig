@@ -16,28 +16,28 @@
                         </button>
                     </div>
                     <div class="fr-modal__content">
-                        <h1 id="legal-modal-title" class="fr-modal__title">
+                        <h2 id="legal-modal-title" class="fr-modal__title">
                             {{ gT("Mentions légales") }}
-                        </h1>
+                        </h2>
 
                         {% if aSurveyInfo.options.legal_content %}
                             {{ aSurveyInfo.options.legal_content|raw }}
                         {% else %}
-                            <h2>Éditeur</h2>
+                            <h3>Éditeur</h3>
                             {% if aSurveyInfo.options.editor %}
                                 {{ aSurveyInfo.options.editor|raw }}
                             {% else %}
                                 <p>[Rensigner cette information dans les options du thème]</p>
                             {% endif %}
 
-                            <h2>Directeur de la publication</h2>
+                            <h3>Directeur de la publication</h3>
                             {% if aSurveyInfo.options.publication_director %}
                                 {{ aSurveyInfo.options.publication_director|raw }}
                             {% else %}
                                 <p>[Rensigner cette information dans les options du thème]</p>
                             {% endif %}
 
-                            <h2>Hébergeur</h2>
+                            <h3>Hébergeur</h3>
                             {% if aSurveyInfo.options.host %}
                                 {{ aSurveyInfo.options.host|raw }}
                             {% else %}

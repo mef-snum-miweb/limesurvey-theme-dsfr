@@ -16,19 +16,19 @@
                         </button>
                     </div>
                     <div class="fr-modal__content">
-                        <h1 id="accessibility-modal-title" class="fr-modal__title">
+                        <h2 id="accessibility-modal-title" class="fr-modal__title">
                             {{ gT("Déclaration d'accessibilité") }}
-                        </h1>
+                        </h2>
 
                         {% if aSurveyInfo.options.accessibility_content %}
                             {{ aSurveyInfo.options.accessibility_content|raw }}
                         {% else %}
                             <p>Ce site est partiellement conforme au RGAA (Référentiel Général d'Amélioration de l'Accessibilité).</p>
 
-                            <h2>État de conformité</h2>
+                            <h3>État de conformité</h3>
                             <p>Conformité partielle. Un audit sera réalisé prochainement.</p>
 
-                            <h2>Amélioration et contact</h2>
+                            <h3>Amélioration et contact</h3>
                             <p>Si vous n'arrivez pas à accéder à un contenu ou à un service, vous pouvez contacter le responsable du site pour être orienté vers une alternative accessible.</p>
 
                             <p><strong>Date de publication :</strong> {{ "now"|date("d/m/Y") }}</p>

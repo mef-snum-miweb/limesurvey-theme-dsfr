@@ -16,23 +16,23 @@
                         </button>
                     </div>
                     <div class="fr-modal__content">
-                        <h1 id="cookies-modal-title" class="fr-modal__title">
+                        <h2 id="cookies-modal-title" class="fr-modal__title">
                             {{ gT("Gestion des cookies") }}
-                        </h1>
+                        </h2>
 
                         {% if aSurveyInfo.options.cookies_content %}
                             {{ aSurveyInfo.options.cookies_content|raw }}
                         {% else %}
-                            <h2>Cookies utilisés</h2>
+                            <h3>Cookies utilisés</h3>
                             <p>Ce site utilise les cookies suivants :</p>
 
-                            <h3>Cookies strictement nécessaires</h3>
+                            <h4>Cookies strictement nécessaires</h4>
                             <ul>
                                 <li><strong>Session LimeSurvey</strong> : permet de conserver votre progression dans le questionnaire</li>
                                 <li><strong>Langue</strong> : mémorise votre choix de langue</li>
                             </ul>
 
-                            <h3>Autres cookies analytiques</h3>
+                            <h4>Autres cookies analytiques</h4>
                             <p>Aucun autre cookie analytique n'est utilisé sur ce site.</p>
 
 

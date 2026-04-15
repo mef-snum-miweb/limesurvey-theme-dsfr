@@ -9,10 +9,11 @@
 <div id="{{ aSurveyInfo.id.welcomecontainer }}" class="fr-container fr-my-6w {{ aSurveyInfo.class.welcomecontainer }}" {{ aSurveyInfo.attr.welcomecontainer }}>
     <div class="fr-col-12">
 
-            <!-- Survey Name -->
-            <h1 class="{{ aSurveyInfo.class.surveyname }}" {{ aSurveyInfo.attr.surveyname }}>
+            {# RGAA 9.1 — h2 sémantique, style visuel h1 via fr-h1.
+               Le h1 unique de la page est posé en sr-only dans layout_global.twig. #}
+            <h2 class="fr-h1 {{ aSurveyInfo.class.surveyname }}" {{ aSurveyInfo.attr.surveyname }}>
                 {{ processString(aSurveyInfo.name,1) }}
-            </h1>
+            </h2>
 
             <!-- Survey description -->
             {% if aSurveyInfo.description %}
