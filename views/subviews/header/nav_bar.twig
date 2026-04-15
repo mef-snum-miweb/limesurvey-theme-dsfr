@@ -41,6 +41,8 @@ For the survey navigator ("Next", "Back", etc.), see: navigation/navigator.twig
                                     <button class="fr-btn--menu fr-btn"
                                             data-fr-opened="false"
                                             aria-controls="header-menu"
+                                            aria-haspopup="dialog"
+                                            aria-expanded="false"
                                             id="header-menu-btn"
                                             title="{{ t.menu }}">
                                         {{ t.menu }}
@@ -73,6 +75,8 @@ For the survey navigator ("Next", "Back", etc.), see: navigation/navigator.twig
                                     <button type="button"
                                             data-fr-opened="false"
                                             aria-controls="question-index-modal"
+                                            aria-haspopup="dialog"
+                                            aria-expanded="false"
                                             class="fr-btn--team fr-btn"
                                             title="{{ t.steps_list }}">
                                         {{ t.steps_list }}
@@ -84,6 +88,8 @@ For the survey navigator ("Next", "Back", etc.), see: navigation/navigator.twig
                                     <button class="fr-btn fr-btn--display fr-btn--icon-left"
                                             type="button"
                                             aria-controls="fr-theme-modal"
+                                            aria-haspopup="dialog"
+                                            aria-expanded="false"
                                             data-fr-opened="false"
                                             title="{{ t.display_settings }}">
                                         {{ t.display_settings }}
@@ -96,6 +102,7 @@ For the survey navigator ("Next", "Back", etc.), see: navigation/navigator.twig
                                         <div class="fr-nav__item">
                                             <button aria-controls="translate-collapse"
                                                     aria-expanded="false"
+                                                    aria-haspopup="menu"
                                                     title="{{ t.select_language }}"
                                                     type="button"
                                                     class="fr-translate__btn fr-btn">
@@ -140,6 +147,8 @@ For the survey navigator ("Next", "Back", etc.), see: navigation/navigator.twig
                             <button type="button"
                                     data-fr-opened="false"
                                     aria-controls="question-index-modal"
+                                    aria-haspopup="dialog"
+                                    aria-expanded="false"
                                     class="fr-btn--team fr-btn"
                                     title="{{ t.steps_list }}">
                                 {{ t.steps_list }}
@@ -150,6 +159,8 @@ For the survey navigator ("Next", "Back", etc.), see: navigation/navigator.twig
                         <button class="fr-btn fr-btn--display fr-btn--icon-left"
                                 type="button"
                                 aria-controls="fr-theme-modal"
+                                aria-haspopup="dialog"
+                                aria-expanded="false"
                                 data-fr-opened="false"
                                 title="{{ t.display_settings }}">
                             {{ t.display_settings }}
@@ -161,6 +172,7 @@ For the survey navigator ("Next", "Back", etc.), see: navigation/navigator.twig
                                 <div class="fr-nav__item">
                                     <button aria-controls="translate-collapse-mobile"
                                             aria-expanded="false"
+                                            aria-haspopup="menu"
                                             title="{{ t.select_language }}"
                                             type="button"
                                             class="fr-translate__btn fr-btn">
