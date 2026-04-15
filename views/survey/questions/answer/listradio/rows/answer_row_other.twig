@@ -57,13 +57,16 @@
             {{ checkconditionFunction }}(this.value, '{{ name }}', 'text');
         });
 
-        // Mise à jour de aria-expanded quand le radio est sélectionné
+        // Mise à jour de aria-expanded quand le radio est sélectionné.
+        // RGAA 12.9 — NE PAS auto-focus le champ texte : cela cassait la
+        // navigation au clavier (flèches) dans le radiogroup en capturant
+        // le focus dès qu'un utilisateur arrivait sur "Autre". Le champ
+        // texte est désormais accessible via Tab, hors du radiogroup
+        // (cf. IIFE refactorListRadioOther dans custom.js qui le déplace
+        // en colonne sœur).
         $('#SOTH{{ name }}').on('change', function(){
             var isChecked = $(this).is(':checked');
             $(this).attr('aria-expanded', isChecked ? 'true' : 'false');
-            if(isChecked) {
-                $("#answer{{ name }}othertext").focus();
-            }
         });
     </script>
 </div>

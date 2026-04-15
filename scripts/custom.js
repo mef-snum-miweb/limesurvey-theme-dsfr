@@ -3551,6 +3551,116 @@ console.log('%c\n' +
 
 })();
 
+/* ============================================
+   RGAA 12.9 — Liste radio : placer "Sans réponse" en tête de liste
+   ============================================
+
+   Dans une question de type "Liste (Boutons radio)" avec option "Autre" +
+   "Sans réponse", le core LimeSurvey rend les options dans cet ordre :
+     1. options standards
+     2. "Autre :" + champ texte
+     3. "Sans réponse"
+
+   Problème RGAA 12.9 : en navigation clavier (flèches Haut/Bas dans un
+   radiogroup), l'utilisateur qui souhaite choisir "Sans réponse" doit
+   traverser tout le radiogroup, y compris "Autre" dont le handler JS
+   faisait un .focus() auto sur le champ texte — ce qui cassait la
+   navigation (cf. fix dans answer_row_other.twig où le .focus() a été
+   supprimé).
+
+   Bonus UX : placer "Sans réponse" en première position rend le refus
+   immédiatement accessible et garde le bloc "Autre + champ texte"
+   cohérent en fin de liste, avec le champ directement sous son radio
+   (relation visuelle et programmatique claire, le radio sert de label
+   conceptuel au champ).
+
+   Cet IIFE repositionne le .fr-fieldset__element contenant le radio
+   "Sans réponse" (value="") en première position du .fr-fieldset__content.
+   Les questions sans option "Sans réponse" ne sont pas modifiées.
+*/
+
+(function() {
+    'use strict';
+
+    function reorderListRadioNoAnswer() {
+        var questions = document.querySelectorAll('.list-radio.question-container');
+        questions.forEach(function(q) {
+            if (q.dataset.listradioReordered === '1') return;
+
+            var noAnswerRadio = q.querySelector('input[type="radio"][value=""]');
+            if (!noAnswerRadio) return;
+
+            var noAnswerRow = noAnswerRadio.closest('.fr-fieldset__element');
+            if (!noAnswerRow) return;
+
+            var content = noAnswerRow.parentNode;
+            if (content && content.firstElementChild !== noAnswerRow) {
+                content.insertBefore(noAnswerRow, content.firstElementChild);
+            }
+
+            // Déterminer l'état par défaut pour la cible Tab du radiogroup.
+            // Comportement natif HTML : Tab cible le radio checked, ou le
+            // premier radio en DOM order si aucun n'est checked.
+            //
+            // Règle pragmatique appliquée (RGAA 12.9 + UX) :
+            //   1. Si aucun radio coché → cocher "Sans réponse" (défaut propre)
+            //   2. Si "Autre" est coché MAIS le champ texte est vide → état
+            //      incomplet (l'utilisateur a cliqué sans finir sa saisie),
+            //      on reset sur "Sans réponse" pour éviter d'avoir un focus
+            //      par défaut sur un état non-terminé
+            //   3. Sinon (réponse complète ou "Sans réponse" déjà coché)
+            //      → on respecte l'état serveur
+            var allRadios = q.querySelectorAll('input[type="radio"][name="' + noAnswerRadio.name + '"]');
+            var anyChecked = Array.prototype.some.call(allRadios, function(r) { return r.checked; });
+
+            var otherRadio = q.querySelector('input[type="radio"][id^="SOTH"]');
+            var isIncompleteOther = false;
+            if (otherRadio && otherRadio.checked) {
+                var otherText = q.querySelector('[id$="othertext"]');
+                if (otherText && otherText.value.trim() === '') {
+                    isIncompleteOther = true;
+                }
+            }
+
+            if (!anyChecked || isIncompleteOther) {
+                // Décocher explicitement tous les radios du groupe, puis cocher
+                // "Sans réponse". Nécessaire de décocher "Autre" d'abord car
+                // sinon l'attribut checked persiste sur le radio même si la
+                // property .checked est réassignée.
+                allRadios.forEach(function(r) {
+                    r.checked = false;
+                    r.removeAttribute('checked');
+                });
+                noAnswerRadio.checked = true;
+                noAnswerRadio.setAttribute('checked', 'checked');
+
+                // Mettre à jour le hidden java input pour rester cohérent
+                // avec la nouvelle sélection (LS Expression Manager s'en sert).
+                var javaInput = q.querySelector('input[type="hidden"][id^="java"]');
+                if (javaInput) {
+                    javaInput.value = '';
+                }
+
+                // Réinitialiser l'aria-expanded sur "Autre" puisqu'il n'est
+                // plus sélectionné (cohérence avec le handler du twig)
+                if (otherRadio) {
+                    otherRadio.setAttribute('aria-expanded', 'false');
+                }
+            }
+
+            q.dataset.listradioReordered = '1';
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', reorderListRadioNoAnswer);
+    } else {
+        reorderListRadioNoAnswer();
+    }
+
+    document.addEventListener('limesurvey:questionsLoaded', reorderListRadioNoAnswer);
+})();
+
 // ============================================
 // FIX: Définition locale des handlers de relevance (questions conditionnelles)
 // ============================================
