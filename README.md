@@ -16,12 +16,57 @@ Voir les [conditions générales d'utilisation](https://github.com/GouvernementF
 ## ✨ Caractéristiques
 
 - ✅ **Conforme DSFR** - aucune classe Bootstrap, uniquement DSFR
-- ♿ **Accessibilité RGAA** optimisée avec composants DSFR natifs
+- ♿ **Partiellement conforme RGAA 4.1** (70,49 %) - audit Spécinov, voir [déclaration d'accessibilité](DECLARATION_RGAA.md)
 - 🎨 **Mode clair/sombre** natif DSFR avec sélecteur utilisateur
 - 📱 **Responsive** adapté à l'usage mobile (linéarisation des tableaux)
 - 🖨️ **Impression optimisée** avec styles dédiés
 - 🔌 **DSFR local** - Toutes les ressources DSFR locales (pas de CDN)
 - 📚 **36 types de questions** supportés avec templates DSFR
+
+---
+
+## ♿ Accessibilité (RGAA)
+
+Ce thème a fait l'objet d'un audit RGAA 4.1 réalisé par [Spécinov](https://www.specinov.fr/). L'application est **partiellement conforme** avec un taux de **70,49 %** de critères respectés.
+
+👉 **Déclaration complète** : [`DECLARATION_RGAA.md`](DECLARATION_RGAA.md)
+
+Les non-conformités sont suivies sous forme d'issues avec le label [`RGAA`](../../labels/RGAA). Un ticket de suivi global existe : [#30 — Plan de correction accessibilité](../../issues/30).
+
+### Critères non conformes et issues associées
+
+| Critère RGAA | Intitulé | Issue(s) |
+|---|---|---|
+| **1.3** | Images porteuses d'information sans alternative textuelle pertinente | [#7](../../issues/7) |
+| **1.4** | CAPTCHA : alternative textuelle n'identifiant pas nature/fonction | [#8](../../issues/8) |
+| **1.5** | CAPTCHA : absence de solution d'accès alternatif | [#8](../../issues/8) |
+| **7.1** | Scripts non compatibles avec les technologies d'assistance | [#9](../../issues/9) |
+| **7.4** | Changements de contexte non signalés ou contrôlables | [#18](../../issues/18) |
+| **7.5** | Messages de statut non correctement restitués | [#17](../../issues/17) |
+| **8.9** | Balises utilisées à des fins de présentation | [#16](../../issues/16) |
+| **9.1** | Information non structurée par des titres appropriés | [#10](../../issues/10) |
+| **9.2** | Structure du document non cohérente | [#11](../../issues/11) |
+| **10.1** | Feuilles de styles non utilisées pour contrôler la présentation | [#15](../../issues/15) |
+| **10.8** | Contenus cachés non correctement ignorés par les technologies d'assistance | [#14](../../issues/14) |
+| **10.11** | Contenus non présentables sans défilement en responsive | [#13](../../issues/13) |
+| **11.2** | Étiquettes de champs non pertinentes | [#21](../../issues/21), [#22](../../issues/22) |
+| **11.10** | Contrôle de saisie non pertinent | [#19](../../issues/19) |
+| **11.11** | Contrôle de saisie non accompagné de suggestions | [#20](../../issues/20) |
+| **12.6** | Zones de regroupement non atteignables ou évitables | [#12](../../issues/12) |
+| **12.9** | Pièges au clavier dans la navigation | [#24](../../issues/24) |
+| **13.5** | Contenus cryptiques sans alternative | [#23](../../issues/23) |
+
+### Corrections complémentaires issues de l'audit
+
+Des issues supplémentaires couvrent des critères identifiés lors des corrections, non listés explicitement dans la déclaration :
+
+| Critère RGAA | Intitulé | Issue |
+|---|---|---|
+| **5.1** | Tableau complexe : ajout d'un résumé | [#25](../../issues/25) |
+| **5.7** | Tableau double échelle : association headers/cellules | [#26](../../issues/26) |
+| **8.7** | Changement de langue du placeholder (cases à cocher) | [#27](../../issues/27) |
+| **9.3** | Liste ordonnée : utiliser `ol` au lieu de `ul` (classement) | [#29](../../issues/29) |
+| **13.1** | Classement : alternative au drag and drop | [#28](../../issues/28) |
 
 ---
 
@@ -91,7 +136,8 @@ Tous les types de questions LimeSurvey sont supportés avec templates DSFR :
 
 #### Accessibilité et utilisabilité
 
-- ✅ **CAPTCHA** - page CAPTCHA native Limesurvey stylisée en DSFR
+- 🟡 **Conformité RGAA 4.1** - partiellement conforme (70,49 %), audit Spécinov — voir [section Accessibilité](#-accessibilité-rgaa) et [`DECLARATION_RGAA.md`](DECLARATION_RGAA.md)
+- ✅ **CAPTCHA** - page CAPTCHA native LimeSurvey stylisée en DSFR
 - ✅ **Mode sombre/clair** - Toggle utilisateur avec localStorage
 - ✅ **Multilingue** - Sélecteur de langue DSFR (fr-translate)
 - ✅ **RGPD** - Modales conformité, cookies, données personnelles
