@@ -75,13 +75,16 @@
             <!-- Ranked choices (right column) -->
             <div class="fr-col-12 fr-col-md-6 ranking-sorted-items">
                 <h4 id="ranking-rank-title-{{qId}}" class="sortable-subtitle sortable-rank-subtitle fr-h6 fr-mb-2w">{{rank_title}}</h4>
-                <ul id="sortable-rank-{{qId}}"
+                {# RGAA 9.3 — liste ordonnée (classement), donc <ol>.
+                   role="listbox" est conservé pour l'interactivité drag-and-drop
+                   (la sémantique ARIA override la sémantique HTML native). #}
+                <ol id="sortable-rank-{{qId}}"
                     class="sortable-rank sortable-list list-group"
                     role="listbox"
                     aria-labelledby="ranking-rank-title-{{qId}}"
                     aria-roledescription="{{ t.ranking_instructions|default('Utilisez les boutons ou Alt+Flèches pour réordonner') }}">
                     <li class="d-none ls-remove"></li>
-                </ul>
+                </ol>
             </div>
         </div>
     </div>
