@@ -34,6 +34,8 @@
             {% endif %}
         {% endif %}
         
+            {# RGAA 10.1 — largeur du champ contrôlée par CSS (unité ch = largeur
+               du caractère 0, équivalente à l'ancien attribut HTML size). #}
             <input
                 class="fr-input selector--inputondemand-list-input {{ kpclass }}"
                 type="text"
@@ -41,7 +43,7 @@
                 id="answer{{ myfname }}"
                 value="{{ dispVal }}"
                 placeholder="{{ flatString(processString(placeholder,1),1) }}"
-                {% if inputsize %} size="{{ inputsize }}" {% endif %}
+                {% if inputsize %} style="width: {{ inputsize }}ch;" {% endif %}
                 {% if maxlength %} maxlength="{{ maxlength }}" {% endif %}
                 {% if numbersonly %} data-number="{{ numbersonly }}" {% endif %}
             />

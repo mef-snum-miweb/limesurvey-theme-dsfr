@@ -46,7 +46,7 @@ Les non-conformités sont suivies sous forme d'issues avec le label [`RGAA`](../
 | **8.9** | Balises utilisées à des fins de présentation | [#16](../../issues/16) |
 | **9.1** | Information non structurée par des titres appropriés | ✅ [#10](../../issues/10) |
 | **9.2** | Structure du document non cohérente | ✅ [#11](../../issues/11) |
-| **10.1** | Feuilles de styles non utilisées pour contrôler la présentation | [#15](../../issues/15) |
+| **10.1** | Feuilles de styles non utilisées pour contrôler la présentation | ✅ [#15](../../issues/15) |
 | **10.8** | Contenus cachés non correctement ignorés par les technologies d'assistance | ✅ [#14](../../issues/14) |
 | **10.11** | Contenus non présentables sans défilement en responsive | ✅ [#13](../../issues/13) |
 | **11.2** | Étiquettes de champs non pertinentes | [#21](../../issues/21), [#22](../../issues/22) |

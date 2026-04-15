@@ -18,6 +18,9 @@
 
 <!-- DSFR Select -->
 <div class="fr-select-group select-item ls-dropdown-item {{ coreClass }}">
+    {# RGAA 10.1 — l'attribut size sur <select> est fonctionnel (transforme
+       le dropdown en listbox avec N options visibles), pas présentationnel.
+       Il reste donc en place et n'est pas concerné par le critère 10.1. #}
     <select
         class="fr-select"
         name="{{ name }}"

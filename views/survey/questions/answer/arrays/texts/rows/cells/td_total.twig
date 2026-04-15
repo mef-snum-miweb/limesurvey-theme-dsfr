@@ -14,11 +14,12 @@
     <td class="answertextright total"></td>
 {% else %}
     <td class="answertextright total">
+        {# RGAA 10.1 — largeur contrôlée par CSS (unité ch = largeur du 0). #}
         <input
             type="text"
             class="fr-input total-input"
             readonly="readonly"
-            size="{{ inputsize ? inputsize : 10 }}"
+            style="width: {{ inputsize ? inputsize : 10 }}ch;"
             aria-label="{{ gT('Total') }}"
         />
     </td>
