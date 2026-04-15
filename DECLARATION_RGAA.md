@@ -17,8 +17,8 @@ L'audit de conformité réalisé par **Spécinov** ([https://www.specinov.fr/](h
 ### Non-conformités
 
 - **[1.3]** Les images porteuses d'information n'ont pas toutes une alternative textuelle pertinente.
-- **[1.4]** Les alternatives textuelles des CAPTCHA et images-tests ne permettent pas toujours d'identifier leur nature et fonction.
-- **[1.5]** Les CAPTCHA ne proposent pas tous une solution d'accès alternatif.
+- **[1.4]** Les alternatives textuelles des CAPTCHA et images-tests ne permettent pas toujours d'identifier leur nature et fonction. *(Mitigé par l'alternative antibot, cf. ci-dessous.)*
+- **[1.5]** Les CAPTCHA ne proposent pas tous une solution d'accès alternatif. *(Mitigé par l'alternative antibot, cf. ci-dessous.)*
 - **[7.1]** Les scripts ne sont pas tous compatibles avec les technologies d'assistance.
 - **[7.4]** Les changements de contexte ne sont pas tous signalés ou contrôlables.
 - **[7.5]** Les messages de statut ne sont pas tous correctement restitués.
@@ -34,6 +34,20 @@ L'audit de conformité réalisé par **Spécinov** ([https://www.specinov.fr/](h
 - **[12.6]** Les zones de regroupement ne peuvent pas toujours être atteintes ou évitées.
 - **[12.9]** La navigation contient parfois des pièges au clavier.
 - **[13.5]** Les contenus cryptiques n'ont pas tous une alternative.
+
+### Mitigation des critères 1.4 et 1.5 — Alternative accessible au CAPTCHA
+
+Le CAPTCHA visuel est généré par le cœur de LimeSurvey (widget Yii `CCaptcha`) et ne peut pas être corrigé depuis le thème sans forker l'application, ce qui est exclu par le périmètre du projet.
+
+En mitigation, le thème fournit une **protection anti-bot accessible par conception**, activable via l'option `antibot_enabled` dans les paramètres du questionnaire (onglet *Protection anti-bot*). Cette alternative repose uniquement sur :
+
+- une **question textuelle cognitive simple** (pas d'image) — ex. *« De quelle couleur est le soleil ? »* — tirée d'un pool par défaut ou personnalisable par l'administrateur du questionnaire ;
+- un **champ honeypot** invisible pour les humains (`aria-hidden="true"`, `tabindex="-1"`) mais rempli automatiquement par les bots ;
+- un **timer minimum** avant soumission (par défaut 5 secondes) pour bloquer les soumissions instantanées.
+
+Cette alternative est **entièrement accessible** : pas d'image, pas de CAPTCHA visuel, label DSFR natif, messages d'erreur `aria-live="polite"`, navigation clavier complète. Elle est implémentée dans `views/subviews/antibot/antibot_challenge.twig`.
+
+**Recommandation** : pour les questionnaires publics nécessitant une protection anti-bot, activer `antibot_enabled = on` et laisser le CAPTCHA LimeSurvey désactivé. La déclaration considère donc les critères 1.4 et 1.5 comme **mitigés** mais pas conformes au sens strict du RGAA (le CAPTCHA non conforme reste accessible dans les paramètres LimeSurvey ; c'est un choix de déploiement).
 
 ### Contenus non soumis à l'obligation d'accessibilité
 
