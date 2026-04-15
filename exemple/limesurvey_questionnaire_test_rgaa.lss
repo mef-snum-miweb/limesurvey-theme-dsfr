@@ -7341,7 +7341,6 @@
     <qid><![CDATA[40]]></qid>
     <question><![CDATA[<p>Se alcune domande hanno le stesse opzioni, puoi usare un array per mostrare la lista di domande.</p>
 
-<p> </p>
 ]]></question>
     <help><![CDATA[Questa è una domanda di solo testo]]></help>
     <script/>
@@ -27626,7 +27625,6 @@ Le seguenti risposte sono state date dal partecipante:<br />
 
 <p>E' possibile modificarlo nelle impostazioni di indagine</p>
 
-<p> </p>
 ]]></surveyls_welcometext>
     <surveyls_endtext><![CDATA[<p>Questo è il messaggio di chiusura dell'indagine, dopo che il rispondente ha premuto INVIA.</p>
 

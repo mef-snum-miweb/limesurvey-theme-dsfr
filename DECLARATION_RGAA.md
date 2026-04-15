@@ -22,7 +22,7 @@ L'audit de conformité réalisé par **Spécinov** ([https://www.specinov.fr/](h
 - **[7.1]** Les scripts ne sont pas tous compatibles avec les technologies d'assistance.
 - **[7.4]** Les changements de contexte ne sont pas tous signalés ou contrôlables.
 - **[7.5]** Les messages de statut ne sont pas tous correctement restitués.
-- **[8.9]** Les balises sont parfois utilisées uniquement à des fins de présentation.
+- **[8.9]** Les balises sont parfois utilisées uniquement à des fins de présentation. *(Artefact du contenu saisi en back-office — cf. ci-dessous.)*
 - **[9.1]** L'information n'est pas toujours structurée par des titres appropriés.
 - **[9.2]** La structure du document n'est pas toujours cohérente.
 - **[10.1]** Les feuilles de styles ne sont pas toujours utilisées pour contrôler la présentation.
@@ -48,6 +48,14 @@ En mitigation, le thème fournit une **protection anti-bot accessible par concep
 Cette alternative est **entièrement accessible** : pas d'image, pas de CAPTCHA visuel, label DSFR natif, messages d'erreur `aria-live="polite"`, navigation clavier complète. Elle est implémentée dans `views/subviews/antibot/antibot_challenge.twig`.
 
 **Recommandation** : pour les questionnaires publics nécessitant une protection anti-bot, activer `antibot_enabled = on` et laisser le CAPTCHA LimeSurvey désactivé. La déclaration considère donc les critères 1.4 et 1.5 comme **mitigés** mais pas conformes au sens strict du RGAA (le CAPTCHA non conforme reste accessible dans les paramètres LimeSurvey ; c'est un choix de déploiement).
+
+### Note sur le critère 8.9 — Balises `<p>` vides
+
+Le critère 8.9 relevé par l'audit concerne des balises `<p> </p>` vides (contenant un espace insécable) utilisées à des fins d'espacement visuel. Après analyse, **le thème ne génère aucune balise `<p>` vide** : ces balises proviennent du **contenu saisi en back-office** (textes de questions, messages de bienvenue, etc.), inséré par l'éditeur WYSIWYG TinyMCE de LimeSurvey qui ajoute ce type de paragraphes vides lorsque l'administrateur effectue des retours à la ligne visuels.
+
+Le questionnaire de référence utilisé pour l'audit (`exemple/limesurvey_questionnaire_test_rgaa.lss`) a été nettoyé pour supprimer ces artefacts. Les administrateurs sont invités à relire les textes saisis via TinyMCE et à supprimer manuellement les paragraphes vides générés involontairement.
+
+**Le critère 8.9 est donc un wontfix côté thème** : la cause racine se situe dans le contenu éditorial, pas dans le code du template. La mitigation relève de la formation des administrateurs de questionnaires.
 
 ### Contenus non soumis à l'obligation d'accessibilité
 
