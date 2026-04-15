@@ -2829,6 +2829,60 @@ console.log('%c\n' +
 })();
 
 /* ============================================
+   RGAA 7.5 / 11.1 — Association des tips de validation (ls-questionhelp)
+   aux champs de saisie via aria-describedby
+   ============================================
+
+   Le core LimeSurvey génère, pour chaque champ avec contrainte de saisie, un
+   tip descriptif dans un <div class="ls-questionhelp" id="vmsg_<qid>">. Ce tip
+   est affiché visuellement sous la question mais n'est pas lié sémantiquement
+   au champ (pas de aria-describedby côté core).
+
+   Cet IIFE étend l'attribut aria-describedby de chaque input/textarea/select
+   de la question pour y inclure l'id du tip. Les lecteurs d'écran annoncent
+   ainsi la contrainte quand l'utilisateur focus le champ, sans interruption
+   parasite au chargement.
+
+   Le role="alert" du core a parallèlement été supprimé de help.twig
+   (override dans views/survey/questions/question_help/help.twig). */
+
+(function() {
+    'use strict';
+
+    function extendDescribedByForValidationTips() {
+        var tips = document.querySelectorAll('.ls-questionhelp[id^="vmsg_"]');
+        tips.forEach(function(tip) {
+            if (tip.dataset.describedbyWired === '1') return;
+
+            var question = tip.closest('[id^="question"]');
+            if (!question) return;
+
+            var fields = question.querySelectorAll('input, textarea, select');
+            fields.forEach(function(field) {
+                if (field.type === 'hidden') return;
+                var existing = field.getAttribute('aria-describedby') || '';
+                var ids = existing.split(/\s+/).filter(Boolean);
+                if (ids.indexOf(tip.id) === -1) {
+                    ids.push(tip.id);
+                    field.setAttribute('aria-describedby', ids.join(' '));
+                }
+            });
+
+            tip.dataset.describedbyWired = '1';
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', extendDescribedByForValidationTips);
+    } else {
+        extendDescribedByForValidationTips();
+    }
+
+    // Réexécuter si contenu AJAX chargé (questions conditionnelles, etc.)
+    document.addEventListener('limesurvey:questionsLoaded', extendDescribedByForValidationTips);
+})();
+
+/* ============================================
    RANKING QUESTIONS - Accessibilité clavier et lecteurs d'écran
    ============================================ */
 

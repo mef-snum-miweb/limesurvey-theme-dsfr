@@ -1,0 +1,28 @@
+{#
+/**
+ * Override du template core LimeSurvey application/views/survey/questions/question_help/help.twig
+ *
+ * Utilisé par application/helpers/qanda_helper.php::validation_message() pour rendre
+ * les tips descriptifs des contraintes de saisie (ex: "Only numbers may be entered in
+ * this field", "The sum must equal 100", etc.) sous les champs de formulaire.
+ *
+ * RGAA 7.5 (Spécinov, avril 2026) — le core utilise role="alert" qui déclenche une
+ * interruption assertive des lecteurs d'écran à chaque render, alors que ce tip est
+ * une description STATIQUE d'une contrainte, pas un message de statut dynamique.
+ *
+ * Fix :
+ * - Suppression de role="alert" (pas un alert)
+ * - Pas de role="status" / aria-live="polite" non plus (pas un live region, contenu
+ *   statique qui ne change pas)
+ * - Association au champ via aria-describedby : effectuée côté JS dans custom.js
+ *   (IIFE "extendDescribedByForValidationTips") car le core ne le fait pas
+ *   automatiquement et on ne peut pas forker LimeSurvey.
+ *
+ * @var $message
+ * @var $classes
+ * @var $id
+ */
+#}
+<div class="ls-questionhelp {{ classes }}" {% if id %} id="{{ id }}" {% endif %} >
+    {{ message }}
+</div>
