@@ -764,7 +764,7 @@ console.log('%c\n' +
                         errorMsg.setAttribute('role', 'alert');
                         messagesGroup.appendChild(errorMsg);
                     }
-                    errorMsg.textContent = 'Seuls des nombres peuvent être entrés dans ce champ.';
+                    errorMsg.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
 
                     setTimeout(updateErrorSummary, 50);
                     return;
@@ -977,7 +977,7 @@ console.log('%c\n' +
                                 errorMessage.setAttribute('role', 'alert');
                                 messagesGroup.appendChild(errorMessage);
                             }
-                            errorMessage.textContent = 'Seuls des nombres peuvent être entrés dans ce champ.';
+                            errorMessage.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
                         } else if (isFilled) {
                             // Champ rempli et valide → retirer les erreurs
                             inputGroup.classList.remove('fr-input-group--error');
@@ -1493,7 +1493,7 @@ console.log('%c\n' +
                         errorMessage.setAttribute('role', 'alert');
                         messagesGroup.appendChild(errorMessage);
                     }
-                    errorMessage.textContent = 'Seuls des nombres peuvent être entrés dans ce champ.';
+                    errorMessage.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
 
                 } else {
                     // Format valide et non vide → Retirer les erreurs
@@ -1855,7 +1855,7 @@ console.log('%c\n' +
                             errorMsg.setAttribute('role', 'alert');
                             messagesGroup.appendChild(errorMsg);
                         }
-                        errorMsg.textContent = 'Seuls des nombres peuvent être entrés dans ce champ.';
+                        errorMsg.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
 
                         // Marquer que cette question a eu une erreur
                         question.dataset.hadError = 'true';
@@ -2880,6 +2880,56 @@ console.log('%c\n' +
 
     // Réexécuter si contenu AJAX chargé (questions conditionnelles, etc.)
     document.addEventListener('limesurvey:questionsLoaded', extendDescribedByForValidationTips);
+})();
+
+/* ============================================
+   RGAA 7.4 — inputmode="numeric" sur les champs numériques
+   ============================================
+
+   Le core LimeSurvey rend les champs "numbers only" comme des
+   <input type="text" data-number="1"> (via Twig direct ou helpers Yii).
+   Sans indication de la nature du champ, l'utilisateur (et les AT)
+   ne savent pas que la saisie sera restreinte aux chiffres jusqu'à
+   ce qu'un message d'erreur apparaisse.
+
+   Cet IIFE ajoute inputmode="numeric" sur tous les inputs avec
+   data-number="1" pour :
+   - Déclencher le clavier numérique sur mobile (meilleure UX)
+   - Signaler aux AT la nature numérique du champ
+   - Préserver la compatibilité avec la validation JS existante
+     (virgule, décimales, signe négatif gérés par theme.js)
+
+   Choix de inputmode="numeric" vs type="number" : type="number" a
+   des bugs connus (notation scientifique, roulette souris, locale)
+   et n'est pas recommandé par WCAG/gov.uk. inputmode reste sur un
+   type="text" plus prévisible.
+
+   Le message explicite demandé par l'audit est déjà fourni via :
+   - Le tip statique ls-questionhelp (cf. fix #17, lié via aria-describedby)
+   - Le message d'erreur dynamique "Seuls des nombres..." (theme.js::validateNumberInput)
+*/
+
+(function() {
+    'use strict';
+
+    function addInputmodeNumericToNumericFields() {
+        var numericInputs = document.querySelectorAll('input[data-number="1"]');
+        numericInputs.forEach(function(input) {
+            if (input.dataset.inputmodeWired === '1') return;
+            if (!input.hasAttribute('inputmode')) {
+                input.setAttribute('inputmode', 'numeric');
+            }
+            input.dataset.inputmodeWired = '1';
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', addInputmodeNumericToNumericFields);
+    } else {
+        addInputmodeNumericToNumericFields();
+    }
+
+    document.addEventListener('limesurvey:questionsLoaded', addInputmodeNumericToNumericFields);
 })();
 
 /* ============================================

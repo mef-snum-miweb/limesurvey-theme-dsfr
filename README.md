@@ -41,7 +41,7 @@ Les non-conformités sont suivies sous forme d'issues avec le label [`RGAA`](../
 | **1.4** | CAPTCHA : alternative textuelle n'identifiant pas nature/fonction | ⛔ [#8](../../issues/8) *wontfix — cf. alternative antibot* |
 | **1.5** | CAPTCHA : absence de solution d'accès alternatif | ⛔ [#8](../../issues/8) *wontfix — cf. alternative antibot* |
 | **7.1** | Scripts non compatibles avec les technologies d'assistance | ✅ [#9](../../issues/9) |
-| **7.4** | Changements de contexte non signalés ou contrôlables | [#18](../../issues/18) |
+| **7.4** | Changements de contexte non signalés ou contrôlables | ✅ [#18](../../issues/18) |
 | **7.5** | Messages de statut non correctement restitués | ✅ [#17](../../issues/17) |
 | **8.9** | Balises utilisées à des fins de présentation | ⛔ [#16](../../issues/16) *wontfix — artefact du contenu admin, pas du thème* |
 | **9.1** | Information non structurée par des titres appropriés | ✅ [#10](../../issues/10) |

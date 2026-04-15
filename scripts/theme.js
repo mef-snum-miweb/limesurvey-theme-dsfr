@@ -964,7 +964,7 @@
                 if (gridRow && parentLi && !isMultipleShortText) {
                     const errorMsg = document.createElement('div');
                     errorMsg.className = 'ls-em-error dsfr-validation-error';
-                    errorMsg.textContent = 'Seuls des nombres peuvent être entrés dans ce champ.';
+                    errorMsg.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
                     errorMsg.style.marginTop = '0.25rem';
 
                     // Insérer après la grid-row
