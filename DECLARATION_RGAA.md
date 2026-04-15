@@ -21,7 +21,7 @@ L'audit de conformité réalisé par **Spécinov** ([https://www.specinov.fr/](h
 - **[1.5]** Les CAPTCHA ne proposent pas tous une solution d'accès alternatif. *(Mitigé par l'alternative antibot, cf. ci-dessous.)*
 - **[7.1]** Les scripts ne sont pas tous compatibles avec les technologies d'assistance.
 - **[7.4]** Les changements de contexte ne sont pas tous signalés ou contrôlables.
-- **[7.5]** Les messages de statut ne sont pas tous correctement restitués.
+- **[7.5]** Les messages de statut ne sont pas tous correctement restitués. *(Fix avec déviation par rapport à la recommandation auditeur — cf. ci-dessous.)*
 - **[8.9]** Les balises sont parfois utilisées uniquement à des fins de présentation. *(Artefact du contenu saisi en back-office — cf. ci-dessous.)*
 - **[9.1]** L'information n'est pas toujours structurée par des titres appropriés.
 - **[9.2]** La structure du document n'est pas toujours cohérente.
@@ -48,6 +48,26 @@ En mitigation, le thème fournit une **protection anti-bot accessible par concep
 Cette alternative est **entièrement accessible** : pas d'image, pas de CAPTCHA visuel, label DSFR natif, messages d'erreur `aria-live="polite"`, navigation clavier complète. Elle est implémentée dans `views/subviews/antibot/antibot_challenge.twig`.
 
 **Recommandation** : pour les questionnaires publics nécessitant une protection anti-bot, activer `antibot_enabled = on` et laisser le CAPTCHA LimeSurvey désactivé. La déclaration considère donc les critères 1.4 et 1.5 comme **mitigés** mais pas conformes au sens strict du RGAA (le CAPTCHA non conforme reste accessible dans les paramètres LimeSurvey ; c'est un choix de déploiement).
+
+### Note sur le critère 7.5 — Tips de validation `ls-questionhelp`
+
+Le critère 7.5 ciblait un usage inapproprié de `role="alert"` sur les éléments `.ls-questionhelp` générés par le core LimeSurvey (`application/views/survey/questions/question_help/help.twig`) et utilisés pour afficher les tips descriptifs de contraintes de saisie (ex : *« Only numbers may be entered in this field »*, *« The sum must equal 100 »*).
+
+**Recommandation auditeur** : remplacer `role="alert"` par `role="status"` + `aria-live="polite"`.
+
+**Analyse complémentaire effectuée lors de la correction** :
+
+- Le tip `ls-questionhelp` est une **description statique** d'une contrainte, pas un message de statut dynamique. Son contenu ne change pas au cours de la session — seule sa visibilité est togglée via la classe `hide-tip`.
+- Les erreurs de saisie réelles sont **déjà poussées** par le thème dans un autre mécanisme : `fr-messages-group` avec `aria-live="polite"` + `<p role="alert">`, lié au champ via `aria-describedby`.
+- Doublonner avec `role="status" aria-live="polite"` sur le tip aboutirait à une **annonce parasite** pour les utilisateurs de lecteur d'écran (annonce du tip au chargement alors qu'aucune interaction n'a eu lieu).
+- Sans ARIA du tout, le tip devient **muet pour les technologies d'assistance**, ce qui violerait les critères 1.1 et 11.1 (information visuelle non restituée).
+
+**Correction appliquée (en dépassement de la recommandation auditeur)** :
+
+1. **Suppression complète** de `role="alert"` sur `.ls-questionhelp` via un override du template core dans `views/survey/questions/question_help/help.twig`. Aucun `role` ni `aria-live` n'est ajouté.
+2. **Association sémantique** du tip au champ via un IIFE dans `scripts/custom.js` (`extendDescribedByForValidationTips`) qui, au chargement du DOM et à chaque `limesurvey:questionsLoaded`, étend l'attribut `aria-describedby` des inputs/textareas/selects de chaque question pour y inclure l'identifiant du tip (`vmsg_<qid>`). Les lecteurs d'écran annoncent ainsi la contrainte naturellement quand l'utilisateur focus le champ, sans interruption.
+
+**Résultat** : conforme au critère 7.5 (plus de message de statut mal restitué), au critère 11.10 (contrainte décrite dans le contexte du champ) et aux critères 1.1 / 11.1 (information visuelle préservée pour les AT). Les erreurs dynamiques continuent d'être annoncées via le mécanisme existant sans interférence.
 
 ### Note sur le critère 8.9 — Balises `<p>` vides
 
