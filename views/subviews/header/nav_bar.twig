@@ -70,31 +70,39 @@ For the survey navigator ("Next", "Back", etc.), see: navigation/navigator.twig
 
                     {% if ShowMenu %}
                         <div class="fr-header__tools">
-                            <div class="fr-header__tools-links">
-                                {% if aSurveyInfo.aQuestionIndex.bShow == true and aSurveyInfo.format != 'A' %}
-                                    <button type="button"
-                                            data-fr-opened="false"
-                                            aria-controls="question-index-modal"
-                                            aria-haspopup="dialog"
-                                            aria-expanded="false"
-                                            class="fr-btn--team fr-btn"
-                                            title="{{ t.steps_list }}">
-                                        {{ t.steps_list }}
-                                    </button>
-                                {% endif %}
+                            <nav class="fr-header__tools-links"
+                                 role="navigation"
+                                 aria-label="{{ gT("Main navigation") }}">
+                                {# Boutons d'outils groupés dans fr-btns-group pour stacking
+                                   vertical DSFR natif (cf. pattern officiel header-menu.ejs). #}
+                                <ul class="fr-btns-group">
+                                    {% if aSurveyInfo.aQuestionIndex.bShow == true and aSurveyInfo.format != 'A' %}
+                                        <li>
+                                            <button type="button"
+                                                    data-fr-opened="false"
+                                                    aria-controls="question-index-modal"
+                                                    aria-haspopup="dialog"
+                                                    aria-expanded="false"
+                                                    class="fr-btn--team fr-btn"
+                                                    title="{{ t.steps_list }}">
+                                                {{ t.steps_list }}
+                                            </button>
+                                        </li>
+                                    {% endif %}
 
-                                {# Sélecteur de thème clair/sombre - Bouton déclencheur modale DSFR #}
-                                <div class="fr-header__tools-links">
-                                    <button class="fr-btn fr-btn--display fr-btn--icon-left"
-                                            type="button"
-                                            aria-controls="fr-theme-modal"
-                                            aria-haspopup="dialog"
-                                            aria-expanded="false"
-                                            data-fr-opened="false"
-                                            title="{{ t.display_settings }}">
-                                        {{ t.display_settings }}
-                                    </button>
-                                </div>
+                                    {# Sélecteur de thème clair/sombre - Bouton déclencheur modale DSFR #}
+                                    <li>
+                                        <button class="fr-btn fr-btn--display fr-btn--icon-left"
+                                                type="button"
+                                                aria-controls="fr-theme-modal"
+                                                aria-haspopup="dialog"
+                                                aria-expanded="false"
+                                                data-fr-opened="false"
+                                                title="{{ t.display_settings }}">
+                                            {{ t.display_settings }}
+                                        </button>
+                                    </li>
+                                </ul>
 
                                 {% if aSurveyInfo.alanguageChanger.show %}
                                     {% set aLCD = aSurveyInfo.alanguageChanger.datas %}
@@ -126,7 +134,7 @@ For the survey navigator ("Next", "Back", etc.), see: navigation/navigator.twig
                                         </div>
                                     </div>
                                 {% endif %}
-                            </div>
+                            </nav>
                         </div>
                     {% endif %}
                 </div>
@@ -142,29 +150,39 @@ For the survey navigator ("Next", "Back", etc.), see: navigation/navigator.twig
                             class="fr-btn--close fr-btn">
                         {{ gT("Close") }}
                     </button>
-                    <div class="fr-header__menu-links">
-                        {% if aSurveyInfo.aQuestionIndex.bShow == true and aSurveyInfo.format != 'A' %}
-                            <button type="button"
-                                    data-fr-opened="false"
-                                    aria-controls="question-index-modal"
-                                    aria-haspopup="dialog"
-                                    aria-expanded="false"
-                                    class="fr-btn--team fr-btn"
-                                    title="{{ t.steps_list }}">
-                                {{ t.steps_list }}
-                            </button>
-                        {% endif %}
+                    <nav class="fr-header__menu-links"
+                         role="navigation"
+                         aria-label="{{ gT("Main navigation") }}">
+                        {# Boutons d'outils groupés dans fr-btns-group pour stacking
+                           vertical DSFR natif (cf. pattern officiel header-menu.ejs). #}
+                        <ul class="fr-btns-group">
+                            {% if aSurveyInfo.aQuestionIndex.bShow == true and aSurveyInfo.format != 'A' %}
+                                <li>
+                                    <button type="button"
+                                            data-fr-opened="false"
+                                            aria-controls="question-index-modal"
+                                            aria-haspopup="dialog"
+                                            aria-expanded="false"
+                                            class="fr-btn--team fr-btn"
+                                            title="{{ t.steps_list }}">
+                                        {{ t.steps_list }}
+                                    </button>
+                                </li>
+                            {% endif %}
 
-                        {# Sélecteur de thème clair/sombre (mobile) - Bouton déclencheur modale DSFR #}
-                        <button class="fr-btn fr-btn--display fr-btn--icon-left"
-                                type="button"
-                                aria-controls="fr-theme-modal"
-                                aria-haspopup="dialog"
-                                aria-expanded="false"
-                                data-fr-opened="false"
-                                title="{{ t.display_settings }}">
-                            {{ t.display_settings }}
-                        </button>
+                            {# Sélecteur de thème clair/sombre (mobile) - Bouton déclencheur modale DSFR #}
+                            <li>
+                                <button class="fr-btn fr-btn--display fr-btn--icon-left"
+                                        type="button"
+                                        aria-controls="fr-theme-modal"
+                                        aria-haspopup="dialog"
+                                        aria-expanded="false"
+                                        data-fr-opened="false"
+                                        title="{{ t.display_settings }}">
+                                    {{ t.display_settings }}
+                                </button>
+                            </li>
+                        </ul>
 
                         {% if aSurveyInfo.alanguageChanger.show %}
                             {% set aLCD = aSurveyInfo.alanguageChanger.datas %}
@@ -196,7 +214,7 @@ For the survey navigator ("Next", "Back", etc.), see: navigation/navigator.twig
                                 </div>
                             </div>
                         {% endif %}
-                    </div>
+                    </nav>
                 </div>
             </div>
         {% endif %}

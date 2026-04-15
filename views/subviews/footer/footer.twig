@@ -36,28 +36,30 @@ Les liens pointent vers # - à personnaliser selon votre organisme
             </div>
         </div>
         <div class="fr-footer__bottom">
-            <ul class="fr-footer__bottom-list">
-                <li class="fr-footer__bottom-item">
-                    <button class="fr-footer__bottom-link" data-fr-opened="false" aria-controls="accessibility-modal" aria-haspopup="dialog" aria-expanded="false">
-                        Accessibilité : partiellement conforme
-                    </button>
-                </li>
-                <li class="fr-footer__bottom-item">
-                    <button class="fr-footer__bottom-link" data-fr-opened="false" aria-controls="legal-modal" aria-haspopup="dialog" aria-expanded="false">
-                        Mentions légales
-                    </button>
-                </li>
-                <li class="fr-footer__bottom-item">
-                    <button class="fr-footer__bottom-link" data-fr-opened="false" aria-controls="privacy-modal" aria-haspopup="dialog" aria-expanded="false">
-                        Données personnelles
-                    </button>
-                </li>
-                <li class="fr-footer__bottom-item">
-                    <button class="fr-footer__bottom-link" data-fr-opened="false" aria-controls="cookies-modal" aria-haspopup="dialog" aria-expanded="false">
-                        Gestion des cookies
-                    </button>
-                </li>
-            </ul>
+            <nav role="navigation" aria-label="{{ gT("Footer") }}">
+                <ul class="fr-footer__bottom-list">
+                    <li class="fr-footer__bottom-item">
+                        <button class="fr-footer__bottom-link" data-fr-opened="false" aria-controls="accessibility-modal" aria-haspopup="dialog" aria-expanded="false">
+                            Accessibilité : partiellement conforme
+                        </button>
+                    </li>
+                    <li class="fr-footer__bottom-item">
+                        <button class="fr-footer__bottom-link" data-fr-opened="false" aria-controls="legal-modal" aria-haspopup="dialog" aria-expanded="false">
+                            Mentions légales
+                        </button>
+                    </li>
+                    <li class="fr-footer__bottom-item">
+                        <button class="fr-footer__bottom-link" data-fr-opened="false" aria-controls="privacy-modal" aria-haspopup="dialog" aria-expanded="false">
+                            Données personnelles
+                        </button>
+                    </li>
+                    <li class="fr-footer__bottom-item">
+                        <button class="fr-footer__bottom-link" data-fr-opened="false" aria-controls="cookies-modal" aria-haspopup="dialog" aria-expanded="false">
+                            Gestion des cookies
+                        </button>
+                    </li>
+                </ul>
+            </nav>
             <div class="fr-footer__bottom-copy">
                 {% if aSurveyInfo.options.intellectual_property %}
                     {{ aSurveyInfo.options.intellectual_property|raw }}
