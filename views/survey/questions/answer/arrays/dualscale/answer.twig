@@ -110,12 +110,9 @@
                                     name="{{ subquestion.myfname0 }}"
                                     value="{{ ld }}"
                                     id="answer{{ subquestion.myfname0 }}-{{ ld }}"
-                                    aria-labelledby="answertext{{ subquestion.myfname }}"
+                                    aria-labelledby="answer{{ basename }}-s0-{{ ld }} answertext{{ subquestion.myfname }}"
                                     {{ labelcode0_checked[subquestion.title][ld]|raw }}
                                 />
-                                <label class="fr-sr-only" for="answer{{ subquestion.myfname0 }}-{{ ld }}">
-                                    {{ processString(labelans0[j]) }}
-                                </label>
                             </td>
                         {% endfor %}
 
@@ -134,12 +131,9 @@
                                     name="{{ subquestion.myfname1 }}"
                                     value="{{ ld }}"
                                     id="answer{{ subquestion.myfname1 }}-{{ ld }}"
-                                    aria-labelledby="answertext{{ subquestion.myfname }}"
+                                    aria-labelledby="answer{{ basename }}-s1-{{ ld }} answertext{{ subquestion.myfname }}"
                                     {{ labelcode1_checked[subquestion.title][ld]|raw }}
                                 />
-                                <label class="fr-sr-only" for="answer{{ subquestion.myfname1 }}-{{ ld }}">
-                                    {{ processString(labelans1[j]) }}
-                                </label>
                             </td>
                         {% endfor %}
 

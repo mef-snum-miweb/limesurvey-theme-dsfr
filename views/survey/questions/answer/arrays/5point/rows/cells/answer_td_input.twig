@@ -16,12 +16,9 @@
         name="{{ myfname }}"
         id="answer{{ myfname }}-{{ i }}"
         class="dsfr-radio-table"
-        aria-labelledby="answer{{ basename }}-{{ i }}"
+        aria-labelledby="answer{{ basename }}-{{ i }} answertext{{ myfname }}"
         value="{{ value }}"
         {{ CHECKED }}
      />
-    <label for="answer{{ myfname }}-{{ i }}" class="fr-sr-only">
-        {{ processString(labelText) }}
-    </label>
 </td>
 <!-- end of td_input -->

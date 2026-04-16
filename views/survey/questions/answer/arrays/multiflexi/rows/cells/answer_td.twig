@@ -31,10 +31,6 @@
         'disabled' : true,
     })) }}
 
-    <label for="answer{{ myfname2 }}" class="fr-sr-only">
-        {{ processString(dataTitle) }}
-    </label>
-
     {% if inputboxlayout == false %}
         <!-- Dropdown Layout -->
         <div class="fr-select-group{% if error %} fr-select-group--error{% endif %}">
@@ -42,7 +38,7 @@
                 class="fr-select{% if error %} fr-select--error{% endif %}"
                 name="{{ myfname2 }}"
                 id="answer{{ myfname2 }}"
-                aria-labelledby="answertext{{ basename }}_{{ dataCode }}"
+                aria-labelledby="answertext{{ basename }}_{{ dataCode }} answertext{{ myfname }}"
             >
                 <option value="">{{ gT('...') }}</option>
                 {% for i in range(minvalue, maxvalue, stepvalue) %}
@@ -58,7 +54,7 @@
         <div class="fr-input-group{% if error %} fr-input-group--error{% endif %}">
             {{ C.Html.textField(myfname2, value, ({
                 'id' : "answer"~myfname2,
-                'aria-labelledby' : "answertext" ~ basename ~ "_" ~ dataCode,
+                'aria-labelledby' : "answertext" ~ basename ~ "_" ~ dataCode ~ " answertext" ~ myfname,
                 'class' : "fr-input "~kpclass~(error ? " fr-input--error" : ""),
                 'title' : gT('Only numbers may be entered in this field.'),
                 'size' : (inputsize ? inputsize : null),
