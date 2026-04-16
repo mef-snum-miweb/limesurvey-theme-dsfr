@@ -49,7 +49,7 @@ Les non-conformités sont suivies sous forme d'issues avec le label [`RGAA`](../
 | **10.1** | Feuilles de styles non utilisées pour contrôler la présentation | ✅ [#15](../../issues/15) |
 | **10.8** | Contenus cachés non correctement ignorés par les technologies d'assistance | ✅ [#14](../../issues/14) |
 | **10.11** | Contenus non présentables sans défilement en responsive | ✅ [#13](../../issues/13) |
-| **11.2** | Étiquettes de champs non pertinentes | [#21](../../issues/21), [#22](../../issues/22) |
+| **11.2** | Étiquettes de champs non pertinentes | ✅ [#21](../../issues/21), [#22](../../issues/22) |
 | **11.10** | Contrôle de saisie non pertinent | [#19](../../issues/19) |
 | **11.11** | Contrôle de saisie non accompagné de suggestions | [#20](../../issues/20) |
 | **12.6** | Zones de regroupement non atteignables ou évitables | ✅ [#12](../../issues/12) |
