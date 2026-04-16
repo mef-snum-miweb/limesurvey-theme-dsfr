@@ -62,7 +62,6 @@ Des issues supplémentaires couvrent des critères identifiés lors des correcti
 
 | Critère RGAA | Intitulé | Issue |
 |---|---|---|
-| **5.1** | Tableau complexe : ajout d'un résumé | [#25](../../issues/25) |
 | **5.7** | Tableau double échelle : association headers/cellules | ✅ [#26](../../issues/26) |
 | **8.7** | Changement de langue du placeholder (cases à cocher) | ✅ [#27](../../issues/27) |
 | **9.3** | Liste ordonnée : utiliser `ol` au lieu de `ul` (classement) | ✅ [#29](../../issues/29) |
