@@ -1,0 +1,153 @@
+# Déclaration d'accessibilité
+
+**Ministère de l'économie et des finances** s'engage à rendre ses sites internet, intranet, extranet et ses progiciels accessibles (et ses applications mobiles et mobilier urbain numérique) conformément à l'article 47 de la loi n°2005-102 du 11 février 2005.
+
+Cette déclaration d'accessibilité s'applique au thème  **limesurvey-theme-dsfr** évalué sur le questionnaire **/exemple/limesurvey_questionnaire_test_rgaa.lss** du dépôt actuel, tiré du questionnaire complet multilingue publié sur le dépôt ([https://github.com/LimeSurvey](https://github.com/LimeSurvey/LimeSurvey/blob/master/docs/demosurveys/ls6_sample_survey_multilingual_fr_de_en_it_ru.lss)) auquel ont été ajoutés des questions obligatoires.
+
+## État de conformité
+
+**Le thème Limesurvey** ([https://github.com/bmatge/limesurvey-theme-dsfr/](https://github.com/bmatge/limesurvey-theme-dsfr/)) est **partiellement conforme** avec le référentiel général d'amélioration de l'accessibilité (RGAA).
+
+## Résultats des tests
+
+L'audit de conformité réalisé par **Spécinov** ([https://www.specinov.fr/](https://www.specinov.fr/)) révèle que **70,49 %** des critères du RGAA version 4.1 sont respectés.
+
+## Contenus non accessibles
+
+### Non-conformités
+
+- **[1.3]** Les images porteuses d'information n'ont pas toutes une alternative textuelle pertinente.
+- **[1.4]** Les alternatives textuelles des CAPTCHA et images-tests ne permettent pas toujours d'identifier leur nature et fonction. *(Mitigé par l'alternative antibot, cf. ci-dessous.)*
+- **[1.5]** Les CAPTCHA ne proposent pas tous une solution d'accès alternatif. *(Mitigé par l'alternative antibot, cf. ci-dessous.)*
+- **[7.1]** Les scripts ne sont pas tous compatibles avec les technologies d'assistance.
+- **[7.4]** Les changements de contexte ne sont pas tous signalés ou contrôlables.
+- **[7.5]** Les messages de statut ne sont pas tous correctement restitués. *(Fix avec déviation par rapport à la recommandation auditeur — cf. ci-dessous.)*
+- **[8.9]** Les balises sont parfois utilisées uniquement à des fins de présentation. *(Artefact du contenu saisi en back-office — cf. ci-dessous.)*
+- **[9.1]** L'information n'est pas toujours structurée par des titres appropriés.
+- **[9.2]** La structure du document n'est pas toujours cohérente.
+- **[10.1]** Les feuilles de styles ne sont pas toujours utilisées pour contrôler la présentation.
+- **[10.8]** Les contenus cachés ne sont pas tous correctement ignorés par les technologies d'assistance.
+- **[10.11]** Les contenus ne peuvent pas toujours être présentés sans défilement en responsive.
+- **[11.2]** Les étiquettes de champs ne sont pas toutes pertinentes.
+- **[11.10]** Le contrôle de saisie n'est pas toujours utilisé de manière pertinente.
+- **[11.11]** Le contrôle de saisie n'est pas toujours accompagné de suggestions.
+- **[12.6]** Les zones de regroupement ne peuvent pas toujours être atteintes ou évitées.
+- **[12.9]** La navigation contient parfois des pièges au clavier.
+- **[13.5]** Les contenus cryptiques n'ont pas tous une alternative.
+
+### Mitigation des critères 1.4 et 1.5 — Alternative accessible au CAPTCHA
+
+Le CAPTCHA visuel est généré par le cœur de LimeSurvey (widget Yii `CCaptcha`) et ne peut pas être corrigé depuis le thème sans forker l'application, ce qui est exclu par le périmètre du projet.
+
+En mitigation, le thème fournit une **protection anti-bot accessible par conception**, activable via l'option `antibot_enabled` dans les paramètres du questionnaire (onglet *Protection anti-bot*). Cette alternative repose uniquement sur :
+
+- une **question textuelle cognitive simple** (pas d'image) — ex. *« De quelle couleur est le soleil ? »* — tirée d'un pool par défaut ou personnalisable par l'administrateur du questionnaire ;
+- un **champ honeypot** invisible pour les humains (`aria-hidden="true"`, `tabindex="-1"`) mais rempli automatiquement par les bots ;
+- un **timer minimum** avant soumission (par défaut 5 secondes) pour bloquer les soumissions instantanées.
+
+Cette alternative est **entièrement accessible** : pas d'image, pas de CAPTCHA visuel, label DSFR natif, messages d'erreur `aria-live="polite"`, navigation clavier complète. Elle est implémentée dans `views/subviews/antibot/antibot_challenge.twig`.
+
+**Recommandation** : pour les questionnaires publics nécessitant une protection anti-bot, activer `antibot_enabled = on` et laisser le CAPTCHA LimeSurvey désactivé. La déclaration considère donc les critères 1.4 et 1.5 comme **mitigés** mais pas conformes au sens strict du RGAA (le CAPTCHA non conforme reste accessible dans les paramètres LimeSurvey ; c'est un choix de déploiement).
+
+### Note sur le critère 7.5 — Tips de validation `ls-questionhelp`
+
+Le critère 7.5 ciblait un usage inapproprié de `role="alert"` sur les éléments `.ls-questionhelp` générés par le core LimeSurvey (`application/views/survey/questions/question_help/help.twig`) et utilisés pour afficher les tips descriptifs de contraintes de saisie (ex : *« Only numbers may be entered in this field »*, *« The sum must equal 100 »*).
+
+**Recommandation auditeur** : remplacer `role="alert"` par `role="status"` + `aria-live="polite"`.
+
+**Analyse complémentaire effectuée lors de la correction** :
+
+- Le tip `ls-questionhelp` est une **description statique** d'une contrainte, pas un message de statut dynamique. Son contenu ne change pas au cours de la session — seule sa visibilité est togglée via la classe `hide-tip`.
+- Les erreurs de saisie réelles sont **déjà poussées** par le thème dans un autre mécanisme : `fr-messages-group` avec `aria-live="polite"` + `<p role="alert">`, lié au champ via `aria-describedby`.
+- Doublonner avec `role="status" aria-live="polite"` sur le tip aboutirait à une **annonce parasite** pour les utilisateurs de lecteur d'écran (annonce du tip au chargement alors qu'aucune interaction n'a eu lieu).
+- Sans ARIA du tout, le tip devient **muet pour les technologies d'assistance**, ce qui violerait les critères 1.1 et 11.1 (information visuelle non restituée).
+
+**Correction appliquée (en dépassement de la recommandation auditeur)** :
+
+1. **Suppression complète** de `role="alert"` sur `.ls-questionhelp` via un override du template core dans `views/survey/questions/question_help/help.twig`. Aucun `role` ni `aria-live` n'est ajouté.
+2. **Association sémantique** du tip au champ via un IIFE dans `scripts/custom.js` (`extendDescribedByForValidationTips`) qui, au chargement du DOM et à chaque `limesurvey:questionsLoaded`, étend l'attribut `aria-describedby` des inputs/textareas/selects de chaque question pour y inclure l'identifiant du tip (`vmsg_<qid>`). Les lecteurs d'écran annoncent ainsi la contrainte naturellement quand l'utilisateur focus le champ, sans interruption.
+
+**Résultat** : conforme au critère 7.5 (plus de message de statut mal restitué), au critère 11.10 (contrainte décrite dans le contexte du champ) et aux critères 1.1 / 11.1 (information visuelle préservée pour les AT). Les erreurs dynamiques continuent d'être annoncées via le mécanisme existant sans interférence.
+
+### Note sur le critère 8.9 — Balises `<p>` vides
+
+Le critère 8.9 relevé par l'audit concerne des balises `<p> </p>` vides (contenant un espace insécable) utilisées à des fins d'espacement visuel. Après analyse, **le thème ne génère aucune balise `<p>` vide** : ces balises proviennent du **contenu saisi en back-office** (textes de questions, messages de bienvenue, etc.), inséré par l'éditeur WYSIWYG TinyMCE de LimeSurvey qui ajoute ce type de paragraphes vides lorsque l'administrateur effectue des retours à la ligne visuels.
+
+Le questionnaire de référence utilisé pour l'audit (`exemple/limesurvey_questionnaire_test_rgaa.lss`) a été nettoyé pour supprimer ces artefacts. Les administrateurs sont invités à relire les textes saisis via TinyMCE et à supprimer manuellement les paragraphes vides générés involontairement.
+
+**Le critère 8.9 est donc un wontfix côté thème** : la cause racine se situe dans le contenu éditorial, pas dans le code du template. La mitigation relève de la formation des administrateurs de questionnaires.
+
+### Contenus non soumis à l'obligation d'accessibilité
+
+_Aucun._
+
+## Établissement de cette déclaration d'accessibilité
+
+Cette déclaration a été établie le **15 avril 2026**, sur la base de la version du thème correspondant au commit [`dcef02d`](https://github.com/bmatge/limesurvey-theme-dsfr/commit/dcef02d) — état du thème au moment de la publication de la déclaration. Les corrections apportées postérieurement à cette version sont tracées via le label [`RGAA`](https://github.com/bmatge/limesurvey-theme-dsfr/labels/RGAA) et le milestone [Conformité RGAA 4.1](https://github.com/bmatge/limesurvey-theme-dsfr/milestone/1).
+
+### Environnement de test
+
+Les vérifications de restitution de contenus ont été réalisées sur la base de la combinaison fournie par la base de référence du RGAA, avec les versions suivantes :
+
+- Sur mobile Android avec Google Chrome et Talkback
+- Sur mobile iOS avec Safari et VoiceOver
+- Sur ordinateur macOS avec Safari et VoiceOver
+- Sur ordinateur Windows avec Firefox et NVDA
+- Sur ordinateur Windows avec Google Chrome et NVDA
+
+### Outils pour évaluer l'accessibilité
+
+- HeadingsMap
+- WCAG Contrast checker
+- Inspecteur de composants
+- Assistant RGAA
+- Validateur HTML du W3C
+- Kastor.green
+
+### Pages du site ayant fait l'objet de la vérification de conformité
+
+- [P01] Accueil (captcha & question simple) & Entrée — Question vérification humain
+- [P02] Thème (pied de page et en-tête)
+- [P03] Étape 2 — Zone de texte court
+- [P04] Étape 2 — Zone de texte court (nombres uniquement, avec un minuteur)
+- [P05] Étape 2 — Multiples zones de texte court
+- [P06] Étape 2 — Tableau (texte)
+- [P07] Étape 3 — Entrée numérique
+- [P08] Étape 3 — Multiples entrées numériques
+- [P09] Étape 3 — Multiples entrées numériques (valeur minimale de la somme : 3, valeur maximum de la somme : 10, nombre maximum de caractères : 1)
+- [P10] Étape 3 — Multiples entrées numériques (utiliser un curseur, précision du curseur : 0.1, valeurs minimale et maximale, utilisation d'un séparateur de texte)
+- [P11] Étape 3 — Tableau (nombres) (saisies de texte)
+- [P12] Étape 4 — Genre
+- [P13] Étape 4 — 5 boutons radios
+- [P14] Étape 4 — 5 boutons radios (emoji)
+- [P15] Étape 4 — 5 boutons radios (étoiles)
+- [P16] Étape 4 — Changement de langue
+- [P17] Étape 4 — Liste (menu déroulant) (avec option par défaut)
+- [P18] Étape 4 — Liste (menu déroulant) (avec séparateur de catégories)
+- [P19] Étape 4 — Liste (boutons radio)
+- [P20] Étape 4 — Liste avec commentaire
+- [P21] Étape 4 — Date
+- [P22] Étape 4 — Date (afficher les boîtes de sélection, année minimale et maximale)
+- [P23] Étape 4 — À la suite, les tableaux de questions à réponses uniques
+- [P24] Étape 4 — Tableau
+- [P25] Étape 4 — Tableau double échelle (double menu déroulant)
+- [P26] Étape 5 — Multiples cases à cocher
+- [P27] Étape 5 — Multiples cases à cocher (avec option d'exclusion)
+- [P28] Étape 5 — Classement
+- [P29] Étape 6 — Une question oui/non pour afficher ou masquer les réponses suivantes
+
+## Retour d'information et contact
+
+Si vous n'arrivez pas à accéder à un contenu ou à un service, vous pouvez contacter le responsable de Ministère de l'économie et des finances pour être orienté vers une alternative accessible ou obtenir le contenu sous une autre forme.
+
+- Créer une **issue** sur le présent dépôt
+
+## Voies de recours
+
+Si vous constatez un défaut d'accessibilité vous empêchant d'accéder à un contenu ou une fonctionnalité du site, que vous nous le signalez et que vous ne parvenez pas à obtenir une réponse de notre part, vous êtes en droit de faire parvenir vos doléances ou une demande de saisine au Défenseur des droits.
+
+Plusieurs moyens sont à votre disposition :
+
+- Écrire un message au Défenseur des droits
+- Contacter le délégué du Défenseur des droits dans votre région
+- Envoyer un courrier par la poste (gratuit, ne pas mettre de timbre) — Défenseur des droits, Libre réponse 71120, 75342 Paris CEDEX 07

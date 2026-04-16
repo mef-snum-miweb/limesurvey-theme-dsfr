@@ -10,7 +10,7 @@ Cette déclaration d'accessibilité s'applique au thème **limesurvey-theme-dsfr
 
 ## Résultats des tests
 
-Un audit initial de conformité a été réalisé par **Spécinov** ([https://www.specinov.fr/](https://www.specinov.fr/)) et a révélé un taux de conformité de **70,49 %** des critères du RGAA version 4.1.
+Un audit initial de conformité a été réalisé par **Spécinov** ([https://www.specinov.fr/](https://www.specinov.fr/)) et a révélé un taux de conformité de **70,49 %** des critères du RGAA version 4.1. La déclaration issue de cet audit est consultable dans [`DECLARATION_RGAA_INITIALE.md`](DECLARATION_RGAA_INITIALE.md).
 
 À la suite de cet audit, **l'ensemble des 16 non-conformités imputables au thème ont été corrigées**. Les corrections sont tracées via le label [`RGAA`](https://github.com/bmatge/limesurvey-theme-dsfr/labels/RGAA) et le milestone [Conformité RGAA 4.1](https://github.com/bmatge/limesurvey-theme-dsfr/milestone/1).
 
