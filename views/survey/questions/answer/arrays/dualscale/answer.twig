@@ -52,29 +52,29 @@
             <thead>
                 {% if leftheader or rightheader %}
                     <tr class="ls-heading dualscale-header">
-                        <th scope="col"></th>
-                        <th scope="colgroup" class="fr-text--bold" colspan="{{ labelans0|length }}">{{ processString(leftheader) }}</th>
-                        {% if separatorwidth %}<th scope="col"></th>{% endif %}
-                        <th scope="colgroup" class="fr-text--bold" colspan="{{ labelans1|length }}">{{ processString(rightheader) }}</th>
-                        {% if shownoanswer %}<th scope="col"></th>{% endif %}
-                        {% if rightexists %}<th scope="col"></th>{% endif %}
+                        <th></th>
+                        <th id="scale0-header-{{ basename }}" class="fr-text--bold" colspan="{{ labelans0|length }}">{{ processString(leftheader) }}</th>
+                        {% if separatorwidth %}<th></th>{% endif %}
+                        <th id="scale1-header-{{ basename }}" class="fr-text--bold" colspan="{{ labelans1|length }}">{{ processString(rightheader) }}</th>
+                        {% if shownoanswer %}<th></th>{% endif %}
+                        {% if rightexists %}<th></th>{% endif %}
                     </tr>
                 {% endif %}
 
                 <tr class="ls-heading dualscale-labels">
-                    <th scope="col"></th>
+                    <th></th>
                     {% for code, label in labelans0 %}
-                        <th scope="col" id="answer{{ basename }}-s0-{{ labelcode0[code] }}" class="fr-text--bold answertext">{{ processString(label) }}</th>
+                        <th id="answer{{ basename }}-s0-{{ labelcode0[code] }}" class="fr-text--bold answertext">{{ processString(label) }}</th>
                     {% endfor %}
-                    {% if separatorwidth %}<th scope="col"></th>{% endif %}
+                    {% if separatorwidth %}<th></th>{% endif %}
                     {% for code, label in labelans1 %}
-                        <th scope="col" id="answer{{ basename }}-s1-{{ labelcode1[code] }}" class="fr-text--bold answertext">{{ processString(label) }}</th>
+                        <th id="answer{{ basename }}-s1-{{ labelcode1[code] }}" class="fr-text--bold answertext">{{ processString(label) }}</th>
                     {% endfor %}
                     {% if shownoanswer %}
-                        <th scope="col" class="fr-text--bold noanswer-text">{{ gT('No answer') }}</th>
+                        <th class="fr-text--bold noanswer-text">{{ gT('No answer') }}</th>
                     {% endif %}
                     {% if rightexists %}
-                        <th scope="col"></th>
+                        <th></th>
                     {% endif %}
                 </tr>
             </thead>
@@ -92,7 +92,7 @@
 
                         {# Scale 0 (first scale) #}
                         {% for j, ld in labelcode0 %}
-                            <td class="answer_cell_{{ ld }} answer-item radio-item scale0-item" headers="answertext{{ subquestion.myfname }} answer{{ basename }}-s0-{{ ld }}">
+                            <td class="answer_cell_{{ ld }} answer-item radio-item scale0-item" headers="answertext{{ subquestion.myfname }} scale0-header-{{ basename }} answer{{ basename }}-s0-{{ ld }}">
                                 <input
                                     type="radio"
                                     name="{{ subquestion.myfname0 }}"
@@ -116,7 +116,7 @@
 
                         {# Scale 1 (second scale) #}
                         {% for j, ld in labelcode1 %}
-                            <td class="answer_cell_{{ ld }} answer-item radio-item scale1-item" headers="answertext{{ subquestion.myfname }} answer{{ basename }}-s1-{{ ld }}">
+                            <td class="answer_cell_{{ ld }} answer-item radio-item scale1-item" headers="answertext{{ subquestion.myfname }} scale1-header-{{ basename }} answer{{ basename }}-s1-{{ ld }}">
                                 <input
                                     type="radio"
                                     name="{{ subquestion.myfname1 }}"
