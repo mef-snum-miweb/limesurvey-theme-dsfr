@@ -39,7 +39,7 @@
         <div class="fr-col-12 fr-col-md-8 fr-mb-2w">
             <div class="fr-input-group">
                 <label class="fr-label fr-sr-only" for="answer{{ myfname }}">
-                    {{ processString(othertext) }} - {{ gT("Please specify:") }}
+                    {{ t.if_other_specify }}
                 </label>
                 {# RGAA 8.7 — utilisation du dict t.* (traduit FR/EN) au lieu de
                    gT() qui tombait en fallback anglais sans lang="en". #}
@@ -49,7 +49,6 @@
                     name="{{ myfname }}"
                     id="answer{{ myfname }}"
                     value="{{ sValue }}"
-                    aria-labelledby="label-{{ myfname }}-other"
                     placeholder="{{ t.please_specify_placeholder }}"
                 />
             </div>
