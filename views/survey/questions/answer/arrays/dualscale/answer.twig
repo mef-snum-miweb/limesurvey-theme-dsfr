@@ -30,6 +30,18 @@
 <div role="group" aria-labelledby="ls-question-text-{{ basename }}">
     <div class="fr-table fr-table--bordered" data-fr-js-table="true">
         <table class="{{ coreClass }}" aria-label="{{ t.dual_scale_matrix|default('Matrice de réponses à double échelle') }}">
+            <caption class="fr-sr-only">
+                Tableau de {{ aSubQuestions|length }} sous-questions avec deux échelles de réponse
+                {%- if leftheader and rightheader -%}
+                    {{ ' ' }}: « {{ processString(leftheader) }} » ({{ labelans0|length }} options) et « {{ processString(rightheader) }} » ({{ labelans1|length }} options)
+                {%- else -%}
+                    {{ ' ' }}de {{ labelans0|length }} et {{ labelans1|length }} options
+                {%- endif -%}
+                {%- if shownoanswer -%}
+                    , avec une option « sans réponse »
+                {%- endif -%}
+                .
+            </caption>
             <colgroup class="col-responses">
                 <col class="answertext" style="width: {{ answerwidth }}%;" />
                 {% for code, label in labelans0 %}
