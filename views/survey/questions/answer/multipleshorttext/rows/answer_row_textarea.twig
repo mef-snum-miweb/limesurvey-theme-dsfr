@@ -17,19 +17,19 @@
 #}
 
 <!-- answer_row_textarea DSFR -->
-<li id="javatbd{{ myfname }}" class="selector--inputondemand-list-item question-item answer-item text-item{% if alert %} input-error{% endif %}{{ extraclass }}" {{ sDisplayStyle }}>
-    <div class="fr-input-group{% if alert %} fr-input-group--error{% endif %}">
+<li id="javatbd{{ myfname }}" class="selector--inputondemand-list-item question-item answer-item text-item{{ extraclass }}" {{ sDisplayStyle }}>
+    <div class="fr-input-group">
         <label class="fr-label" for="answer{{ myfname }}">
             {{ processString(question) }}
         </label>
-        
+
         {% if prefix != '' or suffix != '' %}
         <div class="fr-input-wrap{% if prefix != '' %} fr-input-wrap--prefix{% endif %}{% if suffix != '' %} fr-input-wrap--suffix{% endif %}">
             {% if prefix != '' %}
                 <span class="fr-input-wrap__prefix">{{ processString(prefix) }}</span>
             {% endif %}
         {% endif %}
-        
+
             {# RGAA 10.1 — size n'est pas un attribut HTML valide sur textarea
                (il était ignoré par le navigateur). Si besoin de contrôler la
                largeur, passer par une classe CSS. #}
@@ -42,18 +42,15 @@
                 {% if maxlength %} maxlength="{{ maxlength }}" {% endif %}
                 {% if numbersonly %} data-number="{{ numbersonly }}" {% endif %}
             >{{ dispVal }}</textarea>
-            
+
         {% if prefix != '' or suffix != '' %}
             {% if suffix != '' %}
                 <span class="fr-input-wrap__suffix">{{ processString(suffix) }}</span>
             {% endif %}
         </div>
         {% endif %}
-        
+
         <div class="fr-messages-group" aria-live="polite">
-            {% if alert %}
-                <p class="fr-message fr-message--error">Ce champ est obligatoire</p>
-            {% endif %}
         </div>
     </div>
 </li>
