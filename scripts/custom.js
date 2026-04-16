@@ -891,183 +891,185 @@ console.log('%c\n' +
 
     }
 
-    // === Gestion spécifique des questions à choix multiples (multiple-short-txt) ===
+    // === Gestion spécifique des questions à saisie multiple obligatoire ===
+    // (multiple-short-txt, type Q)
+    //
+    // RGAA 11.10 + 11.11 — Approche « compteur global » :
+    //   • Pas de rouge individuel sur les champs vides (seulement pour erreur de format)
+    //   • Un message global dynamique avec compteur de champs restants
+    //   • Feedback vert discret sur les champs remplis
+    //   • aria-live="polite" pour annoncer la progression aux lecteurs d'écran
 
     /**
-     * Gère les erreurs pour les questions à choix multiples
-     * Chaque ligne (item) doit avoir son propre état d'erreur
+     * Gère les erreurs pour les questions à saisie multiple obligatoire.
+     * Affiche un message global avec compteur au lieu d'une erreur par champ.
      */
     function handleMultipleShortTextErrors() {
         const multipleQuestions = document.querySelectorAll('.question-container.multiple-short-txt');
 
         multipleQuestions.forEach(function(question) {
-            // Cacher les messages d'erreur legacy LimeSurvey pour ce type de question
-            const legacyMessages = question.querySelectorAll('.ls-question-mandatory-initial, .ls-question-mandatory-array');
+            // Ne traiter que les questions en erreur (après soumission)
+            if (!question.classList.contains('input-error')) {
+                return;
+            }
+
+            // Éviter de réattacher les listeners
+            if (question.dataset.mandatoryCounterAttached) {
+                return;
+            }
+            question.dataset.mandatoryCounterAttached = 'true';
+
+            // Cacher les messages d'erreur legacy LimeSurvey
+            var legacyMessages = question.querySelectorAll(
+                '.ls-question-mandatory, .ls-question-mandatory-initial, .ls-question-mandatory-array'
+            );
             legacyMessages.forEach(function(msg) {
                 msg.style.display = 'none';
             });
 
-            const items = question.querySelectorAll('.answer-item');
+            // Cacher le conteneur question-valid-container legacy
+            var validContainer = question.querySelector('.question-valid-container');
+            if (validContainer) {
+                validContainer.style.display = 'none';
+            }
 
-            items.forEach(function(item) {
-                const input = item.querySelector('input, textarea');
-                const inputGroup = item.querySelector('.fr-input-group');
-                const messagesGroup = item.querySelector('.fr-messages-group');
+            // Collecter tous les inputs visibles (exclure les lignes InputOnDemand cachées)
+            var allItems = question.querySelectorAll('.answer-item:not(.d-none)');
 
-                if (!input || !inputGroup || !messagesGroup) return;
-
-                // Vérifier si cet item a la classe d'erreur
-                const hasError = item.classList.contains('ls-error-mandatory') || item.classList.contains('has-error');
-
-                if (hasError) {
-                    // Ajouter la classe d'erreur DSFR
-                    inputGroup.classList.add('fr-input-group--error');
-
-                    // Ajouter le message d'erreur dans fr-messages-group si pas déjà présent
-                    if (!messagesGroup.querySelector('.fr-message--error')) {
-                        const errorMessage = document.createElement('p');
-                        errorMessage.className = 'fr-message fr-message--error';
-                        errorMessage.id = messagesGroup.id + '-error';
-                        errorMessage.textContent = 'Ce champ est obligatoire';
-                        errorMessage.setAttribute('role', 'alert');
-                        messagesGroup.appendChild(errorMessage);
-                    }
-                } else {
-                    // Retirer la classe d'erreur DSFR
+            // Retirer les erreurs individuelles injectées par le template (server-side)
+            allItems.forEach(function(item) {
+                var inputGroup = item.querySelector('.fr-input-group');
+                var messagesGroup = item.querySelector('.fr-messages-group');
+                if (inputGroup) {
                     inputGroup.classList.remove('fr-input-group--error');
-
-                    // Retirer le message d'erreur
-                    const errorMessage = messagesGroup.querySelector('.fr-message--error');
-                    if (errorMessage) {
-                        errorMessage.remove();
-                    }
                 }
+                if (messagesGroup) {
+                    var existingError = messagesGroup.querySelector('.fr-message--error');
+                    if (existingError) existingError.remove();
+                }
+                item.classList.remove('input-error', 'ls-error-mandatory', 'has-error');
+            });
 
-                // Écouter les changements sur cet input (une seule fois)
-                if (!input.dataset.errorListenerAdded) {
-                    input.dataset.errorListenerAdded = 'true';
+            // Créer le conteneur pour le message compteur global
+            var counterContainer = document.createElement('div');
+            counterContainer.className = 'fr-messages-group fr-mt-2w';
+            counterContainer.setAttribute('aria-live', 'polite');
+            counterContainer.id = 'mandatory-counter-' + (question.id || Math.random().toString(36).substring(2, 11));
 
-                    input.addEventListener('input', function() {
-                        // Vérifier immédiatement si le champ est rempli
-                        const isFilled = input.value && input.value.trim() !== '';
+            var counterMessage = document.createElement('p');
+            counterMessage.className = 'fr-message fr-message--error';
+            counterMessage.setAttribute('role', 'status');
+            counterContainer.appendChild(counterMessage);
 
-                        // Vérifier la validation numérique si applicable
-                        const isNumberOnly = input.dataset.number === '1';
-                        const hasInvalidNumber = isNumberOnly && isFilled && !/^-?\d*\.?\d+$/.test(input.value);
+            // Insérer le compteur après la liste de réponses (avant question-valid-container)
+            var answersList = question.querySelector('.ls-answers, .subquestion-list');
+            if (answersList) {
+                answersList.parentNode.insertBefore(counterContainer, answersList.nextSibling);
+            }
 
-                        if (hasInvalidNumber) {
-                            // Valeur non numérique → erreur de validation
-                            inputGroup.classList.add('fr-input-group--error');
-                            inputGroup.classList.remove('fr-input-group--valid');
-                            item.classList.add('has-error');
-                            input.classList.add('error');
+            // Fonction de mise à jour du compteur
+            function updateCounter() {
+                var visibleItems = question.querySelectorAll('.answer-item:not(.d-none)');
+                var totalFields = visibleItems.length;
+                var emptyCount = 0;
 
-                            // Retirer le message de succès s'il existe
-                            const validMessage = messagesGroup.querySelector('.fr-message--valid');
-                            if (validMessage) {
-                                validMessage.remove();
+                visibleItems.forEach(function(item) {
+                    var input = item.querySelector('input, textarea');
+                    if (!input) return;
+
+                    var value = input.value ? input.value.trim() : '';
+                    var inputGroup = item.querySelector('.fr-input-group');
+                    var messagesGroup = item.querySelector('.fr-messages-group');
+
+                    if (value === '') {
+                        // Champ vide — neutre (pas de rouge)
+                        emptyCount++;
+                        if (inputGroup) {
+                            inputGroup.classList.remove('fr-input-group--valid', 'fr-input-group--error');
+                        }
+                        if (messagesGroup) {
+                            var fmtErr = messagesGroup.querySelector('.fr-message--error');
+                            if (fmtErr) fmtErr.remove();
+                            var fmtOk = messagesGroup.querySelector('.fr-message--valid');
+                            if (fmtOk) fmtOk.remove();
+                        }
+                        input.classList.remove('fr-input--error', 'fr-input--valid', 'error');
+                    } else {
+                        // Champ rempli — vérifier le format
+                        var isNumberOnly = input.dataset.number === '1';
+                        var isInvalidNumber = isNumberOnly && !/^-?\d*[.,]?\d+$/.test(value);
+
+                        if (isInvalidNumber) {
+                            // Erreur de format → rouge individuel (le seul cas)
+                            emptyCount++; // compte comme non valide
+                            if (inputGroup) {
+                                inputGroup.classList.add('fr-input-group--error');
+                                inputGroup.classList.remove('fr-input-group--valid');
                             }
-
-                            // Ajouter/mettre à jour le message d'erreur
-                            let errorMessage = messagesGroup.querySelector('.fr-message--error');
-                            if (!errorMessage) {
-                                errorMessage = document.createElement('p');
-                                errorMessage.className = 'fr-message fr-message--error';
-                                errorMessage.id = messagesGroup.id + '-error';
-                                errorMessage.setAttribute('role', 'alert');
-                                messagesGroup.appendChild(errorMessage);
-                            }
-                            errorMessage.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
-                        } else if (isFilled) {
-                            // Champ rempli et valide → retirer les erreurs
-                            inputGroup.classList.remove('fr-input-group--error');
-                            item.classList.remove('ls-error-mandatory', 'has-error');
-                            input.classList.remove('error');
-
-                            // Retirer le message d'erreur et marquer qu'une erreur a été corrigée
-                            const errorMessage = messagesGroup.querySelector('.fr-message--error');
-                            if (errorMessage) {
-                                errorMessage.remove();
-                                // Marquer que cette question a eu une erreur
-                                item.closest('.question-container').dataset.hadError = 'true';
-                            }
-
-                            // Ajouter les classes et message de succès UNIQUEMENT si la question a eu une erreur auparavant
-                            const questionContainer = item.closest('.question-container');
-                            if (questionContainer && questionContainer.dataset.hadError === 'true') {
-                                inputGroup.classList.add('fr-input-group--valid');
-
-                                let validMessage = messagesGroup.querySelector('.fr-message--valid');
-                                if (!validMessage) {
-                                    validMessage = document.createElement('p');
-                                    validMessage.className = 'fr-message fr-message--valid';
-                                    validMessage.id = messagesGroup.id + '-valid';
-                                    messagesGroup.appendChild(validMessage);
-                                }
-                                validMessage.textContent = 'Merci d\'avoir répondu';
+                            input.classList.add('fr-input--error');
+                            input.classList.remove('fr-input--valid');
+                            // Message d'erreur de format sur le champ
+                            if (messagesGroup && !messagesGroup.querySelector('.fr-message--error')) {
+                                var fmtMsg = document.createElement('p');
+                                fmtMsg.className = 'fr-message fr-message--error';
+                                fmtMsg.textContent = tMandatory('numeric_only');
+                                messagesGroup.appendChild(fmtMsg);
                             }
                         } else {
-                            // Champ vide → erreur obligatoire
-                            inputGroup.classList.add('fr-input-group--error');
-                            inputGroup.classList.remove('fr-input-group--valid');
-                            item.classList.add('ls-error-mandatory', 'has-error');
-
-                            // Retirer le message de succès s'il existe
-                            const validMessage = messagesGroup.querySelector('.fr-message--valid');
-                            if (validMessage) {
-                                validMessage.remove();
+                            // Champ rempli et valide → vert discret
+                            if (inputGroup) {
+                                inputGroup.classList.remove('fr-input-group--error');
+                                inputGroup.classList.add('fr-input-group--valid');
                             }
-
-                            // Ajouter le message d'erreur si pas présent
-                            if (!messagesGroup.querySelector('.fr-message--error')) {
-                                const errorMessage = document.createElement('p');
-                                errorMessage.className = 'fr-message fr-message--error';
-                                errorMessage.id = messagesGroup.id + '-error';
-                                errorMessage.textContent = 'Ce champ est obligatoire';
-                                errorMessage.setAttribute('role', 'alert');
-                                messagesGroup.appendChild(errorMessage);
+                            input.classList.remove('fr-input--error', 'error');
+                            input.classList.add('fr-input--valid');
+                            if (messagesGroup) {
+                                var fmtErr2 = messagesGroup.querySelector('.fr-message--error');
+                                if (fmtErr2) fmtErr2.remove();
                             }
                         }
+                    }
+                });
 
-                        // Vérifier si toute la question est valide
-                        setTimeout(function() {
-                            const allInputs = question.querySelectorAll('.answer-item input, .answer-item textarea');
-                            let hasEmptyField = false;
+                // Mettre à jour le message compteur global
+                if (emptyCount === 0) {
+                    // Tous les champs sont remplis et valides → succès
+                    counterContainer.remove();
+                    question.classList.remove('input-error', 'fr-input-group--error');
+                    question.classList.add('input-valid');
 
-                            allInputs.forEach(function(inp) {
-                                if (!inp.value || inp.value.trim() === '') {
-                                    hasEmptyField = true;
-                                }
-                            });
+                    if (typeof updateErrorSummary === 'function') {
+                        setTimeout(updateErrorSummary, 50);
+                    }
+                } else {
+                    // Il reste des champs à remplir
+                    question.classList.add('input-error');
+                    question.classList.remove('input-valid');
 
-                            if (!hasEmptyField) {
-                                // Tous les champs sont remplis → succès
-                                question.classList.remove('input-error', 'fr-input-group--error');
-                                question.classList.add('input-valid');
+                    if (emptyCount === totalFields) {
+                        counterMessage.textContent = tMandatory('fields_all_required', null, totalFields);
+                    } else if (emptyCount === 1) {
+                        counterMessage.textContent = tMandatory('fields_remaining_singular');
+                    } else {
+                        counterMessage.textContent = tMandatory('fields_remaining_plural', emptyCount, totalFields);
+                    }
 
-                                // Cacher les messages legacy
-                                const legacyMsgs = question.querySelectorAll('.ls-question-mandatory-initial, .ls-question-mandatory-array');
-                                legacyMsgs.forEach(function(msg) {
-                                    msg.style.display = 'none';
-                                });
-
-                                // Mettre à jour le récapitulatif d'erreurs
-                                if (typeof updateErrorSummary === 'function') {
-                                    setTimeout(updateErrorSummary, 50);
-                                }
-                            } else {
-                                // Il reste des champs vides → garder l'erreur
-                                question.classList.add('input-error');
-                                question.classList.remove('input-valid', 'fr-input-group--valid');
-
-                                // Mettre à jour le récapitulatif d'erreurs
-                                if (typeof updateErrorSummary === 'function') {
-                                    setTimeout(updateErrorSummary, 50);
-                                }
-                            }
-                        }, 50);
-                    });
+                    if (typeof updateErrorSummary === 'function') {
+                        setTimeout(updateErrorSummary, 50);
+                    }
                 }
+            }
+
+            // Initialiser le compteur
+            updateCounter();
+
+            // Attacher les listeners sur chaque input
+            allItems.forEach(function(item) {
+                var input = item.querySelector('input, textarea');
+                if (!input || input.dataset.errorListenerAdded) return;
+                input.dataset.errorListenerAdded = 'true';
+
+                input.addEventListener('input', updateCounter);
             });
         });
     }
@@ -1544,17 +1546,20 @@ console.log('%c\n' +
     document.addEventListener('limesurvey:questionsLoaded', initNumericValidation);
 
     // === Validation pour les tableaux (array questions) ===
+    //
+    // RGAA 11.10 + 11.11 — Approche « compteur global » (même logique que multiple-short-txt) :
+    //   • Champs vides = neutres (pas de rouge individuel)
+    //   • Champs remplis = vert discret
+    //   • Erreur de format numérique = rouge individuel (seul cas)
+    //   • Message compteur global avec aria-live="polite"
 
     /**
      * Gère la validation des questions de type tableau (array)
-     * - Transforme le message d'erreur en format DSFR
-     * - Ajoute une bordure verte aux champs remplis
-     * - Retire le message quand tous les champs sont remplis
-     * - Change le liseret du conteneur de rouge à vert
+     * avec message compteur global au lieu d'une erreur par cellule.
      */
     function handleArrayValidation() {
         // Trouver toutes les questions de type array avec erreur
-        const arrayQuestions = document.querySelectorAll('.question-container.input-error[class*="array-"]');
+        var arrayQuestions = document.querySelectorAll('.question-container.input-error[class*="array-"]');
 
         arrayQuestions.forEach(function(question) {
             // Éviter de dupliquer les listeners
@@ -1563,138 +1568,147 @@ console.log('%c\n' +
             }
             question.dataset.arrayValidationAttached = 'true';
 
-            // 1. Transformer le message d'erreur en format DSFR
-            // Gérer tous les types de messages d'erreur de tableau
-            const arrayErrorMessage = question.querySelector('.ls-question-mandatory-array, .ls-question-mandatory-arraycolumn');
-            if (arrayErrorMessage && !arrayErrorMessage.classList.contains('fr-message')) {
-                // Créer le message DSFR
-                const dsfrMessage = document.createElement('p');
-                dsfrMessage.className = 'fr-message fr-message--error';
-                dsfrMessage.textContent = arrayErrorMessage.textContent.trim().replace(/\s+/g, ' ');
-                dsfrMessage.id = arrayErrorMessage.id ? arrayErrorMessage.id + '-dsfr' : '';
-                dsfrMessage.setAttribute('role', 'alert');
+            // Cacher les messages d'erreur legacy LimeSurvey
+            var legacyMessages = question.querySelectorAll(
+                '.ls-question-mandatory, .ls-question-mandatory-initial, ' +
+                '.ls-question-mandatory-array, .ls-question-mandatory-arraycolumn'
+            );
+            legacyMessages.forEach(function(msg) {
+                msg.style.display = 'none';
+            });
 
-                // Masquer le message original au lieu de le remplacer
-                arrayErrorMessage.style.display = 'none';
-
-                // Insérer le message DSFR après le message original
-                arrayErrorMessage.parentNode.insertBefore(dsfrMessage, arrayErrorMessage.nextSibling);
+            // Cacher le conteneur question-valid-container legacy
+            var validContainer = question.querySelector('.question-valid-container');
+            if (validContainer) {
+                validContainer.style.display = 'none';
             }
 
-            // Masquer également le message initial s'il existe
-            const initialMessage = question.querySelector('.ls-question-mandatory-initial');
-            if (initialMessage) {
-                initialMessage.style.display = 'none';
-            }
+            // Trouver tous les inputs dans le tableau
+            var allInputs = question.querySelectorAll('table input[type="text"], table textarea, table select');
 
-            // Masquer aussi le message arraycolumn s'il n'a pas déjà été traité
-            const arrayColumnMessage = question.querySelector('.ls-question-mandatory-arraycolumn');
-            if (arrayColumnMessage && arrayColumnMessage.style.display !== 'none') {
-                arrayColumnMessage.style.display = 'none';
-            }
-
-            // 2. Trouver tous les inputs dans le tableau
-            const allInputs = question.querySelectorAll('table input[type="text"], table textarea, table select');
-
-            // 2b. S'assurer que les champs vides ont bien la classe fr-input--error au départ
+            // Retirer les classes d'erreur individuelles injectées par le template
             allInputs.forEach(function(input) {
-                if (!input.value || input.value.trim() === '') {
-                    input.classList.add('fr-input--error');
-                    input.classList.remove('fr-input--valid');
+                input.classList.remove('fr-input--error', 'error');
+                var cell = input.closest('.fr-input-group');
+                if (cell) {
+                    cell.classList.remove('fr-input-group--error');
                 }
             });
 
-            allInputs.forEach(function(input) {
-                // Éviter de dupliquer les listeners
-                if (input.dataset.arrayInputListener) {
-                    return;
+            // Retirer les classes d'erreur sur les lignes
+            var errorRows = question.querySelectorAll('tr.ls-mandatory-error');
+            errorRows.forEach(function(row) {
+                row.classList.remove('ls-mandatory-error');
+                var th = row.querySelector('th.fr-text--error');
+                if (th) th.classList.remove('fr-text--error');
+            });
+
+            // Retirer les classes d'erreur sur les cellules
+            var errorCells = question.querySelectorAll('td.has-error');
+            errorCells.forEach(function(td) {
+                td.classList.remove('has-error');
+            });
+
+            // Créer le conteneur pour le message compteur global
+            var counterContainer = document.createElement('div');
+            counterContainer.className = 'fr-messages-group fr-mt-2w';
+            counterContainer.setAttribute('aria-live', 'polite');
+            counterContainer.id = 'mandatory-counter-' + (question.id || Math.random().toString(36).substring(2, 11));
+
+            var counterMessage = document.createElement('p');
+            counterMessage.className = 'fr-message fr-message--error';
+            counterMessage.setAttribute('role', 'status');
+            counterContainer.appendChild(counterMessage);
+
+            // Insérer le compteur après le tableau
+            var tableWrapper = question.querySelector('.fr-table');
+            if (tableWrapper) {
+                tableWrapper.parentNode.insertBefore(counterContainer, tableWrapper.nextSibling);
+            }
+
+            // Fonction de validation numérique
+            function isValidNumber(value) {
+                return /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
+            }
+
+            // Fonction de mise à jour du compteur
+            function updateCounter() {
+                var totalFields = allInputs.length;
+                var emptyCount = 0;
+
+                allInputs.forEach(function(input) {
+                    var value = input.value ? input.value.trim() : '';
+                    var inputGroup = input.closest('.fr-input-group');
+
+                    if (value === '') {
+                        // Champ vide — neutre
+                        emptyCount++;
+                        input.classList.remove('fr-input--error', 'fr-input--valid');
+                        if (inputGroup) {
+                            inputGroup.classList.remove('fr-input-group--error', 'fr-input-group--valid');
+                        }
+                    } else {
+                        var isNumberOnly = input.dataset.number === '1';
+                        var isInvalidNumber = isNumberOnly && !isValidNumber(value);
+
+                        if (isInvalidNumber) {
+                            // Erreur de format → rouge individuel
+                            emptyCount++;
+                            input.classList.add('fr-input--error');
+                            input.classList.remove('fr-input--valid');
+                            if (inputGroup) {
+                                inputGroup.classList.add('fr-input-group--error');
+                                inputGroup.classList.remove('fr-input-group--valid');
+                            }
+                        } else {
+                            // Champ rempli et valide → vert discret
+                            input.classList.remove('fr-input--error');
+                            input.classList.add('fr-input--valid');
+                            if (inputGroup) {
+                                inputGroup.classList.remove('fr-input-group--error');
+                                inputGroup.classList.add('fr-input-group--valid');
+                            }
+                        }
+                    }
+                });
+
+                // Mettre à jour le message compteur global
+                if (emptyCount === 0) {
+                    // Tous les champs sont remplis et valides → succès
+                    counterContainer.remove();
+                    question.classList.remove('input-error', 'fr-input-group--error');
+                    question.classList.add('input-valid');
+
+                    if (typeof updateErrorSummary === 'function') {
+                        setTimeout(updateErrorSummary, 50);
+                    }
+                } else {
+                    question.classList.add('input-error');
+                    question.classList.remove('input-valid');
+
+                    if (emptyCount === totalFields) {
+                        counterMessage.textContent = tMandatory('fields_all_required', null, totalFields);
+                    } else if (emptyCount === 1) {
+                        counterMessage.textContent = tMandatory('fields_remaining_singular');
+                    } else {
+                        counterMessage.textContent = tMandatory('fields_remaining_plural', emptyCount, totalFields);
+                    }
+
+                    if (typeof updateErrorSummary === 'function') {
+                        setTimeout(updateErrorSummary, 50);
+                    }
                 }
+            }
+
+            // Initialiser le compteur
+            updateCounter();
+
+            // Attacher les listeners sur chaque input
+            allInputs.forEach(function(input) {
+                if (input.dataset.arrayInputListener) return;
                 input.dataset.arrayInputListener = 'true';
 
-                input.addEventListener('input', function() {
-                    const value = input.value.trim();
-                    const isNumberOnly = input.dataset.number === '1';
-
-                    // Vérifier la validité du champ
-                    let isValid = false;
-                    if (value !== '') {
-                        if (isNumberOnly) {
-                            // Validation numérique
-                            isValid = /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
-                        } else {
-                            // Champ texte simple - valide si non vide
-                            isValid = true;
-                        }
-                    }
-
-                    // Mettre à jour l'état visuel du champ
-                    if (isValid) {
-                        // Champ valide → bordure verte
-                        input.classList.remove('fr-input--error');
-                        input.classList.add('fr-input--valid');
-                    } else {
-                        // Champ invalide ou vide → bordure rouge
-                        input.classList.remove('fr-input--valid');
-                        input.classList.add('fr-input--error');
-                    }
-
-                    // 3. Vérifier si tous les champs du tableau sont remplis
-                    setTimeout(function() {
-                        let allFilled = true;
-                        let allValid = true;
-
-                        allInputs.forEach(function(inp) {
-                            const val = inp.value.trim();
-                            if (val === '') {
-                                allFilled = false;
-                                allValid = false;
-                            } else {
-                                const isNum = inp.dataset.number === '1';
-                                if (isNum) {
-                                    const validNum = /^-?\d+([.,]\d*)?$/.test(val) || /^-?\d*[.,]\d+$/.test(val);
-                                    if (!validNum) {
-                                        allValid = false;
-                                    }
-                                }
-                            }
-                        });
-
-                        // 4. Mettre à jour l'état global de la question
-                        const dsfrErrorMsg = question.querySelector('.fr-message--error');
-
-                        if (allFilled && allValid) {
-                            // Tous les champs sont remplis et valides → succès
-                            question.classList.remove('input-error', 'fr-input-group--error');
-                            question.classList.add('input-valid');
-
-                            // Retirer le message d'erreur
-                            if (dsfrErrorMsg) {
-                                dsfrErrorMsg.remove();
-                            }
-
-                            // Mettre à jour le récapitulatif d'erreurs
-                            if (typeof updateErrorSummary === 'function') {
-                                setTimeout(updateErrorSummary, 50);
-                            }
-                        } else {
-                            // Il reste des champs vides ou invalides → garder l'erreur
-                            question.classList.add('input-error');
-                            question.classList.remove('input-valid');
-
-                            // S'assurer que le message d'erreur est présent
-                            if (!dsfrErrorMsg) {
-                                const validContainer = question.querySelector('.question-valid-container');
-                                if (validContainer) {
-                                    const newErrorMsg = document.createElement('p');
-                                    newErrorMsg.className = 'fr-message fr-message--error';
-                                    newErrorMsg.textContent = 'Veuillez compléter toutes les parties.';
-                                    newErrorMsg.setAttribute('role', 'alert');
-                                    validContainer.appendChild(newErrorMsg);
-                                }
-                            }
-                        }
-                    }, 50);
-                });
+                input.addEventListener('input', updateCounter);
             });
         });
     }
@@ -2994,6 +3008,36 @@ console.log('%c\n' +
         var str = dict[key] || RANKING_I18N_FR[key] || key;
         if (typeof label !== 'undefined') {
             str = str.replace('%s', label);
+        }
+        return str;
+    }
+
+    // ---- i18n pour les messages de compteur champs obligatoires ----
+
+    var MANDATORY_I18N_FR = {
+        fields_remaining_plural: 'Veuillez compléter les %remaining% champs restants sur %total%.',
+        fields_remaining_singular: 'Veuillez compléter le dernier champ.',
+        fields_all_required: 'Veuillez compléter tous les champs (%total% champs requis).',
+        field_valid: 'Saisie valide',
+        numeric_only: "Ce champ n'accepte que des valeurs numériques."
+    };
+    var MANDATORY_I18N_EN = {
+        fields_remaining_plural: 'Please complete the remaining %remaining% of %total% fields.',
+        fields_remaining_singular: 'Please complete the last field.',
+        fields_all_required: 'Please complete all fields (%total% fields required).',
+        field_valid: 'Valid input',
+        numeric_only: 'This field only accepts numeric values.'
+    };
+
+    function tMandatory(key, remaining, total) {
+        var lang = (document.documentElement.lang || 'fr').toLowerCase().substring(0, 2);
+        var dict = (lang === 'en') ? MANDATORY_I18N_EN : MANDATORY_I18N_FR;
+        var str = dict[key] || MANDATORY_I18N_FR[key] || key;
+        if (typeof remaining !== 'undefined') {
+            str = str.replace('%remaining%', remaining);
+        }
+        if (typeof total !== 'undefined') {
+            str = str.replace('%total%', total);
         }
         return str;
     }

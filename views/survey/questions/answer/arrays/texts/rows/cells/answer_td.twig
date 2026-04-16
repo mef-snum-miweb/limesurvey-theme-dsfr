@@ -19,12 +19,12 @@
 #}
 
 <!-- answer_td -->
-<td class="answer_cell_{{ ld }} answer-item text-item{% if error %} has-error{% endif %}" title="{{ processString(labelText)|striptags }}">
-    <div class="fr-input-group{% if error %} fr-input-group--error{% endif %}">
+<td class="answer_cell_{{ ld }} answer-item text-item" title="{{ processString(labelText)|striptags }}">
+    <div class="fr-input-group">
         {{ C.Html.textField(myfname2, value, ({
             'id' : "answer"~myfname2,
             'aria-labelledby' : "answertext" ~ basename ~ "_" ~ ld ~ " answertext" ~ myfname,
-            'class' : "fr-input "~kpclass~(error ? " fr-input--error" : ""),
+            'class' : "fr-input "~kpclass,
             'size' : (inputsize ? inputsize : null),
             'maxlength' : (maxlength ? maxlength : null),
             'placeholder' : flatString(processString(placeholder,1),1),
