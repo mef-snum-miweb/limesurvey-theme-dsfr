@@ -24,7 +24,7 @@
             id="answer{{ myfname }}"
             {{ checkedState }}
             value="Y"
-            aria-label="{{ processString(question) }}"
+            aria-label="{{ processString(question) | striptags }}"
             {% if kpclass %}class="{{ kpclass }}"{% endif %}
         />
         <label class="fr-label" for="answer{{ myfname }}">
