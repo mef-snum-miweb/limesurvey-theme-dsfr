@@ -59,12 +59,9 @@
                                 name="{{ aQuestions[i].myfname }}"
                                 value="{{ ansrow.code }}"
                                 id="answer{{ aQuestions[i].myfname }}-{{ ansrow.code }}"
-                                aria-labelledby="label-{{ ansrow.code }}"
+                                aria-labelledby="label-{{ ansrow.code }} answertext{{ aQuestions[i].myfname }}"
                                 {{ checked[ansrow.code][ld] }}
                             />
-                            <label class="fr-sr-only" for="answer{{ aQuestions[i].myfname }}-{{ ansrow.code }}">
-                                {{ processString(aQuestions[i].question) }}
-                            </label>
                         </td>
                     {% endfor %}
                 </tr>

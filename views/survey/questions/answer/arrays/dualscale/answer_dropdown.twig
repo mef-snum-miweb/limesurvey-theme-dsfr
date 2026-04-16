@@ -77,7 +77,7 @@
                                 class='fr-select em_sq_validation'
                                 name="{{ ansrow.myfname0 }}"
                                 id="answer{{ ansrow.myfid0 }}"
-                                aria-labelledby="answertext{{ ansrow.myfname }}"
+                                aria-labelledby="left-header-{{ basename }} answertext{{ ansrow.myfname }}"
                             >
                                 <!-- Please choose... -->
                                 {% if ansrow.sActualAnswer0 == '' %}
@@ -128,7 +128,7 @@
                                 class='fr-select em_sq_validation'
                                 name="{{ ansrow.myfname1 }}"
                                 id="answer{{ ansrow.myfid1 }}"
-                                aria-labelledby="answertext{{ ansrow.myfname }}"
+                                aria-labelledby="right-header-{{ basename }} answertext{{ ansrow.myfname }}"
                             >
                                 <!-- Please choose... -->
                                 {% if ansrow.sActualAnswer1 == '' %}

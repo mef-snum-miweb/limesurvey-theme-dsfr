@@ -36,13 +36,10 @@
             type="radio"
             name="{{ myfname }}"
             id="answer{{ myfname }}-I"
-            aria-labelledby="answer{{ basename }}-I"
+            aria-labelledby="answer{{ basename }}-I answertext{{ myfname }}"
             value="I"
             {{ Ichecked }}
             />
-        <label for="answer{{ myfname }}-I" class="fr-sr-only">
-            {{ gT("Increase") }}
-        </label>
     </td>
 
     <!-- Same -->
@@ -51,13 +48,10 @@
             type="radio"
             name="{{ myfname }}"
             id="answer{{ myfname }}-S"
-            aria-labelledby="answer{{ basename }}-S"
+            aria-labelledby="answer{{ basename }}-S answertext{{ myfname }}"
             value="S"
             {{ Schecked }}
         />
-        <label for="answer{{ myfname }}-S" class="fr-sr-only">
-            {{ gT("Same") }}
-        </label>
     </td>
 
     <!-- Decrease -->
@@ -66,13 +60,10 @@
             type="radio"
             name="{{ myfname }}"
             id="answer{{ myfname }}-D"
-            aria-labelledby="answer{{ basename }}-D"
+            aria-labelledby="answer{{ basename }}-D answertext{{ myfname }}"
             value="D"
             {{ Dchecked }}
         />
-        <label for="answer{{ myfname }}-D" class="fr-sr-only">
-            {{ gT("Decrease") }}
-        </label>
     </td>
 
     <!-- No Answer -->
@@ -82,13 +73,10 @@
                 type="radio"
                 name="{{ myfname }}"
                 id="answer{{ myfname }}-"
-                aria-labelledby="answer{{ basename }}-"
+                aria-labelledby="answer{{ basename }}- answertext{{ myfname }}"
                 value=""
                 {{ NAchecked }}
             />
-            <label for="answer{{ myfname }}-" class="fr-sr-only">
-                {{ gT("No answer") }}
-            </label>
         </td>
     {% endif %}
 </tr>
