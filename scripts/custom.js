@@ -594,8 +594,11 @@ console.log('%c\n' +
         const errorQuestions = document.querySelectorAll('.question-container.input-error');
 
         errorQuestions.forEach(function(question) {
-            // Ignorer les questions multiple-short-txt qui sont gérées par handleMultipleShortTextErrors()
+            // Ignorer les questions gérées par leurs propres handlers spécialisés
             if (question.classList.contains('multiple-short-txt')) {
+                return;
+            }
+            if (question.className.match(/array-/)) {
                 return;
             }
 
@@ -866,7 +869,11 @@ console.log('%c\n' +
                 if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
                     const target = mutation.target;
                     if (target.classList.contains('question-container') && target.classList.contains('input-error')) {
-                        setTimeout(transformErrorsToDsfr, 100); // Petit délai pour laisser LimeSurvey finir
+                        setTimeout(function() {
+                            transformErrorsToDsfr();
+                            handleMultipleShortTextErrors();
+                            handleArrayValidation();
+                        }, 100);
                     }
                 }
 
@@ -874,7 +881,11 @@ console.log('%c\n' +
                 if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
                     mutation.addedNodes.forEach(function(node) {
                         if (node.nodeType === 1 && node.classList && node.classList.contains('input-error')) {
-                            setTimeout(transformErrorsToDsfr, 100);
+                            setTimeout(function() {
+                                transformErrorsToDsfr();
+                                handleMultipleShortTextErrors();
+                                handleArrayValidation();
+                            }, 100);
                         }
                     });
                 }

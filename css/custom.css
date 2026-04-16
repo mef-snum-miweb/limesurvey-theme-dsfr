@@ -300,6 +300,13 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
     margin-top: 0.5rem;
 }
 
+/* RGAA 11.10 — Masquer les messages legacy LimeSurvey pour les questions
+   à saisie multiple gérées par le compteur dynamique (custom.js) */
+.multiple-short-txt.input-error > .question-valid-container,
+.question-container.input-error[class*="array-"] > .question-valid-container {
+    display: none !important;
+}
+
 /* Info (bleu France DSFR) */
 .ls-em-success,
 .ls-em-tip:not(.ls-em-error):not(.em_num_answers) {
