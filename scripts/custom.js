@@ -902,6 +902,36 @@ console.log('%c\n' +
 
     }
 
+    // ---- i18n pour les messages de compteur champs obligatoires ----
+
+    var MANDATORY_I18N_FR = {
+        fields_remaining_plural: 'Veuillez compléter les %remaining% champs restants sur %total%.',
+        fields_remaining_singular: 'Veuillez compléter le dernier champ.',
+        fields_all_required: 'Veuillez compléter tous les champs (%total% champs requis).',
+        field_valid: 'Saisie valide',
+        numeric_only: "Ce champ n'accepte que des valeurs numériques."
+    };
+    var MANDATORY_I18N_EN = {
+        fields_remaining_plural: 'Please complete the remaining %remaining% of %total% fields.',
+        fields_remaining_singular: 'Please complete the last field.',
+        fields_all_required: 'Please complete all fields (%total% fields required).',
+        field_valid: 'Valid input',
+        numeric_only: 'This field only accepts numeric values.'
+    };
+
+    function tMandatory(key, remaining, total) {
+        var lang = (document.documentElement.lang || 'fr').toLowerCase().substring(0, 2);
+        var dict = (lang === 'en') ? MANDATORY_I18N_EN : MANDATORY_I18N_FR;
+        var str = dict[key] || MANDATORY_I18N_FR[key] || key;
+        if (typeof remaining !== 'undefined') {
+            str = str.replace('%remaining%', remaining);
+        }
+        if (typeof total !== 'undefined') {
+            str = str.replace('%total%', total);
+        }
+        return str;
+    }
+
     // === Gestion spécifique des questions à saisie multiple obligatoire ===
     // (multiple-short-txt, type Q)
     //
@@ -916,7 +946,7 @@ console.log('%c\n' +
      * Affiche un message global avec compteur au lieu d'une erreur par champ.
      */
     function handleMultipleShortTextErrors() {
-        const multipleQuestions = document.querySelectorAll('.question-container.multiple-short-txt');
+        var multipleQuestions = document.querySelectorAll('.question-container.multiple-short-txt');
 
         multipleQuestions.forEach(function(question) {
             // Ne traiter que les questions en erreur (après soumission)
@@ -972,10 +1002,14 @@ console.log('%c\n' +
             counterMessage.setAttribute('role', 'status');
             counterContainer.appendChild(counterMessage);
 
-            // Insérer le compteur après la liste de réponses (avant question-valid-container)
+            // Insérer le compteur après la liste de réponses
             var answersList = question.querySelector('.ls-answers, .subquestion-list');
+
             if (answersList) {
                 answersList.parentNode.insertBefore(counterContainer, answersList.nextSibling);
+            } else {
+                // Fallback: insérer en fin de question
+                question.appendChild(counterContainer);
             }
 
             // Fonction de mise à jour du compteur
@@ -3019,36 +3053,6 @@ console.log('%c\n' +
         var str = dict[key] || RANKING_I18N_FR[key] || key;
         if (typeof label !== 'undefined') {
             str = str.replace('%s', label);
-        }
-        return str;
-    }
-
-    // ---- i18n pour les messages de compteur champs obligatoires ----
-
-    var MANDATORY_I18N_FR = {
-        fields_remaining_plural: 'Veuillez compléter les %remaining% champs restants sur %total%.',
-        fields_remaining_singular: 'Veuillez compléter le dernier champ.',
-        fields_all_required: 'Veuillez compléter tous les champs (%total% champs requis).',
-        field_valid: 'Saisie valide',
-        numeric_only: "Ce champ n'accepte que des valeurs numériques."
-    };
-    var MANDATORY_I18N_EN = {
-        fields_remaining_plural: 'Please complete the remaining %remaining% of %total% fields.',
-        fields_remaining_singular: 'Please complete the last field.',
-        fields_all_required: 'Please complete all fields (%total% fields required).',
-        field_valid: 'Valid input',
-        numeric_only: 'This field only accepts numeric values.'
-    };
-
-    function tMandatory(key, remaining, total) {
-        var lang = (document.documentElement.lang || 'fr').toLowerCase().substring(0, 2);
-        var dict = (lang === 'en') ? MANDATORY_I18N_EN : MANDATORY_I18N_FR;
-        var str = dict[key] || MANDATORY_I18N_FR[key] || key;
-        if (typeof remaining !== 'undefined') {
-            str = str.replace('%remaining%', remaining);
-        }
-        if (typeof total !== 'undefined') {
-            str = str.replace('%total%', total);
         }
         return str;
     }
