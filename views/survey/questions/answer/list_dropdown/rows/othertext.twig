@@ -14,7 +14,7 @@
 <!-- Other text field - DSFR -->
 <div class="fr-input-group fr-mt-2w">
     <label for="othertext{{ name }}" class="fr-label">
-        {{ processString(label) }}
+        {{ t.if_other_specify }}
     </label>
     <input
         type="text"
@@ -22,7 +22,6 @@
         id="othertext{{ name }}"
         name="{{ name }}other"
         value="{{ value }}"
-        aria-labelledby="answer{{ name }}-oth-"
     />
 </div>
 

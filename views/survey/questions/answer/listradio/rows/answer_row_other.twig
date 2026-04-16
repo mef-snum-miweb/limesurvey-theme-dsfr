@@ -35,14 +35,16 @@
 
     <!-- Text input for "Other" -->
     <div class="fr-input-group fr-mt-1w">
+        <label class="fr-label fr-sr-only" for="answer{{ name }}othertext">
+            {{ t.if_other_specify }}
+        </label>
         <input
             type="text"
             class="fr-input {{ kpclass }}"
             id="answer{{ name }}othertext"
             name="{{ name }}other"
-            title="{{ flatString(processString(othertext,1),1) }}"
+            title="{{ t.if_other_specify }}"
             {{ answer_other }}
-            aria-labelledby="label-id-{{ name }}"
             {% if numbers_only %} data-number="1" {% endif %}
         />
     </div>
