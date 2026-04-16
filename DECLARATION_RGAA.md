@@ -6,7 +6,7 @@ Cette déclaration d'accessibilité s'applique au thème  **limesurvey-theme-dsf
 
 ## État de conformité
 
-**Le thème Limesurvey** ([https://galileo.bercy.matge.com/index.php/282267](https://galileo.bercy.matge.com/index.php/282267)) est **partiellement conforme** avec le référentiel général d'amélioration de l'accessibilité (RGAA).
+**Le thème Limesurvey** ([https://github.com/bmatge/limesurvey-theme-dsfr/](https://github.com/bmatge/limesurvey-theme-dsfr/)) est **partiellement conforme** avec le référentiel général d'amélioration de l'accessibilité (RGAA).
 
 ## Résultats des tests
 
