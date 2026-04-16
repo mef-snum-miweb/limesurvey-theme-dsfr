@@ -307,6 +307,29 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
     display: none !important;
 }
 
+/* RGAA 11.10 — Neutraliser le rouge individuel LimeSurvey (classe .error
+   injectée par le core) dans les questions gérées par le compteur dynamique.
+   Le rouge individuel n'est appliqué que par le JS via .fr-input--error
+   pour les erreurs de format, pas pour les champs vides. */
+.question-container[data-mandatory-counter-attached] input.error,
+.question-container[data-mandatory-counter-attached] textarea.error,
+.question-container[data-mandatory-counter-attached] select.error,
+.question-container[data-array-validation-attached] input.error,
+.question-container[data-array-validation-attached] textarea.error,
+.question-container[data-array-validation-attached] select.error {
+    border-color: var(--border-default-grey) !important;
+    box-shadow: none !important;
+}
+/* Quand le JS applique explicitement .fr-input--error (format invalide),
+   ça doit rester rouge — la spécificité est plus forte */
+.question-container[data-array-validation-attached] input.fr-input--error,
+.question-container[data-array-validation-attached] textarea.fr-input--error,
+.question-container[data-mandatory-counter-attached] input.fr-input--error,
+.question-container[data-mandatory-counter-attached] textarea.fr-input--error {
+    border-color: var(--error-425-625) !important;
+    box-shadow: inset 0 -2px 0 0 var(--error-425-625) !important;
+}
+
 /* Info (bleu France DSFR) */
 .ls-em-success,
 .ls-em-tip:not(.ls-em-error):not(.em_num_answers) {
