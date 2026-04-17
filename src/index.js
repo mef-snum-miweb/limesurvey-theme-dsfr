@@ -35,6 +35,9 @@ import {
     initConditionalVisibilityNotifier,
     excludeIrrelevantInputsFromTabOrder,
 } from './a11y/conditional-aria.js';
+import { initMultipleShortText } from './inputs/input-on-demand.js';
+import { initBootstrapButtonsRadio, initRadioOtherField } from './inputs/radio-buttons.js';
+import { initCaptchaReload, initCaptchaValidation } from './captcha/captcha.js';
 
 // --- Contrat global : exposition sur window ---
 window.DSFRSanitizeRTEContent = sanitizeRTEContent;
@@ -81,6 +84,13 @@ onReady(() => {
     initConditionalVisibilityNotifier();
     excludeIrrelevantInputsFromTabOrder();
 
+    // Inputs et captcha
+    initMultipleShortText();
+    initBootstrapButtonsRadio();
+    initRadioOtherField();
+    initCaptchaReload();
+    initCaptchaValidation();
+
     // Re-déclencher la transformation + le récapitulatif après soumission
     // LimeSurvey (cas de validation côté serveur qui ne passe pas par pjax).
     const forms = document.querySelectorAll('form#limesurvey, form[name="limesurvey"]');
@@ -115,6 +125,13 @@ onQuestionsLoaded(() => {
     setTimeout(fixTableAccessibility, 200);
     setTimeout(observeNumericMultiSumValidation, 200);
     setTimeout(createErrorSummary, 100);
+
+    // Inputs et captcha — re-init après chargement AJAX
+    initMultipleShortText();
+    initBootstrapButtonsRadio();
+    initRadioOtherField();
+    initCaptchaReload();
+    initCaptchaValidation();
 });
 
 // --- Re-initialisation sur navigation pjax ---

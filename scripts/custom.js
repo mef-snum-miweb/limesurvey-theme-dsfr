@@ -228,200 +228,6 @@
   );
   (function() {
     "use strict";
-    function reinitInputOnDemand() {
-      const addButtons = document.querySelectorAll(".selector--inputondemand-addlinebutton");
-      addButtons.forEach((button) => {
-        if (button.dataset.initialized) return;
-        button.dataset.initialized = "true";
-        const container = button.closest('[id^="selector--inputondemand-"]');
-        if (!container) return;
-        const itemsList = container.querySelector(".selector--inputondemand-list");
-        if (!itemsList) return;
-        button.addEventListener("click", function(e) {
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          const hiddenItems = itemsList.querySelectorAll(".selector--inputondemand-list-item.d-none");
-          if (hiddenItems.length > 0) {
-            const nextItem = hiddenItems[0];
-            nextItem.classList.remove("d-none");
-            const input = nextItem.querySelector("input, textarea");
-            if (input) setTimeout(() => input.focus(), 100);
-            if (hiddenItems.length === 1) button.style.display = "none";
-          }
-        }, true);
-      });
-    }
-    function restoreVisibleLines() {
-      const containers = document.querySelectorAll('[id^="selector--inputondemand-"]');
-      containers.forEach((container) => {
-        const itemsList = container.querySelector(".selector--inputondemand-list");
-        if (!itemsList) return;
-        const allItems = itemsList.querySelectorAll(".selector--inputondemand-list-item");
-        const hiddenItems = itemsList.querySelectorAll(".selector--inputondemand-list-item.d-none");
-        if (hiddenItems.length === allItems.length && allItems.length > 0) {
-          allItems[0].classList.remove("d-none");
-        }
-      });
-    }
-    function updateAddButtonVisibility() {
-      const containers = document.querySelectorAll('[id^="selector--inputondemand-"]');
-      containers.forEach((container) => {
-        const button = container.querySelector(".selector--inputondemand-addlinebutton");
-        const itemsList = container.querySelector(".selector--inputondemand-list");
-        if (!button || !itemsList) return;
-        const hiddenItems = itemsList.querySelectorAll(".selector--inputondemand-list-item.d-none");
-        button.style.display = hiddenItems.length > 0 ? "" : "none";
-      });
-    }
-    function initMultipleShortText() {
-      restoreVisibleLines();
-      reinitInputOnDemand();
-      updateAddButtonVisibility();
-    }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", initMultipleShortText);
-    } else {
-      initMultipleShortText();
-    }
-    document.addEventListener("limesurvey:questionsLoaded", initMultipleShortText);
-    function initBootstrapButtonsRadio() {
-      const radioGroups = document.querySelectorAll('.radio-list[data-bs-toggle="buttons"]');
-      radioGroups.forEach(function(group) {
-        const radios = group.querySelectorAll('input[type="radio"]');
-        radios.forEach(function(radio) {
-          radio.addEventListener("change", function() {
-            if (this.checked) {
-              const allContainers = group.querySelectorAll(".bootstrap-buttons-div .form-check");
-              allContainers.forEach(function(container) {
-                container.classList.remove("active");
-              });
-              const currentContainer = this.closest(".form-check");
-              if (currentContainer) {
-                currentContainer.classList.add("active");
-              }
-            }
-          });
-          if (radio.checked) {
-            const container = radio.closest(".form-check");
-            if (container) {
-              container.classList.add("active");
-            }
-          }
-        });
-      });
-    }
-    function initRadioOtherField() {
-      const otherRadios = document.querySelectorAll('input[type="radio"][value="-oth-"]');
-      otherRadios.forEach(function(radio) {
-        const name = radio.name;
-        const otherDiv = document.getElementById("div" + name + "other");
-        const otherInput = document.getElementById("answer" + name + "othertext");
-        const hiddenInput = document.getElementById("answer" + name + "othertextaux");
-        if (!otherDiv || !otherInput) return;
-        if (radio.checked) {
-          otherDiv.classList.remove("ls-js-hidden");
-          if (hiddenInput && hiddenInput.value) {
-            otherInput.value = hiddenInput.value;
-          }
-        }
-      });
-    }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", function() {
-        initBootstrapButtonsRadio();
-        initRadioOtherField();
-      });
-    } else {
-      initBootstrapButtonsRadio();
-      initRadioOtherField();
-    }
-    document.addEventListener("limesurvey:questionsLoaded", function() {
-      initBootstrapButtonsRadio();
-      initRadioOtherField();
-    });
-    function initCaptchaReload() {
-      const reloadButton = document.getElementById("reloadCaptcha");
-      if (!reloadButton) {
-        return;
-      }
-      if (reloadButton.dataset.captchaInitialized) {
-        return;
-      }
-      reloadButton.dataset.captchaInitialized = "true";
-      reloadButton.addEventListener("click", function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        const captchaContainer = reloadButton.closest('.fr-captcha, .captcha-container, [class*="captcha"]');
-        let captchaImage = null;
-        if (captchaContainer) {
-          captchaImage = captchaContainer.querySelector("img");
-        }
-        if (!captchaImage) {
-          const form = reloadButton.closest("form");
-          if (form) {
-            captchaImage = form.querySelector('img[src*="captcha"]');
-          }
-        }
-        if (!captchaImage) {
-          window.location.reload();
-          return;
-        }
-        const currentSrc = captchaImage.src;
-        const newSrc = currentSrc.replace(/v=[^&]*/, "v=" + (/* @__PURE__ */ new Date()).getTime());
-        captchaImage.style.opacity = "0.5";
-        captchaImage.onload = function() {
-          captchaImage.style.opacity = "1";
-          if (typeof window.__lsDsfrFixCaptchaAlt === "function") {
-            window.__lsDsfrFixCaptchaAlt();
-          }
-        };
-        captchaImage.onerror = function() {
-          captchaImage.style.opacity = "1";
-        };
-        captchaImage.src = newSrc;
-      });
-    }
-    function initCaptchaValidation() {
-      const captchaForm = document.getElementById("form-captcha");
-      const captchaInput = document.getElementById("loadsecurity");
-      const messagesGroup = document.getElementById("loadsecurity-messages");
-      const inputGroup = captchaInput == null ? void 0 : captchaInput.closest(".fr-input-group");
-      if (!captchaForm || !captchaInput || !messagesGroup) {
-        return;
-      }
-      captchaForm.addEventListener("submit", function(e) {
-        inputGroup.classList.remove("fr-input-group--error");
-        messagesGroup.innerHTML = "";
-        if (!captchaInput.value || captchaInput.value.trim() === "") {
-          e.preventDefault();
-          e.stopPropagation();
-          inputGroup.classList.add("fr-input-group--error");
-          const errorMessage = document.createElement("p");
-          errorMessage.className = "fr-message fr-message--error";
-          errorMessage.textContent = "Veuillez saisir votre réponse";
-          messagesGroup.appendChild(errorMessage);
-          captchaInput.focus();
-          return false;
-        }
-      });
-    }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", function() {
-        initCaptchaReload();
-        initCaptchaValidation();
-      });
-    } else {
-      initCaptchaReload();
-      initCaptchaValidation();
-    }
-    document.addEventListener("limesurvey:questionsLoaded", function() {
-      initCaptchaReload();
-      initCaptchaValidation();
-    });
-  })();
-  (function() {
-    "use strict";
     function getItemLabel(item) {
       var textSpan = item.querySelector(".ranking-item-text");
       if (textSpan) return textSpan.textContent.trim();
@@ -2581,6 +2387,171 @@
     });
   }
 
+  // modules/theme-dsfr/src/inputs/input-on-demand.js
+  function reinitInputOnDemand() {
+    const addButtons = document.querySelectorAll(".selector--inputondemand-addlinebutton");
+    addButtons.forEach((button) => {
+      if (button.dataset.initialized) return;
+      button.dataset.initialized = "true";
+      const container = button.closest('[id^="selector--inputondemand-"]');
+      if (!container) return;
+      const itemsList = container.querySelector(".selector--inputondemand-list");
+      if (!itemsList) return;
+      button.addEventListener("click", function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        const hiddenItems = itemsList.querySelectorAll(".selector--inputondemand-list-item.d-none");
+        if (hiddenItems.length > 0) {
+          const nextItem = hiddenItems[0];
+          nextItem.classList.remove("d-none");
+          const input = nextItem.querySelector("input, textarea");
+          if (input) setTimeout(() => input.focus(), 100);
+          if (hiddenItems.length === 1) button.style.display = "none";
+        }
+      }, true);
+    });
+  }
+  function restoreVisibleLines() {
+    const containers = document.querySelectorAll('[id^="selector--inputondemand-"]');
+    containers.forEach((container) => {
+      const itemsList = container.querySelector(".selector--inputondemand-list");
+      if (!itemsList) return;
+      const allItems = itemsList.querySelectorAll(".selector--inputondemand-list-item");
+      const hiddenItems = itemsList.querySelectorAll(".selector--inputondemand-list-item.d-none");
+      if (hiddenItems.length === allItems.length && allItems.length > 0) {
+        allItems[0].classList.remove("d-none");
+      }
+    });
+  }
+  function updateAddButtonVisibility() {
+    const containers = document.querySelectorAll('[id^="selector--inputondemand-"]');
+    containers.forEach((container) => {
+      const button = container.querySelector(".selector--inputondemand-addlinebutton");
+      const itemsList = container.querySelector(".selector--inputondemand-list");
+      if (!button || !itemsList) return;
+      const hiddenItems = itemsList.querySelectorAll(".selector--inputondemand-list-item.d-none");
+      button.style.display = hiddenItems.length > 0 ? "" : "none";
+    });
+  }
+  function initMultipleShortText() {
+    restoreVisibleLines();
+    reinitInputOnDemand();
+    updateAddButtonVisibility();
+  }
+
+  // modules/theme-dsfr/src/inputs/radio-buttons.js
+  function initBootstrapButtonsRadio() {
+    const radioGroups = document.querySelectorAll('.radio-list[data-bs-toggle="buttons"]');
+    radioGroups.forEach(function(group) {
+      const radios = group.querySelectorAll('input[type="radio"]');
+      radios.forEach(function(radio) {
+        radio.addEventListener("change", function() {
+          if (this.checked) {
+            const allContainers = group.querySelectorAll(".bootstrap-buttons-div .form-check");
+            allContainers.forEach(function(container) {
+              container.classList.remove("active");
+            });
+            const currentContainer = this.closest(".form-check");
+            if (currentContainer) {
+              currentContainer.classList.add("active");
+            }
+          }
+        });
+        if (radio.checked) {
+          const container = radio.closest(".form-check");
+          if (container) {
+            container.classList.add("active");
+          }
+        }
+      });
+    });
+  }
+  function initRadioOtherField() {
+    const otherRadios = document.querySelectorAll('input[type="radio"][value="-oth-"]');
+    otherRadios.forEach(function(radio) {
+      const name = radio.name;
+      const otherDiv = document.getElementById("div" + name + "other");
+      const otherInput = document.getElementById("answer" + name + "othertext");
+      const hiddenInput = document.getElementById("answer" + name + "othertextaux");
+      if (!otherDiv || !otherInput) return;
+      if (radio.checked) {
+        otherDiv.classList.remove("ls-js-hidden");
+        if (hiddenInput && hiddenInput.value) {
+          otherInput.value = hiddenInput.value;
+        }
+      }
+    });
+  }
+
+  // modules/theme-dsfr/src/captcha/captcha.js
+  function initCaptchaReload() {
+    const reloadButton = document.getElementById("reloadCaptcha");
+    if (!reloadButton) {
+      return;
+    }
+    if (reloadButton.dataset.captchaInitialized) {
+      return;
+    }
+    reloadButton.dataset.captchaInitialized = "true";
+    reloadButton.addEventListener("click", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      const captchaContainer = reloadButton.closest('.fr-captcha, .captcha-container, [class*="captcha"]');
+      let captchaImage = null;
+      if (captchaContainer) {
+        captchaImage = captchaContainer.querySelector("img");
+      }
+      if (!captchaImage) {
+        const form = reloadButton.closest("form");
+        if (form) {
+          captchaImage = form.querySelector('img[src*="captcha"]');
+        }
+      }
+      if (!captchaImage) {
+        window.location.reload();
+        return;
+      }
+      const currentSrc = captchaImage.src;
+      const newSrc = currentSrc.replace(/v=[^&]*/, "v=" + (/* @__PURE__ */ new Date()).getTime());
+      captchaImage.style.opacity = "0.5";
+      captchaImage.onload = function() {
+        captchaImage.style.opacity = "1";
+        if (typeof window.__lsDsfrFixCaptchaAlt === "function") {
+          window.__lsDsfrFixCaptchaAlt();
+        }
+      };
+      captchaImage.onerror = function() {
+        captchaImage.style.opacity = "1";
+      };
+      captchaImage.src = newSrc;
+    });
+  }
+  function initCaptchaValidation() {
+    const captchaForm = document.getElementById("form-captcha");
+    const captchaInput = document.getElementById("loadsecurity");
+    const messagesGroup = document.getElementById("loadsecurity-messages");
+    const inputGroup = captchaInput == null ? void 0 : captchaInput.closest(".fr-input-group");
+    if (!captchaForm || !captchaInput || !messagesGroup) {
+      return;
+    }
+    captchaForm.addEventListener("submit", function(e) {
+      inputGroup.classList.remove("fr-input-group--error");
+      messagesGroup.innerHTML = "";
+      if (!captchaInput.value || captchaInput.value.trim() === "") {
+        e.preventDefault();
+        e.stopPropagation();
+        inputGroup.classList.add("fr-input-group--error");
+        const errorMessage = document.createElement("p");
+        errorMessage.className = "fr-message fr-message--error";
+        errorMessage.textContent = "Veuillez saisir votre réponse";
+        messagesGroup.appendChild(errorMessage);
+        captchaInput.focus();
+        return false;
+      }
+    });
+  }
+
   // modules/theme-dsfr/src/index.js
   window.DSFRSanitizeRTEContent = sanitizeRTEContent;
   window.updateErrorSummary = updateErrorSummary;
@@ -2611,6 +2582,11 @@
     setupConditionalQuestionsObserver();
     initConditionalVisibilityNotifier();
     excludeIrrelevantInputsFromTabOrder();
+    initMultipleShortText();
+    initBootstrapButtonsRadio();
+    initRadioOtherField();
+    initCaptchaReload();
+    initCaptchaValidation();
     const forms = document.querySelectorAll('form#limesurvey, form[name="limesurvey"]');
     forms.forEach((form) => {
       form.addEventListener("submit", () => {
@@ -2639,6 +2615,11 @@
     setTimeout(fixTableAccessibility, 200);
     setTimeout(observeNumericMultiSumValidation, 200);
     setTimeout(createErrorSummary, 100);
+    initMultipleShortText();
+    initBootstrapButtonsRadio();
+    initRadioOtherField();
+    initCaptchaReload();
+    initCaptchaValidation();
   });
   onPjax(() => {
     setTimeout(sanitizeRTEContent, 100);
