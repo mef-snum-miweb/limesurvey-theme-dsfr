@@ -1,5 +1,116 @@
 /* Thème DSFR pour LimeSurvey — bundle généré par esbuild depuis src/. Ne pas éditer à la main. */
 (() => {
+  // modules/theme-dsfr/src/core/i18n.js
+  var MANDATORY_I18N_FR = {
+    fields_remaining_plural: "Veuillez compléter les %remaining% champs restants sur %total%.",
+    fields_remaining_singular: "Veuillez compléter le dernier champ.",
+    fields_all_required: "Veuillez compléter tous les champs (%total% champs requis).",
+    field_valid: "Saisie valide",
+    numeric_only: "Ce champ n'accepte que des valeurs numériques."
+  };
+  var MANDATORY_I18N_EN = {
+    fields_remaining_plural: "Please complete the remaining %remaining% of %total% fields.",
+    fields_remaining_singular: "Please complete the last field.",
+    fields_all_required: "Please complete all fields (%total% fields required).",
+    field_valid: "Valid input",
+    numeric_only: "This field only accepts numeric values."
+  };
+  function tMandatory(key, remaining, total) {
+    const lang = (document.documentElement.lang || "fr").toLowerCase().substring(0, 2);
+    const dict = lang === "en" ? MANDATORY_I18N_EN : MANDATORY_I18N_FR;
+    let str = dict[key] || MANDATORY_I18N_FR[key] || key;
+    if (typeof remaining !== "undefined") {
+      str = str.replace("%remaining%", remaining);
+    }
+    if (typeof total !== "undefined") {
+      str = str.replace("%total%", total);
+    }
+    return str;
+  }
+  var RANKING_I18N_FR = {
+    ranking_actions_for: "Actions pour %s",
+    ranking_add: "Ajouter au classement",
+    ranking_add_aria: "Ajouter %s au classement",
+    ranking_up: "Monter",
+    ranking_up_aria: "Monter %s",
+    ranking_down: "Descendre",
+    ranking_down_aria: "Descendre %s",
+    ranking_remove: "Retirer",
+    ranking_remove_aria: "Retirer %s du classement"
+  };
+  var RANKING_I18N_EN = {
+    ranking_actions_for: "Actions for %s",
+    ranking_add: "Add to ranking",
+    ranking_add_aria: "Add %s to ranking",
+    ranking_up: "Move up",
+    ranking_up_aria: "Move %s up",
+    ranking_down: "Move down",
+    ranking_down_aria: "Move %s down",
+    ranking_remove: "Remove",
+    ranking_remove_aria: "Remove %s from ranking"
+  };
+  function tRanking(key, label) {
+    const lang = (document.documentElement.lang || "fr").toLowerCase().substring(0, 2);
+    const dict = lang === "en" ? RANKING_I18N_EN : RANKING_I18N_FR;
+    let str = dict[key] || RANKING_I18N_FR[key] || key;
+    if (typeof label !== "undefined") {
+      str = str.replace("%s", label);
+    }
+    return str;
+  }
+
+  // modules/theme-dsfr/src/core/dom-utils.js
+  function isValidNumber(value) {
+    return /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
+  }
+  function isQuestionHidden(el) {
+    return el.style.display === "none" || el.classList.contains("ls-irrelevant") || el.classList.contains("ls-hidden") || el.classList.contains("d-none");
+  }
+  function shouldSkipElement(element) {
+    if (!element) return true;
+    if (element.classList && (element.classList.contains("required-asterisk") || element.classList.contains("asterisk"))) return true;
+    if (element.tagName === "IMG") return true;
+    if (element.querySelector && element.querySelector("img")) return true;
+    if (element.closest && element.closest('[class*="upload"]')) return true;
+    if (element.closest && element.closest('[class*="file"]')) return true;
+    return false;
+  }
+
+  // modules/theme-dsfr/src/rte/sanitize-constants.js
+  var RTE_STYLE_PROPERTIES = [
+    "color",
+    "background-color",
+    "background",
+    "font-size",
+    "font-family",
+    "font-weight",
+    "font-style",
+    "text-decoration",
+    "text-align",
+    "line-height",
+    "letter-spacing",
+    "text-transform",
+    "text-indent",
+    "margin",
+    "margin-top",
+    "margin-right",
+    "margin-bottom",
+    "margin-left",
+    "padding",
+    "padding-top",
+    "padding-right",
+    "padding-bottom",
+    "padding-left",
+    "border",
+    "border-color",
+    "border-width",
+    "border-style"
+  ];
+  var RTE_CONTENT_SELECTORS = [
+    ".question-title-container",
+    ".question-help-container"
+  ];
+
   // modules/theme-dsfr/src/legacy.js
   console.log(
     "%c\n             Développé avec ❤️ par la                   \n                                                        \n       ███╗   ███╗██╗██╗    ██╗███████╗██████╗           \n       ████╗ ████║██║██║    ██║██╔════╝██╔══██╗          \n       ██╔████╔██║██║██║ █╗ ██║█████╗  ██████╔╝          \n       ██║╚██╔╝██║██║██║███╗██║██╔══╝  ██╔══██╗          \n       ██║ ╚═╝ ██║██║╚███╔███╔╝███████╗██████╔╝          \n       ╚═╝     ╚═╝╚═╝ ╚══╝╚══╝ ╚══════╝╚═════╝           \n                                                        \n           Mission Ingénierie du Web                   \n    Ministère de l'Économie et des Finances         \n    https://github.com/bmatge/limesurvey-theme-dsfr  \n    Thème DSFR pour LimeSurvey - 2025 - Etalab 2.0    \n",
@@ -450,8 +561,8 @@
           return;
         }
         if (isNumberOnly) {
-          const isValidNumber = /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
-          if (!isValidNumber) {
+          const isValidNumber2 = /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
+          if (!isValidNumber2) {
             inputGroup.classList.add("fr-input-group--error");
             inputGroup.classList.remove("fr-input-group--valid");
             question.classList.add("input-error");
@@ -570,32 +681,6 @@
         childList: true,
         subtree: true
       });
-    }
-    var MANDATORY_I18N_FR = {
-      fields_remaining_plural: "Veuillez compléter les %remaining% champs restants sur %total%.",
-      fields_remaining_singular: "Veuillez compléter le dernier champ.",
-      fields_all_required: "Veuillez compléter tous les champs (%total% champs requis).",
-      field_valid: "Saisie valide",
-      numeric_only: "Ce champ n'accepte que des valeurs numériques."
-    };
-    var MANDATORY_I18N_EN = {
-      fields_remaining_plural: "Please complete the remaining %remaining% of %total% fields.",
-      fields_remaining_singular: "Please complete the last field.",
-      fields_all_required: "Please complete all fields (%total% fields required).",
-      field_valid: "Valid input",
-      numeric_only: "This field only accepts numeric values."
-    };
-    function tMandatory(key, remaining, total) {
-      var lang = (document.documentElement.lang || "fr").toLowerCase().substring(0, 2);
-      var dict = lang === "en" ? MANDATORY_I18N_EN : MANDATORY_I18N_FR;
-      var str = dict[key] || MANDATORY_I18N_FR[key] || key;
-      if (typeof remaining !== "undefined") {
-        str = str.replace("%remaining%", remaining);
-      }
-      if (typeof total !== "undefined") {
-        str = str.replace("%total%", total);
-      }
-      return str;
     }
     function handleMultipleShortTextErrors() {
       var multipleQuestions = document.querySelectorAll(".question-container.multiple-short-txt");
@@ -989,8 +1074,8 @@
             inputGroup.classList.remove("fr-input-group--error", "fr-input-group--valid");
             return;
           }
-          const isValidNumber = /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
-          if (!isValidNumber) {
+          const isValidNumber2 = /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
+          if (!isValidNumber2) {
             question.classList.add("input-error");
             inputGroup.classList.add("fr-input-group--error");
             inputGroup.classList.remove("fr-input-group--valid");
@@ -1088,9 +1173,6 @@
         var tableWrapper = question.querySelector(".fr-table");
         if (tableWrapper) {
           tableWrapper.parentNode.insertBefore(counterContainer, tableWrapper.nextSibling);
-        }
-        function isValidNumber(value) {
-          return /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
         }
         function updateCounter() {
           var totalFields = allInputs.length;
@@ -1242,8 +1324,8 @@
               if (validMsg) validMsg.remove();
               return;
             }
-            const isValidNumber = /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
-            if (!isValidNumber) {
+            const isValidNumber2 = /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
+            if (!isValidNumber2) {
               this.classList.add("fr-input--error");
               this.classList.remove("fr-input--valid");
               inputGroup.classList.add("fr-input-group--error");
@@ -1809,9 +1891,6 @@
         }
         return "Une question";
       }
-      function isQuestionHidden(el) {
-        return el.style.display === "none" || el.classList.contains("ls-irrelevant") || el.classList.contains("ls-hidden") || el.classList.contains("d-none");
-      }
       var announceTimer = null;
       var pendingAnnouncements = [];
       function scheduleAnnouncement(message) {
@@ -1956,37 +2035,6 @@
   })();
   (function() {
     "use strict";
-    var RANKING_I18N_FR = {
-      ranking_actions_for: "Actions pour %s",
-      ranking_add: "Ajouter au classement",
-      ranking_add_aria: "Ajouter %s au classement",
-      ranking_up: "Monter",
-      ranking_up_aria: "Monter %s",
-      ranking_down: "Descendre",
-      ranking_down_aria: "Descendre %s",
-      ranking_remove: "Retirer",
-      ranking_remove_aria: "Retirer %s du classement"
-    };
-    var RANKING_I18N_EN = {
-      ranking_actions_for: "Actions for %s",
-      ranking_add: "Add to ranking",
-      ranking_add_aria: "Add %s to ranking",
-      ranking_up: "Move up",
-      ranking_up_aria: "Move %s up",
-      ranking_down: "Move down",
-      ranking_down_aria: "Move %s down",
-      ranking_remove: "Remove",
-      ranking_remove_aria: "Remove %s from ranking"
-    };
-    function tRanking(key, label) {
-      var lang = (document.documentElement.lang || "fr").toLowerCase().substring(0, 2);
-      var dict = lang === "en" ? RANKING_I18N_EN : RANKING_I18N_FR;
-      var str = dict[key] || RANKING_I18N_FR[key] || key;
-      if (typeof label !== "undefined") {
-        str = str.replace("%s", label);
-      }
-      return str;
-    }
     function getItemLabel(item) {
       var textSpan = item.querySelector(".ranking-item-text");
       if (textSpan) return textSpan.textContent.trim();
@@ -2506,48 +2554,6 @@
   })();
   (function() {
     "use strict";
-    const RTE_STYLE_PROPERTIES = [
-      "color",
-      "background-color",
-      "background",
-      "font-size",
-      "font-family",
-      "font-weight",
-      "font-style",
-      "text-decoration",
-      "text-align",
-      "line-height",
-      "letter-spacing",
-      "text-transform",
-      "text-indent",
-      "margin",
-      "margin-top",
-      "margin-right",
-      "margin-bottom",
-      "margin-left",
-      "padding",
-      "padding-top",
-      "padding-right",
-      "padding-bottom",
-      "padding-left",
-      "border",
-      "border-color",
-      "border-width",
-      "border-style"
-    ];
-    const RTE_CONTENT_SELECTORS = [
-      ".question-title-container",
-      ".question-help-container"
-    ];
-    function shouldSkipElement(element) {
-      if (!element) return true;
-      if (element.classList && (element.classList.contains("required-asterisk") || element.classList.contains("asterisk"))) return true;
-      if (element.tagName === "IMG") return true;
-      if (element.querySelector && element.querySelector("img")) return true;
-      if (element.closest && element.closest('[class*="upload"]')) return true;
-      if (element.closest && element.closest('[class*="file"]')) return true;
-      return false;
-    }
     function sanitizeElementStyles(element) {
       if (!element || element.nodeType !== Node.ELEMENT_NODE) return;
       if (shouldSkipElement(element)) return;

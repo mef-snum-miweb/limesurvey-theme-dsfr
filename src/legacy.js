@@ -5,6 +5,10 @@
  * sans modifier theme.js
  */
 
+import { tMandatory, tRanking } from './core/i18n.js';
+import { isValidNumber, isQuestionHidden, shouldSkipElement } from './core/dom-utils.js';
+import { RTE_STYLE_PROPERTIES, RTE_CONTENT_SELECTORS } from './rte/sanitize-constants.js';
+
 // Message de bienvenue
 console.log('%c\n' +
     '             Développé avec ❤️ par la                   \n' +
@@ -918,36 +922,6 @@ console.log('%c\n' +
 
     }
 
-    // ---- i18n pour les messages de compteur champs obligatoires ----
-
-    var MANDATORY_I18N_FR = {
-        fields_remaining_plural: 'Veuillez compléter les %remaining% champs restants sur %total%.',
-        fields_remaining_singular: 'Veuillez compléter le dernier champ.',
-        fields_all_required: 'Veuillez compléter tous les champs (%total% champs requis).',
-        field_valid: 'Saisie valide',
-        numeric_only: "Ce champ n'accepte que des valeurs numériques."
-    };
-    var MANDATORY_I18N_EN = {
-        fields_remaining_plural: 'Please complete the remaining %remaining% of %total% fields.',
-        fields_remaining_singular: 'Please complete the last field.',
-        fields_all_required: 'Please complete all fields (%total% fields required).',
-        field_valid: 'Valid input',
-        numeric_only: 'This field only accepts numeric values.'
-    };
-
-    function tMandatory(key, remaining, total) {
-        var lang = (document.documentElement.lang || 'fr').toLowerCase().substring(0, 2);
-        var dict = (lang === 'en') ? MANDATORY_I18N_EN : MANDATORY_I18N_FR;
-        var str = dict[key] || MANDATORY_I18N_FR[key] || key;
-        if (typeof remaining !== 'undefined') {
-            str = str.replace('%remaining%', remaining);
-        }
-        if (typeof total !== 'undefined') {
-            str = str.replace('%total%', total);
-        }
-        return str;
-    }
-
     // === Gestion spécifique des questions à saisie multiple obligatoire ===
     // (multiple-short-txt, type Q)
     //
@@ -1696,11 +1670,6 @@ console.log('%c\n' +
             var tableWrapper = question.querySelector('.fr-table');
             if (tableWrapper) {
                 tableWrapper.parentNode.insertBefore(counterContainer, tableWrapper.nextSibling);
-            }
-
-            // Fonction de validation numérique
-            function isValidNumber(value) {
-                return /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
             }
 
             // Fonction de mise à jour du compteur
@@ -2804,13 +2773,6 @@ console.log('%c\n' +
             return 'Une question';
         }
 
-        function isQuestionHidden(el) {
-            return el.style.display === 'none' ||
-                   el.classList.contains('ls-irrelevant') ||
-                   el.classList.contains('ls-hidden') ||
-                   el.classList.contains('d-none');
-        }
-
         // Timer pour regrouper les annonces (éviter le spam)
         var announceTimer = null;
         var pendingAnnouncements = [];
@@ -3082,49 +3044,6 @@ console.log('%c\n' +
      */
 
     // ---- Helpers ----
-
-    /**
-     * i18n minimal pour le module ranking.
-     *
-     * Détecte la langue de la page via <html lang="..">. Si non préfixée par "en"
-     * (détection simple sur les 2 premiers caractères), renvoie la version française.
-     * Gère l'interpolation d'un label via le placeholder %s.
-     *
-     * Les clés restent ajoutables au fil de l'eau pour couvrir les chaînes actuellement
-     * hardcodées dans le module.
-     */
-    var RANKING_I18N_FR = {
-        ranking_actions_for:  'Actions pour %s',
-        ranking_add:          'Ajouter au classement',
-        ranking_add_aria:     'Ajouter %s au classement',
-        ranking_up:           'Monter',
-        ranking_up_aria:      'Monter %s',
-        ranking_down:         'Descendre',
-        ranking_down_aria:    'Descendre %s',
-        ranking_remove:       'Retirer',
-        ranking_remove_aria:  'Retirer %s du classement'
-    };
-    var RANKING_I18N_EN = {
-        ranking_actions_for:  'Actions for %s',
-        ranking_add:          'Add to ranking',
-        ranking_add_aria:     'Add %s to ranking',
-        ranking_up:           'Move up',
-        ranking_up_aria:      'Move %s up',
-        ranking_down:         'Move down',
-        ranking_down_aria:    'Move %s down',
-        ranking_remove:       'Remove',
-        ranking_remove_aria:  'Remove %s from ranking'
-    };
-
-    function tRanking(key, label) {
-        var lang = (document.documentElement.lang || 'fr').toLowerCase().substring(0, 2);
-        var dict = (lang === 'en') ? RANKING_I18N_EN : RANKING_I18N_FR;
-        var str = dict[key] || RANKING_I18N_FR[key] || key;
-        if (typeof label !== 'undefined') {
-            str = str.replace('%s', label);
-        }
-        return str;
-    }
 
     /**
      * Récupère le label textuel d'un item de ranking
@@ -3952,72 +3871,6 @@ function updateRepeatHeading(answers) {
  */
 (function() {
     'use strict';
-
-    // Styles de mise en forme à supprimer (typiquement ajoutés par le RTE)
-    const RTE_STYLE_PROPERTIES = [
-        'color',
-        'background-color',
-        'background',
-        'font-size',
-        'font-family',
-        'font-weight',
-        'font-style',
-        'text-decoration',
-        'text-align',
-        'line-height',
-        'letter-spacing',
-        'text-transform',
-        'text-indent',
-        'margin',
-        'margin-top',
-        'margin-right',
-        'margin-bottom',
-        'margin-left',
-        'padding',
-        'padding-top',
-        'padding-right',
-        'padding-bottom',
-        'padding-left',
-        'border',
-        'border-color',
-        'border-width',
-        'border-style'
-    ];
-
-    // Styles fonctionnels à conserver (typiquement injectés par JS)
-    // display, visibility, position, top, left, right, bottom, width, height,
-    // transform, opacity, z-index, overflow, etc.
-
-    // Éléments à traiter (uniquement titre et aide des questions)
-    const RTE_CONTENT_SELECTORS = [
-        '.question-title-container',
-        '.question-help-container'
-    ];
-
-    /**
-     * Vérifie si un élément doit être exclu du nettoyage
-     */
-    function shouldSkipElement(element) {
-        if (!element) return true;
-
-        // Exclure les astérisques des questions obligatoires
-        if (element.classList && (
-            element.classList.contains('required-asterisk') ||
-            element.classList.contains('asterisk')
-        )) return true;
-
-        // Exclure les images
-        if (element.tagName === 'IMG') return true;
-
-        // Exclure les éléments contenant des images
-        if (element.querySelector && element.querySelector('img')) return true;
-
-        // Exclure les éléments liés aux fichiers/upload
-        if (element.closest && element.closest('[class*="upload"]')) return true;
-        if (element.closest && element.closest('[class*="file"]')) return true;
-
-        return false;
-    }
 
     /**
      * Nettoie les styles de mise en forme d'un élément
