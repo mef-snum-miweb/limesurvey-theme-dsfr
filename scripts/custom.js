@@ -419,230 +419,6 @@
       initCaptchaReload();
       initCaptchaValidation();
     });
-    function extractQuestionCodes(expression) {
-      if (!expression) return [];
-      const questionCodes = [];
-      const regex = /\b(Q\d+(?:_SQ\d+)?)\./gi;
-      let match;
-      while ((match = regex.exec(expression)) !== null) {
-        const code = match[1];
-        if (!questionCodes.includes(code)) {
-          questionCodes.push(code);
-        }
-      }
-      return questionCodes;
-    }
-    function findQuestionByCode(questionCode) {
-      let question = document.querySelector(`[data-qcode="${questionCode}"]`);
-      if (!question) {
-        question = document.querySelector(`[id*="${questionCode}"]`);
-      }
-      return question;
-    }
-    function getQuestionText(questionElement) {
-      const questionTitle = questionElement.querySelector('[id^="ls-question-text-"]');
-      if (questionTitle) {
-        const text = questionTitle.textContent.trim();
-        return text.length > 50 ? text.substring(0, 50) + "..." : text;
-      }
-      const questionNumber = questionElement.querySelector(".fr-text--xs");
-      if (questionNumber) {
-        return questionNumber.textContent.trim();
-      }
-      return "la question précédente";
-    }
-    function createConditionalDescription(questionId, parentQuestions) {
-      const descId = `conditional-desc-${questionId}`;
-      let descElement = document.getElementById(descId);
-      if (descElement) {
-        return descElement;
-      }
-      descElement = document.createElement("div");
-      descElement.id = descId;
-      descElement.className = "fr-sr-only";
-      descElement.setAttribute("role", "note");
-      let descText;
-      if (parentQuestions.length === 1) {
-        descText = `Cette question dépend de votre réponse à ${parentQuestions[0]}.`;
-      } else if (parentQuestions.length > 1) {
-        const lastQuestion = parentQuestions.pop();
-        descText = `Cette question dépend de vos réponses à ${parentQuestions.join(", ")} et ${lastQuestion}.`;
-      } else {
-        descText = "Cette question est conditionnelle.";
-      }
-      descElement.textContent = descText;
-      return descElement;
-    }
-    function addAriaDescribedBy(questionElement, descriptionId) {
-      const formFields = questionElement.querySelectorAll("input, select, textarea");
-      formFields.forEach((field) => {
-        const currentDescribedBy = field.getAttribute("aria-describedby") || "";
-        if (!currentDescribedBy.includes(descriptionId)) {
-          const newDescribedBy = currentDescribedBy ? `${currentDescribedBy} ${descriptionId}`.trim() : descriptionId;
-          field.setAttribute("aria-describedby", newDescribedBy);
-        }
-      });
-    }
-    function processConditionalQuestion(questionElement) {
-      var _a;
-      const relevanceExpression = questionElement.getAttribute("data-relevance");
-      if (!relevanceExpression) return;
-      const questionId = questionElement.id || ((_a = questionElement.querySelector("[id]")) == null ? void 0 : _a.id) || `q-${Date.now()}`;
-      const parentQuestionCodes = extractQuestionCodes(relevanceExpression);
-      if (parentQuestionCodes.length === 0) return;
-      const parentQuestionTexts = [];
-      parentQuestionCodes.forEach((code) => {
-        const parentElement = findQuestionByCode(code);
-        if (parentElement) {
-          const questionText = getQuestionText(parentElement);
-          parentQuestionTexts.push(questionText);
-        }
-      });
-      if (parentQuestionTexts.length === 0) return;
-      const descElement = createConditionalDescription(questionId, parentQuestionTexts);
-      questionElement.insertBefore(descElement, questionElement.firstChild);
-      addAriaDescribedBy(questionElement, descElement.id);
-    }
-    function initConditionalQuestionsAria() {
-      var conditionalQuestions = document.querySelectorAll(".question-container[data-relevance]");
-      var hiddenQuestions = document.querySelectorAll(".question-container.ls-irrelevant, .question-container.ls-hidden");
-      hiddenQuestions.forEach(function(q) {
-        if (!q.hasAttribute("data-relevance") && !q.dataset.dsfrConditionalProcessed) {
-          q.dataset.dsfrConditionalProcessed = "true";
-          var questionId = q.id || "q-" + Date.now() + "-" + Math.random().toString(36).substring(2, 7);
-          var descElement = createConditionalDescription(questionId, []);
-          q.insertBefore(descElement, q.firstChild);
-          addAriaDescribedBy(q, descElement.id);
-        }
-      });
-      conditionalQuestions.forEach(function(questionElement) {
-        if (questionElement.dataset.dsfrConditionalProcessed) return;
-        questionElement.dataset.dsfrConditionalProcessed = "true";
-        try {
-          processConditionalQuestion(questionElement);
-        } catch (error) {
-        }
-      });
-    }
-    function setupConditionalQuestionsObserver() {
-      var observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-          mutation.addedNodes.forEach(function(node) {
-            if (node.nodeType !== Node.ELEMENT_NODE) return;
-            var targets = [];
-            if (node.classList && node.classList.contains("question-container")) {
-              targets.push(node);
-            }
-            var nested = node.querySelectorAll && node.querySelectorAll(".question-container");
-            if (nested) {
-              nested.forEach(function(n) {
-                targets.push(n);
-              });
-            }
-            targets.forEach(function(q) {
-              if (q.dataset.dsfrConditionalProcessed) return;
-              if (q.hasAttribute("data-relevance") || q.classList.contains("ls-irrelevant") || q.classList.contains("ls-hidden")) {
-                q.dataset.dsfrConditionalProcessed = "true";
-                if (q.hasAttribute("data-relevance")) {
-                  try {
-                    processConditionalQuestion(q);
-                  } catch (e) {
-                  }
-                } else {
-                  var qId = q.id || "q-" + Date.now();
-                  var desc = createConditionalDescription(qId, []);
-                  q.insertBefore(desc, q.firstChild);
-                  addAriaDescribedBy(q, desc.id);
-                }
-              }
-            });
-          });
-        });
-      });
-      var surveyContainer = document.getElementById("limesurvey") || document.body;
-      observer.observe(surveyContainer, {
-        childList: true,
-        subtree: true
-      });
-    }
-    function initConditionalVisibilityNotifier() {
-      var liveRegion = document.getElementById("conditional-live-region");
-      if (!liveRegion) {
-        liveRegion = document.createElement("div");
-        liveRegion.id = "conditional-live-region";
-        liveRegion.className = "fr-sr-only";
-        liveRegion.setAttribute("aria-live", "polite");
-        liveRegion.setAttribute("aria-atomic", "true");
-        document.body.appendChild(liveRegion);
-      }
-      function getQuestionLabel(questionEl) {
-        var titleEl = questionEl.querySelector('[id^="ls-question-text-"]');
-        if (titleEl) {
-          var text = titleEl.textContent.trim();
-          return text.length > 80 ? text.substring(0, 80) + "…" : text;
-        }
-        return "Une question";
-      }
-      var announceTimer = null;
-      var pendingAnnouncements = [];
-      function scheduleAnnouncement(message) {
-        pendingAnnouncements.push(message);
-        if (announceTimer) clearTimeout(announceTimer);
-        announceTimer = setTimeout(function() {
-          liveRegion.textContent = pendingAnnouncements.join(". ");
-          pendingAnnouncements = [];
-          setTimeout(function() {
-            liveRegion.textContent = "";
-          }, 3e3);
-        }, 300);
-      }
-      var observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-          var el = mutation.target;
-          if (!el.classList || !el.classList.contains("question-container")) return;
-          if (mutation.type === "attributes") {
-            var isHidden = isQuestionHidden(el);
-            var wasHidden = el.dataset.conditionalWasHidden === "true";
-            if (isHidden && !wasHidden) {
-              el.dataset.conditionalWasHidden = "true";
-            } else if (!isHidden && wasHidden) {
-              el.dataset.conditionalWasHidden = "false";
-              var label = getQuestionLabel(el);
-              scheduleAnnouncement("Nouvelle question affichée : " + label);
-            }
-          }
-        });
-      });
-      var allQuestions = document.querySelectorAll(".question-container");
-      allQuestions.forEach(function(q) {
-        q.dataset.conditionalWasHidden = isQuestionHidden(q) ? "true" : "false";
-        observer.observe(q, {
-          attributes: true,
-          attributeFilter: ["style", "class"]
-        });
-      });
-    }
-    function excludeIrrelevantInputsFromTabOrder() {
-      var irrelevant = document.querySelectorAll(".question-container.ls-irrelevant, .question-container.ls-hidden");
-      irrelevant.forEach(function(q) {
-        q.querySelectorAll('input:not([type="hidden"]), textarea, select').forEach(function(field) {
-          field.setAttribute("tabindex", "-1");
-        });
-      });
-    }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", function() {
-        initConditionalQuestionsAria();
-        setupConditionalQuestionsObserver();
-        initConditionalVisibilityNotifier();
-        excludeIrrelevantInputsFromTabOrder();
-      });
-    } else {
-      initConditionalQuestionsAria();
-      setupConditionalQuestionsObserver();
-      initConditionalVisibilityNotifier();
-      excludeIrrelevantInputsFromTabOrder();
-    }
   })();
   (function() {
     "use strict";
@@ -2591,6 +2367,220 @@
     });
   }
 
+  // modules/theme-dsfr/src/a11y/conditional-aria.js
+  function extractQuestionCodes(expression) {
+    if (!expression) return [];
+    const questionCodes = [];
+    const regex = /\b(Q\d+(?:_SQ\d+)?)\./gi;
+    let match;
+    while ((match = regex.exec(expression)) !== null) {
+      const code = match[1];
+      if (!questionCodes.includes(code)) {
+        questionCodes.push(code);
+      }
+    }
+    return questionCodes;
+  }
+  function findQuestionByCode(questionCode) {
+    let question = document.querySelector(`[data-qcode="${questionCode}"]`);
+    if (!question) {
+      question = document.querySelector(`[id*="${questionCode}"]`);
+    }
+    return question;
+  }
+  function getQuestionText(questionElement) {
+    const questionTitle = questionElement.querySelector('[id^="ls-question-text-"]');
+    if (questionTitle) {
+      const text = questionTitle.textContent.trim();
+      return text.length > 50 ? text.substring(0, 50) + "..." : text;
+    }
+    const questionNumber = questionElement.querySelector(".fr-text--xs");
+    if (questionNumber) {
+      return questionNumber.textContent.trim();
+    }
+    return "la question précédente";
+  }
+  function createConditionalDescription(questionId, parentQuestions) {
+    const descId = `conditional-desc-${questionId}`;
+    let descElement = document.getElementById(descId);
+    if (descElement) {
+      return descElement;
+    }
+    descElement = document.createElement("div");
+    descElement.id = descId;
+    descElement.className = "fr-sr-only";
+    descElement.setAttribute("role", "note");
+    let descText;
+    const pq = [...parentQuestions];
+    if (pq.length === 1) {
+      descText = `Cette question dépend de votre réponse à ${pq[0]}.`;
+    } else if (pq.length > 1) {
+      const lastQuestion = pq.pop();
+      descText = `Cette question dépend de vos réponses à ${pq.join(", ")} et ${lastQuestion}.`;
+    } else {
+      descText = "Cette question est conditionnelle.";
+    }
+    descElement.textContent = descText;
+    return descElement;
+  }
+  function addAriaDescribedBy(questionElement, descriptionId) {
+    const formFields = questionElement.querySelectorAll("input, select, textarea");
+    formFields.forEach((field) => {
+      const currentDescribedBy = field.getAttribute("aria-describedby") || "";
+      if (!currentDescribedBy.includes(descriptionId)) {
+        const newDescribedBy = currentDescribedBy ? `${currentDescribedBy} ${descriptionId}`.trim() : descriptionId;
+        field.setAttribute("aria-describedby", newDescribedBy);
+      }
+    });
+  }
+  function processConditionalQuestion(questionElement) {
+    var _a;
+    const relevanceExpression = questionElement.getAttribute("data-relevance");
+    if (!relevanceExpression) return;
+    const questionId = questionElement.id || ((_a = questionElement.querySelector("[id]")) == null ? void 0 : _a.id) || `q-${Date.now()}`;
+    const parentQuestionCodes = extractQuestionCodes(relevanceExpression);
+    if (parentQuestionCodes.length === 0) return;
+    const parentQuestionTexts = [];
+    parentQuestionCodes.forEach((code) => {
+      const parentElement = findQuestionByCode(code);
+      if (parentElement) {
+        const questionText = getQuestionText(parentElement);
+        parentQuestionTexts.push(questionText);
+      }
+    });
+    if (parentQuestionTexts.length === 0) return;
+    const descElement = createConditionalDescription(questionId, parentQuestionTexts);
+    questionElement.insertBefore(descElement, questionElement.firstChild);
+    addAriaDescribedBy(questionElement, descElement.id);
+  }
+  function initConditionalQuestionsAria() {
+    var conditionalQuestions = document.querySelectorAll(".question-container[data-relevance]");
+    var hiddenQuestions = document.querySelectorAll(".question-container.ls-irrelevant, .question-container.ls-hidden");
+    hiddenQuestions.forEach(function(q) {
+      if (!q.hasAttribute("data-relevance") && !q.dataset.dsfrConditionalProcessed) {
+        q.dataset.dsfrConditionalProcessed = "true";
+        var questionId = q.id || "q-" + Date.now() + "-" + Math.random().toString(36).substring(2, 7);
+        var descElement = createConditionalDescription(questionId, []);
+        q.insertBefore(descElement, q.firstChild);
+        addAriaDescribedBy(q, descElement.id);
+      }
+    });
+    conditionalQuestions.forEach(function(questionElement) {
+      if (questionElement.dataset.dsfrConditionalProcessed) return;
+      questionElement.dataset.dsfrConditionalProcessed = "true";
+      try {
+        processConditionalQuestion(questionElement);
+      } catch (error) {
+      }
+    });
+  }
+  function setupConditionalQuestionsObserver() {
+    var observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        mutation.addedNodes.forEach(function(node) {
+          if (node.nodeType !== Node.ELEMENT_NODE) return;
+          var targets = [];
+          if (node.classList && node.classList.contains("question-container")) {
+            targets.push(node);
+          }
+          var nested = node.querySelectorAll && node.querySelectorAll(".question-container");
+          if (nested) {
+            nested.forEach(function(n) {
+              targets.push(n);
+            });
+          }
+          targets.forEach(function(q) {
+            if (q.dataset.dsfrConditionalProcessed) return;
+            if (q.hasAttribute("data-relevance") || q.classList.contains("ls-irrelevant") || q.classList.contains("ls-hidden")) {
+              q.dataset.dsfrConditionalProcessed = "true";
+              if (q.hasAttribute("data-relevance")) {
+                try {
+                  processConditionalQuestion(q);
+                } catch (e) {
+                }
+              } else {
+                var qId = q.id || "q-" + Date.now();
+                var desc = createConditionalDescription(qId, []);
+                q.insertBefore(desc, q.firstChild);
+                addAriaDescribedBy(q, desc.id);
+              }
+            }
+          });
+        });
+      });
+    });
+    var surveyContainer = document.getElementById("limesurvey") || document.body;
+    observer.observe(surveyContainer, {
+      childList: true,
+      subtree: true
+    });
+  }
+  function initConditionalVisibilityNotifier() {
+    var liveRegion = document.getElementById("conditional-live-region");
+    if (!liveRegion) {
+      liveRegion = document.createElement("div");
+      liveRegion.id = "conditional-live-region";
+      liveRegion.className = "fr-sr-only";
+      liveRegion.setAttribute("aria-live", "polite");
+      liveRegion.setAttribute("aria-atomic", "true");
+      document.body.appendChild(liveRegion);
+    }
+    function getQuestionLabel(questionEl) {
+      var titleEl = questionEl.querySelector('[id^="ls-question-text-"]');
+      if (titleEl) {
+        var text = titleEl.textContent.trim();
+        return text.length > 80 ? text.substring(0, 80) + "…" : text;
+      }
+      return "Une question";
+    }
+    var announceTimer = null;
+    var pendingAnnouncements = [];
+    function scheduleAnnouncement(message) {
+      pendingAnnouncements.push(message);
+      if (announceTimer) clearTimeout(announceTimer);
+      announceTimer = setTimeout(function() {
+        liveRegion.textContent = pendingAnnouncements.join(". ");
+        pendingAnnouncements = [];
+        setTimeout(function() {
+          liveRegion.textContent = "";
+        }, 3e3);
+      }, 300);
+    }
+    var observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        var el = mutation.target;
+        if (!el.classList || !el.classList.contains("question-container")) return;
+        if (mutation.type === "attributes") {
+          var isHidden = isQuestionHidden(el);
+          var wasHidden = el.dataset.conditionalWasHidden === "true";
+          if (isHidden && !wasHidden) {
+            el.dataset.conditionalWasHidden = "true";
+          } else if (!isHidden && wasHidden) {
+            el.dataset.conditionalWasHidden = "false";
+            var label = getQuestionLabel(el);
+            scheduleAnnouncement("Nouvelle question affichée : " + label);
+          }
+        }
+      });
+    });
+    var allQuestions = document.querySelectorAll(".question-container");
+    allQuestions.forEach(function(q) {
+      q.dataset.conditionalWasHidden = isQuestionHidden(q) ? "true" : "false";
+      observer.observe(q, {
+        attributes: true,
+        attributeFilter: ["style", "class"]
+      });
+    });
+  }
+  function excludeIrrelevantInputsFromTabOrder() {
+    var irrelevant = document.querySelectorAll(".question-container.ls-irrelevant, .question-container.ls-hidden");
+    irrelevant.forEach(function(q) {
+      q.querySelectorAll('input:not([type="hidden"]), textarea, select').forEach(function(field) {
+        field.setAttribute("tabindex", "-1");
+      });
+    });
+  }
+
   // modules/theme-dsfr/src/index.js
   window.DSFRSanitizeRTEContent = sanitizeRTEContent;
   window.updateErrorSummary = updateErrorSummary;
@@ -2617,6 +2607,10 @@
     setTimeout(createErrorSummary, 100);
     fixDropdownArrayInlineStyles();
     setupStyleObserver();
+    initConditionalQuestionsAria();
+    setupConditionalQuestionsObserver();
+    initConditionalVisibilityNotifier();
+    excludeIrrelevantInputsFromTabOrder();
     const forms = document.querySelectorAll('form#limesurvey, form[name="limesurvey"]');
     forms.forEach((form) => {
       form.addEventListener("submit", () => {

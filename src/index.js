@@ -29,6 +29,12 @@ import { initNumericValidation, handleNumericMultiValidation, observeNumericMult
 import { handleArrayValidation, handleSimpleQuestionValidation } from './validation/array-validation.js';
 import { transformValidationMessages } from './validation/validation-messages.js';
 import { fixDropdownArrayInlineStyles, setupStyleObserver } from './dropdowns/dropdown-array.js';
+import {
+    initConditionalQuestionsAria,
+    setupConditionalQuestionsObserver,
+    initConditionalVisibilityNotifier,
+    excludeIrrelevantInputsFromTabOrder,
+} from './a11y/conditional-aria.js';
 
 // --- Contrat global : exposition sur window ---
 window.DSFRSanitizeRTEContent = sanitizeRTEContent;
@@ -68,6 +74,12 @@ onReady(() => {
     // Tableaux dropdown-array : nettoyage mobile + observer
     fixDropdownArrayInlineStyles();
     setupStyleObserver();
+
+    // Questions conditionnelles (a11y)
+    initConditionalQuestionsAria();
+    setupConditionalQuestionsObserver();
+    initConditionalVisibilityNotifier();
+    excludeIrrelevantInputsFromTabOrder();
 
     // Re-déclencher la transformation + le récapitulatif après soumission
     // LimeSurvey (cas de validation côté serveur qui ne passe pas par pjax).
