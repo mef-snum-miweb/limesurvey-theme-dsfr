@@ -1910,87 +1910,6 @@
   })();
   (function() {
     "use strict";
-    function enableImageLazyLoading() {
-      const imageSelectors = [
-        ".answer-item img",
-        ".fr-fieldset__content img",
-        ".answertext img",
-        ".fr-checkbox-group img",
-        ".fr-radio-group img",
-        ".question-text-container img",
-        ".ls-question-text img",
-        ".ls-question-help img"
-      ];
-      const images = document.querySelectorAll(imageSelectors.join(", "));
-      images.forEach(function(img) {
-        if (!img.hasAttribute("loading")) {
-          img.setAttribute("loading", "lazy");
-        }
-        if (!img.hasAttribute("alt") || img.getAttribute("alt").trim() === "") {
-          const altText = img.hasAttribute("title") && img.getAttribute("title").trim() !== "" ? img.getAttribute("title") : "Image de réponse";
-          img.setAttribute("alt", altText);
-        }
-        if (!img.classList.contains("dsfr-enhanced-image")) {
-          img.classList.add("dsfr-enhanced-image");
-        }
-      });
-    }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", enableImageLazyLoading);
-    } else {
-      enableImageLazyLoading();
-    }
-    document.addEventListener("limesurvey:questionsLoaded", enableImageLazyLoading);
-  })();
-  (function() {
-    "use strict";
-    function extendDescribedByForValidationTips() {
-      var tips = document.querySelectorAll('.ls-questionhelp[id^="vmsg_"]');
-      tips.forEach(function(tip) {
-        if (tip.dataset.describedbyWired === "1") return;
-        var question = tip.closest('[id^="question"]');
-        if (!question) return;
-        var fields = question.querySelectorAll("input, textarea, select");
-        fields.forEach(function(field) {
-          if (field.type === "hidden") return;
-          var existing = field.getAttribute("aria-describedby") || "";
-          var ids = existing.split(/\s+/).filter(Boolean);
-          if (ids.indexOf(tip.id) === -1) {
-            ids.push(tip.id);
-            field.setAttribute("aria-describedby", ids.join(" "));
-          }
-        });
-        tip.dataset.describedbyWired = "1";
-      });
-    }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", extendDescribedByForValidationTips);
-    } else {
-      extendDescribedByForValidationTips();
-    }
-    document.addEventListener("limesurvey:questionsLoaded", extendDescribedByForValidationTips);
-  })();
-  (function() {
-    "use strict";
-    function addInputmodeNumericToNumericFields() {
-      var numericInputs = document.querySelectorAll('input[data-number="1"]');
-      numericInputs.forEach(function(input) {
-        if (input.dataset.inputmodeWired === "1") return;
-        if (!input.hasAttribute("inputmode")) {
-          input.setAttribute("inputmode", "numeric");
-        }
-        input.dataset.inputmodeWired = "1";
-      });
-    }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", addInputmodeNumericToNumericFields);
-    } else {
-      addInputmodeNumericToNumericFields();
-    }
-    document.addEventListener("limesurvey:questionsLoaded", addInputmodeNumericToNumericFields);
-  })();
-  (function() {
-    "use strict";
     function getItemLabel(item) {
       var textSpan = item.querySelector(".ranking-item-text");
       if (textSpan) return textSpan.textContent.trim();
@@ -2340,57 +2259,6 @@
       });
     }
   })();
-  (function() {
-    "use strict";
-    function reorderListRadioNoAnswer() {
-      var questions = document.querySelectorAll(".list-radio.question-container");
-      questions.forEach(function(q) {
-        if (q.dataset.listradioReordered === "1") return;
-        var noAnswerRadio = q.querySelector('input[type="radio"][value=""]');
-        if (!noAnswerRadio) return;
-        var noAnswerRow = noAnswerRadio.closest(".fr-fieldset__element");
-        if (!noAnswerRow) return;
-        var content = noAnswerRow.parentNode;
-        if (content && content.firstElementChild !== noAnswerRow) {
-          content.insertBefore(noAnswerRow, content.firstElementChild);
-        }
-        var allRadios = q.querySelectorAll('input[type="radio"][name="' + noAnswerRadio.name + '"]');
-        var anyChecked = Array.prototype.some.call(allRadios, function(r) {
-          return r.checked;
-        });
-        var otherRadio = q.querySelector('input[type="radio"][id^="SOTH"]');
-        var isIncompleteOther = false;
-        if (otherRadio && otherRadio.checked) {
-          var otherText = q.querySelector('[id$="othertext"]');
-          if (otherText && otherText.value.trim() === "") {
-            isIncompleteOther = true;
-          }
-        }
-        if (!anyChecked || isIncompleteOther) {
-          allRadios.forEach(function(r) {
-            r.checked = false;
-            r.removeAttribute("checked");
-          });
-          noAnswerRadio.checked = true;
-          noAnswerRadio.setAttribute("checked", "checked");
-          var javaInput = q.querySelector('input[type="hidden"][id^="java"]');
-          if (javaInput) {
-            javaInput.value = "";
-          }
-          if (otherRadio) {
-            otherRadio.setAttribute("aria-expanded", "false");
-          }
-        }
-        q.dataset.listradioReordered = "1";
-      });
-    }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", reorderListRadioNoAnswer);
-    } else {
-      reorderListRadioNoAnswer();
-    }
-    document.addEventListener("limesurvey:questionsLoaded", reorderListRadioNoAnswer);
-  })();
   function triggerEmRelevance() {
     triggerEmRelevanceQuestion();
     triggerEmRelevanceGroup();
@@ -2508,105 +2376,6 @@
     $(document).on("pjax:complete", initRelevanceHandlers);
     document.addEventListener("limesurvey:questionsLoaded", initRelevanceHandlers);
   })();
-  (function() {
-    "use strict";
-    function fixTableAccessibility() {
-      var tables = document.querySelectorAll(".ls-answers table, .ls-table-wrapper table, .fr-table table");
-      tables.forEach(function(table) {
-        var tbodyRows = table.querySelectorAll("tbody tr");
-        tbodyRows.forEach(function(tr) {
-          var th = tr.querySelector("th");
-          if (th && !th.hasAttribute("scope")) {
-            th.setAttribute("scope", "row");
-          }
-        });
-        var theadThs = table.querySelectorAll("thead th");
-        theadThs.forEach(function(th) {
-          if (!th.hasAttribute("scope")) {
-            th.setAttribute("scope", "col");
-          }
-        });
-        var hasColHeaders = table.querySelectorAll("thead th[id]").length > 0;
-        var hasRowHeaders = table.querySelectorAll("tbody th[id]").length > 0;
-        if (hasColHeaders && hasRowHeaders) {
-          var colHeaderIds = [];
-          var headerRow = table.querySelector("thead tr:last-child");
-          if (headerRow) {
-            var thIndex = 0;
-            headerRow.querySelectorAll("th").forEach(function(th) {
-              if (th.id) {
-                colHeaderIds[thIndex] = th.id;
-              }
-              thIndex++;
-            });
-          }
-          tbodyRows.forEach(function(tr) {
-            var rowTh = tr.querySelector("th[id]");
-            if (!rowTh) return;
-            var rowHeaderId = rowTh.id;
-            var cellIndex = 0;
-            tr.querySelectorAll("td, th").forEach(function(cell) {
-              if (cell.tagName === "TH") {
-                cellIndex++;
-                return;
-              }
-              if (!cell.hasAttribute("headers") && colHeaderIds[cellIndex]) {
-                cell.setAttribute("headers", rowHeaderId + " " + colHeaderIds[cellIndex]);
-              }
-              cellIndex++;
-            });
-          });
-        }
-        var needsIds = false;
-        var allTheadThs = table.querySelectorAll("thead th");
-        var allTbodyThs = table.querySelectorAll("tbody th");
-        allTheadThs.forEach(function(th) {
-          if (!th.id && th.textContent.trim()) needsIds = true;
-        });
-        allTbodyThs.forEach(function(th) {
-          if (!th.id && th.textContent.trim()) needsIds = true;
-        });
-        if (needsIds) {
-          var tableId = table.id || "tbl-" + Math.random().toString(36).substr(2, 6);
-          var colIds = [];
-          allTheadThs.forEach(function(th, i) {
-            if (!th.id && th.textContent.trim()) {
-              th.id = tableId + "-col-" + i;
-            }
-            colIds[i] = th.id || null;
-          });
-          tbodyRows.forEach(function(tr) {
-            var th = tr.querySelector("th");
-            if (!th) return;
-            if (!th.id && th.textContent.trim()) {
-              var rowName = tr.id || "row-" + Math.random().toString(36).substr(2, 6);
-              th.id = tableId + "-" + rowName;
-            }
-            if (!th.id) return;
-            var cellIndex = 0;
-            tr.querySelectorAll("td, th").forEach(function(cell) {
-              if (cell.tagName === "TH") {
-                cellIndex++;
-                return;
-              }
-              if (!cell.hasAttribute("headers") && colIds[cellIndex]) {
-                cell.setAttribute("headers", th.id + " " + colIds[cellIndex]);
-              }
-              cellIndex++;
-            });
-          });
-        }
-      });
-    }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", fixTableAccessibility);
-    } else {
-      fixTableAccessibility();
-    }
-    document.addEventListener("limesurvey:questionsLoaded", function() {
-      setTimeout(fixTableAccessibility, 200);
-    });
-  })();
   if (typeof window !== "undefined") {
     window.triggerEmRelevance = triggerEmRelevance;
     window.triggerEmRelevanceQuestion = triggerEmRelevanceQuestion;
@@ -2614,6 +2383,23 @@
     window.triggerEmRelevanceSubQuestion = triggerEmRelevanceSubQuestion;
     window.updateLineClass = updateLineClass;
     window.updateRepeatHeading = updateRepeatHeading;
+  }
+
+  // modules/theme-dsfr/src/core/runtime.js
+  function onReady(cb) {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", cb);
+    } else {
+      cb();
+    }
+  }
+  function onQuestionsLoaded(cb) {
+    document.addEventListener("limesurvey:questionsLoaded", cb);
+  }
+  function onPjax(cb) {
+    if (typeof window.$ !== "undefined") {
+      window.$(document).on("pjax:complete", cb);
+    }
   }
 
   // modules/theme-dsfr/src/rte/sanitize-constants.js
@@ -2697,16 +2483,218 @@
     console.log("[DSFR] Contenu RTE nettoyé");
   }
 
-  // modules/theme-dsfr/src/index.js
-  window.DSFRSanitizeRTEContent = sanitizeRTEContent;
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", sanitizeRTEContent);
-  } else {
-    sanitizeRTEContent();
-  }
-  if (typeof window.$ !== "undefined") {
-    window.$(document).on("pjax:complete", function() {
-      setTimeout(sanitizeRTEContent, 100);
+  // modules/theme-dsfr/src/a11y/lazy-images.js
+  var IMAGE_SELECTORS = [
+    ".answer-item img",
+    ".fr-fieldset__content img",
+    ".answertext img",
+    ".fr-checkbox-group img",
+    ".fr-radio-group img",
+    ".question-text-container img",
+    ".ls-question-text img",
+    ".ls-question-help img"
+  ];
+  function enableImageLazyLoading() {
+    const images = document.querySelectorAll(IMAGE_SELECTORS.join(", "));
+    images.forEach(function(img) {
+      if (!img.hasAttribute("loading")) {
+        img.setAttribute("loading", "lazy");
+      }
+      if (!img.hasAttribute("alt") || img.getAttribute("alt").trim() === "") {
+        const altText = img.hasAttribute("title") && img.getAttribute("title").trim() !== "" ? img.getAttribute("title") : "Image de réponse";
+        img.setAttribute("alt", altText);
+      }
+      if (!img.classList.contains("dsfr-enhanced-image")) {
+        img.classList.add("dsfr-enhanced-image");
+      }
     });
   }
+
+  // modules/theme-dsfr/src/a11y/table-accessibility.js
+  function fixTableAccessibility() {
+    const tables = document.querySelectorAll(".ls-answers table, .ls-table-wrapper table, .fr-table table");
+    tables.forEach(function(table) {
+      const tbodyRows = table.querySelectorAll("tbody tr");
+      tbodyRows.forEach(function(tr) {
+        const th = tr.querySelector("th");
+        if (th && !th.hasAttribute("scope")) {
+          th.setAttribute("scope", "row");
+        }
+      });
+      const theadThs = table.querySelectorAll("thead th");
+      theadThs.forEach(function(th) {
+        if (!th.hasAttribute("scope")) {
+          th.setAttribute("scope", "col");
+        }
+      });
+      const hasColHeaders = table.querySelectorAll("thead th[id]").length > 0;
+      const hasRowHeaders = table.querySelectorAll("tbody th[id]").length > 0;
+      if (hasColHeaders && hasRowHeaders) {
+        const colHeaderIds = [];
+        const headerRow = table.querySelector("thead tr:last-child");
+        if (headerRow) {
+          let thIndex = 0;
+          headerRow.querySelectorAll("th").forEach(function(th) {
+            if (th.id) {
+              colHeaderIds[thIndex] = th.id;
+            }
+            thIndex++;
+          });
+        }
+        tbodyRows.forEach(function(tr) {
+          const rowTh = tr.querySelector("th[id]");
+          if (!rowTh) return;
+          const rowHeaderId = rowTh.id;
+          let cellIndex = 0;
+          tr.querySelectorAll("td, th").forEach(function(cell) {
+            if (cell.tagName === "TH") {
+              cellIndex++;
+              return;
+            }
+            if (!cell.hasAttribute("headers") && colHeaderIds[cellIndex]) {
+              cell.setAttribute("headers", rowHeaderId + " " + colHeaderIds[cellIndex]);
+            }
+            cellIndex++;
+          });
+        });
+      }
+      let needsIds = false;
+      const allTheadThs = table.querySelectorAll("thead th");
+      const allTbodyThs = table.querySelectorAll("tbody th");
+      allTheadThs.forEach(function(th) {
+        if (!th.id && th.textContent.trim()) needsIds = true;
+      });
+      allTbodyThs.forEach(function(th) {
+        if (!th.id && th.textContent.trim()) needsIds = true;
+      });
+      if (needsIds) {
+        const tableId = table.id || "tbl-" + Math.random().toString(36).substr(2, 6);
+        const colIds = [];
+        allTheadThs.forEach(function(th, i) {
+          if (!th.id && th.textContent.trim()) {
+            th.id = tableId + "-col-" + i;
+          }
+          colIds[i] = th.id || null;
+        });
+        tbodyRows.forEach(function(tr) {
+          const th = tr.querySelector("th");
+          if (!th) return;
+          if (!th.id && th.textContent.trim()) {
+            const rowName = tr.id || "row-" + Math.random().toString(36).substr(2, 6);
+            th.id = tableId + "-" + rowName;
+          }
+          if (!th.id) return;
+          let cellIndex = 0;
+          tr.querySelectorAll("td, th").forEach(function(cell) {
+            if (cell.tagName === "TH") {
+              cellIndex++;
+              return;
+            }
+            if (!cell.hasAttribute("headers") && colIds[cellIndex]) {
+              cell.setAttribute("headers", th.id + " " + colIds[cellIndex]);
+            }
+            cellIndex++;
+          });
+        });
+      }
+    });
+  }
+
+  // modules/theme-dsfr/src/inputs/numeric-inputmode.js
+  function addInputmodeNumericToNumericFields() {
+    const numericInputs = document.querySelectorAll('input[data-number="1"]');
+    numericInputs.forEach(function(input) {
+      if (input.dataset.inputmodeWired === "1") return;
+      if (!input.hasAttribute("inputmode")) {
+        input.setAttribute("inputmode", "numeric");
+      }
+      input.dataset.inputmodeWired = "1";
+    });
+  }
+
+  // modules/theme-dsfr/src/inputs/listradio-no-answer.js
+  function reorderListRadioNoAnswer() {
+    const questions = document.querySelectorAll(".list-radio.question-container");
+    questions.forEach(function(q) {
+      if (q.dataset.listradioReordered === "1") return;
+      const noAnswerRadio = q.querySelector('input[type="radio"][value=""]');
+      if (!noAnswerRadio) return;
+      const noAnswerRow = noAnswerRadio.closest(".fr-fieldset__element");
+      if (!noAnswerRow) return;
+      const content = noAnswerRow.parentNode;
+      if (content && content.firstElementChild !== noAnswerRow) {
+        content.insertBefore(noAnswerRow, content.firstElementChild);
+      }
+      const allRadios = q.querySelectorAll('input[type="radio"][name="' + noAnswerRadio.name + '"]');
+      const anyChecked = Array.prototype.some.call(allRadios, function(r) {
+        return r.checked;
+      });
+      const otherRadio = q.querySelector('input[type="radio"][id^="SOTH"]');
+      let isIncompleteOther = false;
+      if (otherRadio && otherRadio.checked) {
+        const otherText = q.querySelector('[id$="othertext"]');
+        if (otherText && otherText.value.trim() === "") {
+          isIncompleteOther = true;
+        }
+      }
+      if (!anyChecked || isIncompleteOther) {
+        allRadios.forEach(function(r) {
+          r.checked = false;
+          r.removeAttribute("checked");
+        });
+        noAnswerRadio.checked = true;
+        noAnswerRadio.setAttribute("checked", "checked");
+        const javaInput = q.querySelector('input[type="hidden"][id^="java"]');
+        if (javaInput) {
+          javaInput.value = "";
+        }
+        if (otherRadio) {
+          otherRadio.setAttribute("aria-expanded", "false");
+        }
+      }
+      q.dataset.listradioReordered = "1";
+    });
+  }
+
+  // modules/theme-dsfr/src/validation/described-by.js
+  function extendDescribedByForValidationTips() {
+    const tips = document.querySelectorAll('.ls-questionhelp[id^="vmsg_"]');
+    tips.forEach(function(tip) {
+      if (tip.dataset.describedbyWired === "1") return;
+      const question = tip.closest('[id^="question"]');
+      if (!question) return;
+      const fields = question.querySelectorAll("input, textarea, select");
+      fields.forEach(function(field) {
+        if (field.type === "hidden") return;
+        const existing = field.getAttribute("aria-describedby") || "";
+        const ids = existing.split(/\s+/).filter(Boolean);
+        if (ids.indexOf(tip.id) === -1) {
+          ids.push(tip.id);
+          field.setAttribute("aria-describedby", ids.join(" "));
+        }
+      });
+      tip.dataset.describedbyWired = "1";
+    });
+  }
+
+  // modules/theme-dsfr/src/index.js
+  window.DSFRSanitizeRTEContent = sanitizeRTEContent;
+  onReady(() => {
+    sanitizeRTEContent();
+    enableImageLazyLoading();
+    extendDescribedByForValidationTips();
+    addInputmodeNumericToNumericFields();
+    reorderListRadioNoAnswer();
+    fixTableAccessibility();
+  });
+  onQuestionsLoaded(() => {
+    enableImageLazyLoading();
+    extendDescribedByForValidationTips();
+    addInputmodeNumericToNumericFields();
+    reorderListRadioNoAnswer();
+    setTimeout(fixTableAccessibility, 200);
+  });
+  onPjax(() => {
+    setTimeout(sanitizeRTEContent, 100);
+  });
 })();
