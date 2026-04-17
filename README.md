@@ -52,7 +52,7 @@ Ce thème fait partie de la suite [limesurvey-dsfr-suite](https://github.com/bma
 git clone --recurse-submodules https://github.com/bmatge/limesurvey-dsfr-suite.git
 cd limesurvey-dsfr-suite
 docker compose -f docker-compose.dev.yml up -d
-# http://localhost:8080 (admin / admin)
+# http://localhost:8081 (admin / admin)
 ```
 
 Les fichiers du thème sont montés en direct : toute modification est visible après un refresh.
@@ -84,6 +84,43 @@ Guide complet : [`DOCUMENTATION.md`](DOCUMENTATION.md)
 ## Documentation technique
 
 L'architecture du thème, l'intégration DSFR, la structure des fichiers et le détail des composants sont documentés dans [`DOCUMENTATION.md`](DOCUMENTATION.md).
+
+---
+
+## Développement
+
+Le JavaScript du thème vit dans `src/` sous forme de modules ES, et `scripts/custom.js` est un artefact produit par **esbuild** — ne pas l'éditer à la main. Arborescence :
+
+```
+src/
+├── banner.js          # console.log d'accueil
+├── index.js           # point d'entrée + orchestration des inits
+├── core/              # i18n, dom-utils, runtime (onReady/onQuestionsLoaded/onPjax)
+├── rte/               # sanitize du HTML ajouté par l'éditeur de texte riche
+├── a11y/              # lazy-images, table-accessibility, conditional-aria
+├── validation/        # validation DSFR (errors, mst, aria-invalid, error-summary,
+│                      # numeric, array, validation-messages, required-fields,
+│                      # described-by)
+├── inputs/            # input-on-demand, radio-buttons, numeric-inputmode,
+│                      # listradio-no-answer
+├── dropdowns/         # dropdown-array (linéarisation mobile)
+├── captcha/           # captcha (rechargement + validation DSFR)
+├── ranking/           # ranking accessible (17 fonctions, a11y SortableJS)
+└── relevance/         # relevance-jquery (handlers questions conditionnelles)
+```
+
+Scripts (à exécuter depuis `limesurvey-dsfr-suite/`) :
+
+```bash
+npm run build:theme           # bundle scripts/custom.js une fois
+npm run build:theme:watch     # rebuild à chaque sauvegarde
+npm run build:theme:check     # rebuild + git diff --exit-code (CI)
+npm run dev:purge-cache       # vide le cache assets Yii du container Docker
+npm run test:unit             # Vitest
+npm run test:e2e              # Playwright
+```
+
+**Note ops** : LimeSurvey met `custom.js` en cache dans `/tmp/assets/<hash>/`. Après un rebuild, si le navigateur reçoit toujours l'ancien bundle, lancer `npm run dev:purge-cache`.
 
 ---
 
