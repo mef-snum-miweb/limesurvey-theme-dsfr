@@ -66,50 +66,6 @@
   function isQuestionHidden(el) {
     return el.style.display === "none" || el.classList.contains("ls-irrelevant") || el.classList.contains("ls-hidden") || el.classList.contains("d-none");
   }
-  function shouldSkipElement(element) {
-    if (!element) return true;
-    if (element.classList && (element.classList.contains("required-asterisk") || element.classList.contains("asterisk"))) return true;
-    if (element.tagName === "IMG") return true;
-    if (element.querySelector && element.querySelector("img")) return true;
-    if (element.closest && element.closest('[class*="upload"]')) return true;
-    if (element.closest && element.closest('[class*="file"]')) return true;
-    return false;
-  }
-
-  // modules/theme-dsfr/src/rte/sanitize-constants.js
-  var RTE_STYLE_PROPERTIES = [
-    "color",
-    "background-color",
-    "background",
-    "font-size",
-    "font-family",
-    "font-weight",
-    "font-style",
-    "text-decoration",
-    "text-align",
-    "line-height",
-    "letter-spacing",
-    "text-transform",
-    "text-indent",
-    "margin",
-    "margin-top",
-    "margin-right",
-    "margin-bottom",
-    "margin-left",
-    "padding",
-    "padding-top",
-    "padding-right",
-    "padding-bottom",
-    "padding-left",
-    "border",
-    "border-color",
-    "border-width",
-    "border-style"
-  ];
-  var RTE_CONTENT_SELECTORS = [
-    ".question-title-container",
-    ".question-help-container"
-  ];
 
   // modules/theme-dsfr/src/legacy.js
   console.log(
@@ -2554,64 +2510,6 @@
   })();
   (function() {
     "use strict";
-    function sanitizeElementStyles(element) {
-      if (!element || element.nodeType !== Node.ELEMENT_NODE) return;
-      if (shouldSkipElement(element)) return;
-      if (!element.hasAttribute("style")) return;
-      RTE_STYLE_PROPERTIES.forEach((prop) => {
-        element.style.removeProperty(prop);
-      });
-      if (element.getAttribute("style") === "" || element.style.cssText.trim() === "") {
-        element.removeAttribute("style");
-      }
-    }
-    function removeDeprecatedAttributes(element) {
-      if (!element || element.nodeType !== Node.ELEMENT_NODE) return;
-      if (shouldSkipElement(element)) return;
-      ["align", "bgcolor", "color", "face", "size"].forEach((attr) => {
-        if (element.hasAttribute(attr)) {
-          element.removeAttribute(attr);
-        }
-      });
-    }
-    function sanitizeTree(root) {
-      if (!root) return;
-      sanitizeElementStyles(root);
-      const children = root.querySelectorAll("*");
-      children.forEach((child) => {
-        sanitizeElementStyles(child);
-      });
-    }
-    function sanitizeRTEContent() {
-      if (typeof window.LSThemeOptions === "undefined" || window.LSThemeOptions.sanitize_rte_content !== "on") {
-        return;
-      }
-      console.log("[DSFR] Nettoyage du contenu RTE...");
-      RTE_CONTENT_SELECTORS.forEach((selector) => {
-        try {
-          const elements = document.querySelectorAll(selector);
-          elements.forEach((element) => {
-            sanitizeTree(element);
-          });
-        } catch (e) {
-        }
-      });
-      console.log("[DSFR] Contenu RTE nettoyé");
-    }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", sanitizeRTEContent);
-    } else {
-      sanitizeRTEContent();
-    }
-    if (typeof $ !== "undefined") {
-      $(document).on("pjax:complete", function() {
-        setTimeout(sanitizeRTEContent, 100);
-      });
-    }
-    window.DSFRSanitizeRTEContent = sanitizeRTEContent;
-  })();
-  (function() {
-    "use strict";
     function fixTableAccessibility() {
       var tables = document.querySelectorAll(".ls-answers table, .ls-table-wrapper table, .fr-table table");
       tables.forEach(function(table) {
@@ -2716,5 +2614,99 @@
     window.triggerEmRelevanceSubQuestion = triggerEmRelevanceSubQuestion;
     window.updateLineClass = updateLineClass;
     window.updateRepeatHeading = updateRepeatHeading;
+  }
+
+  // modules/theme-dsfr/src/rte/sanitize-constants.js
+  var RTE_STYLE_PROPERTIES = [
+    "color",
+    "background-color",
+    "background",
+    "font-size",
+    "font-family",
+    "font-weight",
+    "font-style",
+    "text-decoration",
+    "text-align",
+    "line-height",
+    "letter-spacing",
+    "text-transform",
+    "text-indent",
+    "margin",
+    "margin-top",
+    "margin-right",
+    "margin-bottom",
+    "margin-left",
+    "padding",
+    "padding-top",
+    "padding-right",
+    "padding-bottom",
+    "padding-left",
+    "border",
+    "border-color",
+    "border-width",
+    "border-style"
+  ];
+  var RTE_CONTENT_SELECTORS = [
+    ".question-title-container",
+    ".question-help-container"
+  ];
+
+  // modules/theme-dsfr/src/rte/sanitize.js
+  function shouldSkipElement(element) {
+    if (!element) return true;
+    if (element.classList && (element.classList.contains("required-asterisk") || element.classList.contains("asterisk"))) return true;
+    if (element.tagName === "IMG") return true;
+    if (element.querySelector && element.querySelector("img")) return true;
+    if (element.closest && element.closest('[class*="upload"]')) return true;
+    if (element.closest && element.closest('[class*="file"]')) return true;
+    return false;
+  }
+  function sanitizeElementStyles(element) {
+    if (!element || element.nodeType !== Node.ELEMENT_NODE) return;
+    if (shouldSkipElement(element)) return;
+    if (!element.hasAttribute("style")) return;
+    RTE_STYLE_PROPERTIES.forEach((prop) => {
+      element.style.removeProperty(prop);
+    });
+    if (element.getAttribute("style") === "" || element.style.cssText.trim() === "") {
+      element.removeAttribute("style");
+    }
+  }
+  function sanitizeTree(root) {
+    if (!root) return;
+    sanitizeElementStyles(root);
+    const children = root.querySelectorAll("*");
+    children.forEach((child) => {
+      sanitizeElementStyles(child);
+    });
+  }
+  function sanitizeRTEContent() {
+    if (typeof window.LSThemeOptions === "undefined" || window.LSThemeOptions.sanitize_rte_content !== "on") {
+      return;
+    }
+    console.log("[DSFR] Nettoyage du contenu RTE...");
+    RTE_CONTENT_SELECTORS.forEach((selector) => {
+      try {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach((element) => {
+          sanitizeTree(element);
+        });
+      } catch (e) {
+      }
+    });
+    console.log("[DSFR] Contenu RTE nettoyé");
+  }
+
+  // modules/theme-dsfr/src/index.js
+  window.DSFRSanitizeRTEContent = sanitizeRTEContent;
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", sanitizeRTEContent);
+  } else {
+    sanitizeRTEContent();
+  }
+  if (typeof window.$ !== "undefined") {
+    window.$(document).on("pjax:complete", function() {
+      setTimeout(sanitizeRTEContent, 100);
+    });
   }
 })();

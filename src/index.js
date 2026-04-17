@@ -8,3 +8,24 @@
  */
 
 import './legacy.js';
+import { sanitizeRTEContent } from './rte/sanitize.js';
+
+// --- Contrat global : exposition sur window ---
+// window.DSFRSanitizeRTEContent permet à du code externe (autres plugins,
+// callback twig) de redéclencher le nettoyage RTE sans attendre un event.
+window.DSFRSanitizeRTEContent = sanitizeRTEContent;
+
+// --- Orchestration du nettoyage RTE ---
+// Exécution au chargement, puis re-déclenchement sur navigation AJAX (pjax).
+// Sera migré vers un helper `core/runtime.js` en session 3.
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', sanitizeRTEContent);
+} else {
+    sanitizeRTEContent();
+}
+
+if (typeof window.$ !== 'undefined') {
+    window.$(document).on('pjax:complete', function () {
+        setTimeout(sanitizeRTEContent, 100);
+    });
+}

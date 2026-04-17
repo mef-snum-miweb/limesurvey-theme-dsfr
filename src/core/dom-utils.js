@@ -21,27 +21,3 @@ export function isQuestionHidden(el) {
         el.classList.contains('d-none')
     );
 }
-
-/**
- * Détermine si un élément doit être ignoré par le nettoyage de styles
- * inline ajoutés par le RTE (astérisques obligatoires, images, uploads).
- * Utilisé par la chaîne `sanitize*` — sera déplacé dans `src/rte/` lors
- * de l'extraction du module sanitize.
- */
-export function shouldSkipElement(element) {
-    if (!element) return true;
-
-    if (element.classList && (
-        element.classList.contains('required-asterisk') ||
-        element.classList.contains('asterisk')
-    )) return true;
-
-    if (element.tagName === 'IMG') return true;
-
-    if (element.querySelector && element.querySelector('img')) return true;
-
-    if (element.closest && element.closest('[class*="upload"]')) return true;
-    if (element.closest && element.closest('[class*="file"]')) return true;
-
-    return false;
-}

@@ -6,8 +6,7 @@
  */
 
 import { tMandatory, tRanking } from './core/i18n.js';
-import { isValidNumber, isQuestionHidden, shouldSkipElement } from './core/dom-utils.js';
-import { RTE_STYLE_PROPERTIES, RTE_CONTENT_SELECTORS } from './rte/sanitize-constants.js';
+import { isValidNumber, isQuestionHidden } from './core/dom-utils.js';
 
 // Message de bienvenue
 console.log('%c\n' +
@@ -3857,120 +3856,6 @@ function updateRepeatHeading(answers) {
     // Réexécuter après chargement AJAX (pjax)
     $(document).on('pjax:complete', initRelevanceHandlers);
     document.addEventListener('limesurvey:questionsLoaded', initRelevanceHandlers);
-
-})();
-
-/**
- * === Nettoyage du contenu RTE pour conformité DSFR ===
- *
- * Supprime uniquement les styles inline de mise en forme ajoutés par les contributeurs
- * via l'éditeur de texte riche (RTE) de LimeSurvey.
- * Conserve les styles fonctionnels injectés par JavaScript.
- *
- * Cette fonctionnalité est contrôlée par l'option de thème "sanitize_rte_content"
- */
-(function() {
-    'use strict';
-
-    /**
-     * Nettoie les styles de mise en forme d'un élément
-     * Conserve les styles fonctionnels (display, visibility, position, etc.)
-     */
-    function sanitizeElementStyles(element) {
-        if (!element || element.nodeType !== Node.ELEMENT_NODE) return;
-
-        // Vérifier si l'élément doit être exclu
-        if (shouldSkipElement(element)) return;
-
-        // Si pas de style inline, rien à faire
-        if (!element.hasAttribute('style')) return;
-
-        // Supprimer uniquement les propriétés de mise en forme
-        RTE_STYLE_PROPERTIES.forEach(prop => {
-            element.style.removeProperty(prop);
-        });
-
-        // Si le style est maintenant vide, supprimer l'attribut
-        if (element.getAttribute('style') === '' || element.style.cssText.trim() === '') {
-            element.removeAttribute('style');
-        }
-    }
-
-    /**
-     * Supprime les attributs HTML obsolètes de mise en forme
-     */
-    function removeDeprecatedAttributes(element) {
-        if (!element || element.nodeType !== Node.ELEMENT_NODE) return;
-        if (shouldSkipElement(element)) return;
-
-        // Attributs HTML obsolètes de mise en forme
-        ['align', 'bgcolor', 'color', 'face', 'size'].forEach(attr => {
-            if (element.hasAttribute(attr)) {
-                element.removeAttribute(attr);
-            }
-        });
-    }
-
-    /**
-     * Nettoie récursivement un élément et ses enfants
-     * Ne supprime que les styles de mise en forme, conserve les classes et styles fonctionnels
-     */
-    function sanitizeTree(root) {
-        if (!root) return;
-
-        // Nettoyer l'élément racine
-        sanitizeElementStyles(root);
-
-        // Nettoyer tous les enfants
-        const children = root.querySelectorAll('*');
-        children.forEach(child => {
-            sanitizeElementStyles(child);
-        });
-    }
-
-    /**
-     * Exécute le nettoyage sur tout le contenu RTE de la page
-     */
-    function sanitizeRTEContent() {
-        // Vérifier si l'option est activée via une variable globale
-        // Cette variable sera définie dans le template Twig
-        if (typeof window.LSThemeOptions === 'undefined' ||
-            window.LSThemeOptions.sanitize_rte_content !== 'on') {
-            return;
-        }
-
-        console.log('[DSFR] Nettoyage du contenu RTE...');
-
-        RTE_CONTENT_SELECTORS.forEach(selector => {
-            try {
-                const elements = document.querySelectorAll(selector);
-                elements.forEach(element => {
-                    sanitizeTree(element);
-                });
-            } catch (e) {
-                // Ignorer les erreurs de sélecteur invalide
-            }
-        });
-
-        console.log('[DSFR] Contenu RTE nettoyé');
-    }
-
-    // Exécuter au chargement du DOM
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', sanitizeRTEContent);
-    } else {
-        sanitizeRTEContent();
-    }
-
-    // Réexécuter après navigation AJAX (pjax)
-    if (typeof $ !== 'undefined') {
-        $(document).on('pjax:complete', function() {
-            setTimeout(sanitizeRTEContent, 100);
-        });
-    }
-
-    // Exposer la fonction pour usage externe si nécessaire
-    window.DSFRSanitizeRTEContent = sanitizeRTEContent;
 
 })();
 
