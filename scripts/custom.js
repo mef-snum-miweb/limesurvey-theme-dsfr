@@ -419,685 +419,6 @@
       initCaptchaReload();
       initCaptchaValidation();
     });
-    function initNumericValidation() {
-      const numericInputs = document.querySelectorAll('input[data-number="1"]');
-      numericInputs.forEach(function(input) {
-        if (input.dataset.numericValidationAttached) {
-          return;
-        }
-        input.dataset.numericValidationAttached = "true";
-        input.addEventListener("input", function() {
-          const value = this.value.trim();
-          const question = this.closest(".question-container");
-          const inputGroup = this.closest(".fr-input-group");
-          if (!question || !inputGroup) return;
-          const messagesGroup = inputGroup.querySelector(".fr-messages-group");
-          if (!messagesGroup) return;
-          if (value === "") {
-            const errorMessage = messagesGroup.querySelector(".fr-message--error");
-            if (errorMessage) {
-              errorMessage.remove();
-            }
-            const validMessage = messagesGroup.querySelector(".fr-message--valid");
-            if (validMessage) {
-              validMessage.remove();
-            }
-            inputGroup.classList.remove("fr-input-group--error", "fr-input-group--valid");
-            return;
-          }
-          const isValidNumber2 = /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
-          if (!isValidNumber2) {
-            question.classList.add("input-error");
-            inputGroup.classList.add("fr-input-group--error");
-            inputGroup.classList.remove("fr-input-group--valid");
-            this.classList.add("fr-input--error");
-            this.classList.remove("fr-input--valid");
-            const validMessage = messagesGroup.querySelector(".fr-message--valid");
-            if (validMessage) {
-              validMessage.remove();
-            }
-            let errorMessage = messagesGroup.querySelector(".fr-message--error");
-            if (!errorMessage) {
-              errorMessage = document.createElement("p");
-              errorMessage.className = "fr-message fr-message--error";
-              errorMessage.id = messagesGroup.id + "-error";
-              errorMessage.setAttribute("role", "alert");
-              messagesGroup.appendChild(errorMessage);
-            }
-            errorMessage.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
-          } else {
-            question.classList.remove("input-error");
-            inputGroup.classList.remove("fr-input-group--error");
-            this.classList.remove("fr-input--error");
-            const errorMessage = messagesGroup.querySelector(".fr-message--error");
-            if (errorMessage) {
-              errorMessage.remove();
-              question.dataset.hadError = "true";
-            }
-            if (question.dataset.hadError === "true") {
-              question.classList.add("input-valid");
-              inputGroup.classList.add("fr-input-group--valid");
-              this.classList.add("fr-input--valid");
-              let validMessage = messagesGroup.querySelector(".fr-message--valid");
-              if (!validMessage) {
-                validMessage = document.createElement("p");
-                validMessage.className = "fr-message fr-message--valid";
-                validMessage.id = messagesGroup.id + "-valid";
-                messagesGroup.appendChild(validMessage);
-              }
-              validMessage.textContent = "Merci d'avoir répondu";
-            }
-            setTimeout(updateErrorSummary, 50);
-          }
-        });
-      });
-    }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", initNumericValidation);
-    } else {
-      initNumericValidation();
-    }
-    document.addEventListener("limesurvey:questionsLoaded", initNumericValidation);
-    function handleArrayValidation2() {
-      var arrayQuestions = document.querySelectorAll('.question-container.input-error[class*="array-"]');
-      arrayQuestions.forEach(function(question) {
-        if (question.dataset.arrayValidationAttached) {
-          return;
-        }
-        question.dataset.arrayValidationAttached = "true";
-        var legacyMessages = question.querySelectorAll(
-          ".ls-question-mandatory, .ls-question-mandatory-initial, .ls-question-mandatory-array, .ls-question-mandatory-arraycolumn"
-        );
-        legacyMessages.forEach(function(msg) {
-          msg.style.display = "none";
-        });
-        var validContainer = question.querySelector(".question-valid-container");
-        if (validContainer) {
-          validContainer.style.display = "none";
-        }
-        var allInputs = question.querySelectorAll('table input[type="text"], table textarea, table select');
-        allInputs.forEach(function(input) {
-          input.classList.remove("fr-input--error", "error");
-          var cell = input.closest(".fr-input-group");
-          if (cell) {
-            cell.classList.remove("fr-input-group--error");
-          }
-        });
-        var errorRows = question.querySelectorAll("tr.ls-mandatory-error");
-        errorRows.forEach(function(row) {
-          row.classList.remove("ls-mandatory-error");
-          var th = row.querySelector("th.fr-text--error");
-          if (th) th.classList.remove("fr-text--error");
-        });
-        var errorCells = question.querySelectorAll("td.has-error");
-        errorCells.forEach(function(td) {
-          td.classList.remove("has-error");
-        });
-        var counterContainer = document.createElement("div");
-        counterContainer.className = "fr-messages-group fr-mt-2w";
-        counterContainer.setAttribute("aria-live", "polite");
-        counterContainer.id = "mandatory-counter-" + (question.id || Math.random().toString(36).substring(2, 11));
-        var counterMessage = document.createElement("p");
-        counterMessage.className = "fr-message fr-message--error";
-        counterMessage.setAttribute("role", "status");
-        counterContainer.appendChild(counterMessage);
-        var tableWrapper = question.querySelector(".fr-table");
-        if (tableWrapper) {
-          tableWrapper.parentNode.insertBefore(counterContainer, tableWrapper.nextSibling);
-        }
-        function updateCounter() {
-          var totalFields = allInputs.length;
-          var emptyCount = 0;
-          allInputs.forEach(function(input) {
-            var value = input.value ? input.value.trim() : "";
-            var inputGroup = input.closest(".fr-input-group");
-            if (value === "") {
-              emptyCount++;
-              input.classList.remove("fr-input--error", "fr-input--valid");
-              if (inputGroup) {
-                inputGroup.classList.remove("fr-input-group--error", "fr-input-group--valid");
-              }
-            } else {
-              var isNumberOnly = input.dataset.number === "1";
-              var isInvalidNumber = isNumberOnly && !isValidNumber(value);
-              if (isInvalidNumber) {
-                emptyCount++;
-                input.classList.add("fr-input--error");
-                input.classList.remove("fr-input--valid");
-                if (inputGroup) {
-                  inputGroup.classList.add("fr-input-group--error");
-                  inputGroup.classList.remove("fr-input-group--valid");
-                }
-              } else {
-                input.classList.remove("fr-input--error");
-                input.classList.add("fr-input--valid");
-                if (inputGroup) {
-                  inputGroup.classList.remove("fr-input-group--error");
-                  inputGroup.classList.add("fr-input-group--valid");
-                }
-              }
-            }
-          });
-          if (emptyCount === 0) {
-            counterContainer.remove();
-            question.classList.remove("input-error", "fr-input-group--error");
-            question.classList.add("input-valid");
-            if (typeof updateErrorSummary === "function") {
-              setTimeout(updateErrorSummary, 50);
-            }
-          } else {
-            question.classList.add("input-error");
-            question.classList.remove("input-valid");
-            if (emptyCount === totalFields) {
-              counterMessage.textContent = tMandatory("fields_all_required", null, totalFields);
-            } else if (emptyCount === 1) {
-              counterMessage.textContent = tMandatory("fields_remaining_singular");
-            } else {
-              counterMessage.textContent = tMandatory("fields_remaining_plural", emptyCount, totalFields);
-            }
-            if (typeof updateErrorSummary === "function") {
-              setTimeout(updateErrorSummary, 50);
-            }
-          }
-        }
-        updateCounter();
-        allInputs.forEach(function(input) {
-          if (input.dataset.arrayInputListener) return;
-          input.dataset.arrayInputListener = "true";
-          input.addEventListener("input", updateCounter);
-        });
-      });
-    }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", handleArrayValidation2);
-    } else {
-      handleArrayValidation2();
-    }
-    document.addEventListener("limesurvey:questionsLoaded", handleArrayValidation2);
-    function handleNumericMultiValidation() {
-      const numericMultiQuestions = document.querySelectorAll(".question-container.numeric-multi");
-      numericMultiQuestions.forEach(function(question) {
-        if (question.dataset.dsfrNumericMultiInit) {
-          return;
-        }
-        question.dataset.dsfrNumericMultiInit = "true";
-        const initialErrorMessage = question.querySelector(".ls-question-mandatory-initial");
-        if (initialErrorMessage) {
-          initialErrorMessage.style.display = "none";
-        }
-        const arrayErrorMessage = question.querySelector(".ls-question-mandatory-array");
-        if (arrayErrorMessage && !arrayErrorMessage.classList.contains("fr-message")) {
-          const dsfrMessage = document.createElement("p");
-          dsfrMessage.className = "fr-message fr-message--error";
-          dsfrMessage.textContent = arrayErrorMessage.textContent.trim().replace(/\s+/g, " ");
-          dsfrMessage.setAttribute("role", "alert");
-          arrayErrorMessage.style.display = "none";
-          arrayErrorMessage.parentNode.insertBefore(dsfrMessage, arrayErrorMessage.nextSibling);
-        }
-        const numericInputs = question.querySelectorAll('input.numeric[data-number="1"]');
-        numericInputs.forEach(function(input) {
-          const listItem = input.closest("li.question-item");
-          if (!listItem) return;
-          let inputGroup = input.closest(".fr-input-group");
-          if (!inputGroup) {
-            inputGroup = document.createElement("div");
-            inputGroup.className = "fr-input-group";
-            const parent = input.parentNode;
-            parent.insertBefore(inputGroup, input);
-            inputGroup.appendChild(input);
-            const messagesGroup = document.createElement("div");
-            messagesGroup.className = "fr-messages-group";
-            messagesGroup.id = input.id + "-messages";
-            messagesGroup.setAttribute("aria-live", "polite");
-            inputGroup.appendChild(messagesGroup);
-            input.setAttribute("aria-describedby", messagesGroup.id);
-          }
-          if (listItem.classList.contains("ls-error-mandatory") || listItem.classList.contains("has-error")) {
-            input.classList.add("fr-input--error");
-            if (inputGroup) {
-              inputGroup.classList.add("fr-input-group--error");
-            }
-            const messagesGroup = inputGroup.querySelector(".fr-messages-group");
-            if (messagesGroup && (!input.value || input.value.trim() === "")) {
-              let errorMsg = messagesGroup.querySelector(".fr-message--error");
-              if (!errorMsg) {
-                errorMsg = document.createElement("p");
-                errorMsg.className = "fr-message fr-message--error";
-                errorMsg.setAttribute("role", "alert");
-                messagesGroup.appendChild(errorMsg);
-              }
-              errorMsg.textContent = "Ce champ est obligatoire";
-            }
-            const lsEmError = listItem.querySelector(".ls-em-error");
-            if (lsEmError) {
-              lsEmError.style.display = "none";
-            }
-          }
-          if (input.dataset.numericMultiListenerAttached) {
-            return;
-          }
-          input.dataset.numericMultiListenerAttached = "true";
-          input.addEventListener("input", function() {
-            const value = this.value.trim();
-            const messagesGroup = inputGroup.querySelector(".fr-messages-group");
-            const lsEmError = listItem.querySelector(".ls-em-error");
-            if (lsEmError) {
-              lsEmError.style.display = "none";
-            }
-            if (value === "") {
-              this.classList.add("fr-input--error");
-              this.classList.remove("fr-input--valid");
-              inputGroup.classList.add("fr-input-group--error");
-              inputGroup.classList.remove("fr-input-group--valid");
-              const errorMsg = messagesGroup.querySelector(".fr-message--error");
-              if (errorMsg) errorMsg.remove();
-              const validMsg = messagesGroup.querySelector(".fr-message--valid");
-              if (validMsg) validMsg.remove();
-              return;
-            }
-            const isValidNumber2 = /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
-            if (!isValidNumber2) {
-              this.classList.add("fr-input--error");
-              this.classList.remove("fr-input--valid");
-              inputGroup.classList.add("fr-input-group--error");
-              inputGroup.classList.remove("fr-input-group--valid");
-              const validMsg = messagesGroup.querySelector(".fr-message--valid");
-              if (validMsg) validMsg.remove();
-              let errorMsg = messagesGroup.querySelector(".fr-message--error");
-              if (!errorMsg) {
-                errorMsg = document.createElement("p");
-                errorMsg.className = "fr-message fr-message--error";
-                errorMsg.setAttribute("role", "alert");
-                messagesGroup.appendChild(errorMsg);
-              }
-              errorMsg.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
-              question.dataset.hadError = "true";
-            } else {
-              this.classList.remove("fr-input--error");
-              inputGroup.classList.remove("fr-input-group--error");
-              const errorMsg = messagesGroup.querySelector(".fr-message--error");
-              if (errorMsg) {
-                errorMsg.remove();
-                question.dataset.hadError = "true";
-              }
-              var hasSumConstraint = !!question.querySelector(".dynamic-total");
-              if (!hasSumConstraint && question.dataset.hadError === "true") {
-                this.classList.add("fr-input--valid");
-                inputGroup.classList.add("fr-input-group--valid");
-                let validMsg = messagesGroup.querySelector(".fr-message--valid");
-                if (!validMsg) {
-                  validMsg = document.createElement("p");
-                  validMsg.className = "fr-message fr-message--valid";
-                  messagesGroup.appendChild(validMsg);
-                }
-                validMsg.textContent = "Merci d'avoir répondu";
-              }
-            }
-            setTimeout(function() {
-              var allInputs = question.querySelectorAll('input.numeric[data-number="1"]');
-              var allFormatValid = true;
-              var allFilled = true;
-              allInputs.forEach(function(inp) {
-                var val = inp.value ? inp.value.trim() : "";
-                if (val === "") {
-                  allFilled = false;
-                  allFormatValid = false;
-                } else {
-                  var isValid = /^-?\d+([.,]\d*)?$/.test(val) || /^-?\d*[.,]\d+$/.test(val);
-                  if (!isValid) allFormatValid = false;
-                }
-              });
-              var totalEl = question.querySelector(".dynamic-total");
-              var hasSumConstraint2 = false;
-              var isSumValid = true;
-              if (totalEl) {
-                var qId = totalEl.id ? totalEl.id.replace("totalvalue_", "") : null;
-                var sumRangeMsg = qId ? document.getElementById("vmsg_" + qId + "_sum_range-dsfr") : null;
-                if (sumRangeMsg) {
-                  hasSumConstraint2 = true;
-                  var rangeMatch = sumRangeMsg.textContent.match(/(\d+)\s+.+\s+(\d+)/);
-                  if (rangeMatch) {
-                    var minSum = parseFloat(rangeMatch[1]);
-                    var maxSum = parseFloat(rangeMatch[2]);
-                    var currentSum = 0;
-                    allInputs.forEach(function(inp) {
-                      var val = inp.value ? inp.value.trim().replace(",", ".") : "";
-                      if (val !== "" && !isNaN(parseFloat(val))) {
-                        currentSum += parseFloat(val);
-                      }
-                    });
-                    isSumValid = currentSum >= minSum && currentSum <= maxSum;
-                  }
-                }
-              }
-              if (allFormatValid && allFilled && isSumValid) {
-                question.classList.remove("input-error", "fr-input-group--error");
-                question.classList.add("input-valid");
-                if (question.dataset.hadError === "true") {
-                  allInputs.forEach(function(inp) {
-                    var grp = inp.closest(".fr-input-group");
-                    if (grp) {
-                      grp.classList.remove("fr-input-group--error");
-                      grp.classList.add("fr-input-group--valid");
-                      inp.classList.remove("fr-input--error");
-                      inp.classList.add("fr-input--valid");
-                      var msgs = grp.querySelector(".fr-messages-group");
-                      if (msgs) {
-                        var vMsg = msgs.querySelector(".fr-message--valid");
-                        if (!vMsg) {
-                          vMsg = document.createElement("p");
-                          vMsg.className = "fr-message fr-message--valid";
-                          msgs.appendChild(vMsg);
-                        }
-                        vMsg.textContent = "Merci d'avoir répondu";
-                      }
-                    }
-                  });
-                }
-                var dsfrErrorMsg = question.querySelector(".question-valid-container .fr-message--error");
-                if (dsfrErrorMsg) dsfrErrorMsg.remove();
-                if (typeof updateErrorSummary === "function") {
-                  setTimeout(updateErrorSummary, 50);
-                }
-              } else if (allFormatValid && hasSumConstraint2 && !isSumValid) {
-                question.classList.remove("input-valid");
-                question.classList.add("input-error");
-                allInputs.forEach(function(inp) {
-                  var grp = inp.closest(".fr-input-group");
-                  if (grp) {
-                    grp.classList.remove("fr-input-group--error", "fr-input-group--valid");
-                    inp.classList.remove("fr-input--error", "fr-input--valid");
-                    var msgs = grp.querySelector(".fr-messages-group");
-                    if (msgs) {
-                      var vMsg = msgs.querySelector(".fr-message--valid");
-                      if (vMsg) vMsg.remove();
-                      var eMsg = msgs.querySelector(".fr-message--error");
-                      if (eMsg) eMsg.remove();
-                    }
-                  }
-                });
-                question.dataset.hadError = "true";
-              } else if (!allFormatValid) {
-                question.classList.add("input-error");
-                question.classList.remove("input-valid");
-              }
-            }, 200);
-          });
-        });
-      });
-    }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", handleNumericMultiValidation);
-    } else {
-      handleNumericMultiValidation();
-    }
-    document.addEventListener("limesurvey:questionsLoaded", handleNumericMultiValidation);
-    function observeNumericMultiSumValidation() {
-      var numericMultiQuestions = document.querySelectorAll(".question-container.numeric-multi");
-      console.log("[DSFR SumValidation] Questions numeric-multi trouvées:", numericMultiQuestions.length);
-      numericMultiQuestions.forEach(function(question) {
-        var totalEl = question.querySelector(".dynamic-total");
-        console.log("[DSFR SumValidation] totalEl:", totalEl ? totalEl.id : "NON TROUVÉ");
-        if (!totalEl) return;
-        var qId = totalEl.id ? totalEl.id.replace("totalvalue_", "") : null;
-        console.log("[DSFR SumValidation] qId:", qId);
-        if (!qId) return;
-        var sumRangeMsgId = "vmsg_" + qId + "_sum_range-dsfr";
-        var sumRangeMsg = document.getElementById(sumRangeMsgId);
-        console.log("[DSFR SumValidation] sumRangeMsg (" + sumRangeMsgId + "):", sumRangeMsg ? sumRangeMsg.textContent : "NON TROUVÉ");
-        if (!sumRangeMsg) {
-          sumRangeMsg = document.getElementById("vmsg_" + qId + "_sum_range");
-          console.log("[DSFR SumValidation] fallback vmsg_" + qId + "_sum_range:", sumRangeMsg ? sumRangeMsg.textContent : "NON TROUVÉ");
-        }
-        if (!sumRangeMsg) return;
-        if (totalEl.dataset.dsfrSumObserver) return;
-        totalEl.dataset.dsfrSumObserver = "true";
-        var rangeMatch = sumRangeMsg.textContent.match(/(\d+)\s+.+\s+(\d+)/);
-        console.log("[DSFR SumValidation] rangeMatch:", rangeMatch);
-        if (!rangeMatch) return;
-        var minSum = parseFloat(rangeMatch[1]);
-        var maxSum = parseFloat(rangeMatch[2]);
-        var totalRow = totalEl.closest(".ls-group-total");
-        function checkSumAndUpdate() {
-          var allInputs2 = question.querySelectorAll('input.numeric[data-number="1"]');
-          var currentSum = 0;
-          var anyFilled = false;
-          allInputs2.forEach(function(inp) {
-            var val = inp.value ? inp.value.trim().replace(",", ".") : "";
-            if (val !== "" && !isNaN(parseFloat(val))) {
-              currentSum += parseFloat(val);
-              anyFilled = true;
-            }
-          });
-          var isSumError = anyFilled && (currentSum < minSum || currentSum > maxSum);
-          if (isSumError) {
-            sumRangeMsg.classList.remove("fr-message--info", "fr-message--valid");
-            sumRangeMsg.classList.add("fr-message--error");
-            sumRangeMsg.setAttribute("role", "alert");
-            if (totalRow) {
-              var totalErrMsg = totalRow.querySelector(".sum-range-error");
-              if (!totalErrMsg) {
-                totalErrMsg = document.createElement("p");
-                totalErrMsg.className = "fr-message fr-message--error sum-range-error";
-                totalErrMsg.setAttribute("role", "alert");
-                totalErrMsg.textContent = sumRangeMsg.textContent;
-                var totalInputGroup = totalRow.querySelector(".ls-input-group");
-                if (totalInputGroup) {
-                  totalInputGroup.appendChild(totalErrMsg);
-                } else {
-                  totalRow.appendChild(totalErrMsg);
-                }
-              }
-            }
-            question.classList.remove("input-valid");
-            question.classList.add("input-error");
-            allInputs2.forEach(function(inp) {
-              var grp = inp.closest(".fr-input-group");
-              if (grp) {
-                grp.classList.remove("fr-input-group--valid");
-                inp.classList.remove("fr-input--valid");
-                var msgs = grp.querySelector(".fr-messages-group");
-                if (msgs) {
-                  var vMsg = msgs.querySelector(".fr-message--valid");
-                  if (vMsg) vMsg.remove();
-                }
-              }
-            });
-            question.dataset.hadError = "true";
-          } else {
-            sumRangeMsg.classList.remove("fr-message--error");
-            sumRangeMsg.classList.add("fr-message--info");
-            sumRangeMsg.removeAttribute("role");
-            if (totalRow) {
-              var totalErrMsg = totalRow.querySelector(".sum-range-error");
-              if (totalErrMsg) totalErrMsg.remove();
-            }
-          }
-        }
-        checkSumAndUpdate();
-        var allInputs = question.querySelectorAll('input.numeric[data-number="1"]');
-        allInputs.forEach(function(inp) {
-          inp.addEventListener("input", function() {
-            setTimeout(checkSumAndUpdate, 250);
-          });
-        });
-      });
-    }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", function() {
-        setTimeout(observeNumericMultiSumValidation, 200);
-      });
-    } else {
-      setTimeout(observeNumericMultiSumValidation, 200);
-    }
-    document.addEventListener("limesurvey:questionsLoaded", function() {
-      setTimeout(observeNumericMultiSumValidation, 200);
-    });
-    function handleSimpleQuestionValidation() {
-      const simpleQuestions = document.querySelectorAll(".question-container.input-error");
-      simpleQuestions.forEach(function(question) {
-        if (question.classList.contains("numeric-multi") || question.classList.contains("multiple-short-txt") || question.dataset.simpleValidationAttached || question.classList.toString().match(/array-/)) {
-          return;
-        }
-        question.dataset.simpleValidationAttached = "true";
-        const allLsMessages = question.querySelectorAll(".ls-question-mandatory, .ls-question-mandatory-initial, .ls-question-mandatory-other");
-        allLsMessages.forEach(function(msg) {
-          msg.style.display = "none";
-        });
-        const radios = question.querySelectorAll('input[type="radio"]');
-        const checkboxes = question.querySelectorAll('input[type="checkbox"]');
-        const selects = question.querySelectorAll("select");
-        const dateInputs = question.querySelectorAll('input[type="date"], input[type="text"].date');
-        function markQuestionValid() {
-          question.classList.remove("input-error", "fr-input-group--error");
-          question.classList.add("input-valid");
-          const allErrors = question.querySelectorAll(".ls-question-mandatory, .ls-question-mandatory-initial, .ls-question-mandatory-other");
-          allErrors.forEach(function(error) {
-            error.style.display = "none";
-          });
-          const dsfrError = question.querySelector(".fr-message--error");
-          if (dsfrError) {
-            dsfrError.remove();
-          }
-          if (typeof updateErrorSummary === "function") {
-            setTimeout(updateErrorSummary, 50);
-          }
-        }
-        radios.forEach(function(radio) {
-          radio.addEventListener("change", function() {
-            if (this.checked) {
-              markQuestionValid();
-            }
-          });
-        });
-        checkboxes.forEach(function(checkbox) {
-          checkbox.addEventListener("change", function() {
-            const anyChecked = Array.from(checkboxes).some((cb) => cb.checked);
-            if (anyChecked) {
-              markQuestionValid();
-            }
-          });
-        });
-        selects.forEach(function(select) {
-          select.addEventListener("change", function() {
-            if (this.value && this.value !== "" && this.value !== "-oth-") {
-              markQuestionValid();
-            }
-          });
-        });
-        dateInputs.forEach(function(dateInput) {
-          dateInput.addEventListener("change", function() {
-            if (this.value && this.value.trim() !== "") {
-              markQuestionValid();
-            }
-          });
-        });
-      });
-    }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", handleSimpleQuestionValidation);
-    } else {
-      handleSimpleQuestionValidation();
-    }
-    document.addEventListener("limesurvey:questionsLoaded", handleSimpleQuestionValidation);
-    function transformValidationMessages() {
-      const emMessages = document.querySelectorAll(".ls-question-message");
-      emMessages.forEach((message) => {
-        if (message.classList.contains("fr-message")) {
-          return;
-        }
-        let messageType = "info";
-        if (message.classList.contains("ls-em-error")) {
-          messageType = "error";
-        } else if (message.classList.contains("ls-em-warning")) {
-          messageType = "warning";
-        } else if (message.classList.contains("ls-em-success") || message.classList.contains("ls-em-tip")) {
-          messageType = "info";
-        }
-        const dsfrMessage = document.createElement("p");
-        dsfrMessage.className = `fr-message fr-message--${messageType}`;
-        dsfrMessage.textContent = message.textContent.trim();
-        dsfrMessage.id = message.id ? `${message.id}-dsfr` : "";
-        message.replaceWith(dsfrMessage);
-      });
-    }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", function() {
-        transformValidationMessages();
-      });
-    } else {
-      transformValidationMessages();
-    }
-    setTimeout(function() {
-      transformValidationMessages();
-    }, 100);
-    document.addEventListener("limesurvey:questionsLoaded", function() {
-      transformValidationMessages();
-    });
-    function fixDropdownArrayInlineStyles() {
-      if (window.innerWidth >= 768) {
-        return;
-      }
-      const dropdownArrays = document.querySelectorAll("table.dropdown-array");
-      dropdownArrays.forEach((table) => {
-        const cells = table.querySelectorAll('tbody tr td[style*="display"]');
-        cells.forEach((cell) => {
-          cell.removeAttribute("style");
-        });
-      });
-    }
-    let styleObserver = null;
-    let resizeTimer;
-    function setupStyleObserver() {
-      if (window.innerWidth >= 768) {
-        if (styleObserver) {
-          styleObserver.disconnect();
-          styleObserver = null;
-        }
-        return;
-      }
-      if (styleObserver) {
-        return;
-      }
-      styleObserver = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-          if (mutation.type === "attributes" && mutation.attributeName === "style") {
-            const target = mutation.target;
-            if (target.tagName === "TD" && target.closest("table.dropdown-array")) {
-              target.removeAttribute("style");
-            }
-          }
-        });
-      });
-      const dropdownArrays = document.querySelectorAll("table.dropdown-array");
-      dropdownArrays.forEach(function(table) {
-        styleObserver.observe(table, {
-          attributes: true,
-          attributeFilter: ["style"],
-          subtree: true
-        });
-      });
-    }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", function() {
-        fixDropdownArrayInlineStyles();
-        setupStyleObserver();
-      });
-    } else {
-      fixDropdownArrayInlineStyles();
-      setupStyleObserver();
-    }
-    window.addEventListener("resize", function() {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(function() {
-        fixDropdownArrayInlineStyles();
-        setupStyleObserver();
-      }, 250);
-    });
-    document.addEventListener("limesurvey:questionsLoaded", function() {
-      fixDropdownArrayInlineStyles();
-      setupStyleObserver();
-    });
     function extractQuestionCodes(expression) {
       if (!expression) return [];
       const questionCodes = [];
@@ -2651,6 +1972,625 @@
     });
   }
 
+  // modules/theme-dsfr/src/validation/numeric-validation.js
+  function initNumericValidation() {
+    const numericInputs = document.querySelectorAll('input[data-number="1"]');
+    numericInputs.forEach(function(input) {
+      if (input.dataset.numericValidationAttached) {
+        return;
+      }
+      input.dataset.numericValidationAttached = "true";
+      input.addEventListener("input", function() {
+        const value = this.value.trim();
+        const question = this.closest(".question-container");
+        const inputGroup = this.closest(".fr-input-group");
+        if (!question || !inputGroup) return;
+        const messagesGroup = inputGroup.querySelector(".fr-messages-group");
+        if (!messagesGroup) return;
+        if (value === "") {
+          const errorMessage = messagesGroup.querySelector(".fr-message--error");
+          if (errorMessage) {
+            errorMessage.remove();
+          }
+          const validMessage = messagesGroup.querySelector(".fr-message--valid");
+          if (validMessage) {
+            validMessage.remove();
+          }
+          inputGroup.classList.remove("fr-input-group--error", "fr-input-group--valid");
+          return;
+        }
+        const isValidNumber2 = /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
+        if (!isValidNumber2) {
+          question.classList.add("input-error");
+          inputGroup.classList.add("fr-input-group--error");
+          inputGroup.classList.remove("fr-input-group--valid");
+          this.classList.add("fr-input--error");
+          this.classList.remove("fr-input--valid");
+          const validMessage = messagesGroup.querySelector(".fr-message--valid");
+          if (validMessage) {
+            validMessage.remove();
+          }
+          let errorMessage = messagesGroup.querySelector(".fr-message--error");
+          if (!errorMessage) {
+            errorMessage = document.createElement("p");
+            errorMessage.className = "fr-message fr-message--error";
+            errorMessage.id = messagesGroup.id + "-error";
+            errorMessage.setAttribute("role", "alert");
+            messagesGroup.appendChild(errorMessage);
+          }
+          errorMessage.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
+        } else {
+          question.classList.remove("input-error");
+          inputGroup.classList.remove("fr-input-group--error");
+          this.classList.remove("fr-input--error");
+          const errorMessage = messagesGroup.querySelector(".fr-message--error");
+          if (errorMessage) {
+            errorMessage.remove();
+            question.dataset.hadError = "true";
+          }
+          if (question.dataset.hadError === "true") {
+            question.classList.add("input-valid");
+            inputGroup.classList.add("fr-input-group--valid");
+            this.classList.add("fr-input--valid");
+            let validMessage = messagesGroup.querySelector(".fr-message--valid");
+            if (!validMessage) {
+              validMessage = document.createElement("p");
+              validMessage.className = "fr-message fr-message--valid";
+              validMessage.id = messagesGroup.id + "-valid";
+              messagesGroup.appendChild(validMessage);
+            }
+            validMessage.textContent = "Merci d'avoir répondu";
+          }
+          setTimeout(updateErrorSummary, 50);
+        }
+      });
+    });
+  }
+  function handleNumericMultiValidation() {
+    const numericMultiQuestions = document.querySelectorAll(".question-container.numeric-multi");
+    numericMultiQuestions.forEach(function(question) {
+      if (question.dataset.dsfrNumericMultiInit) {
+        return;
+      }
+      question.dataset.dsfrNumericMultiInit = "true";
+      const initialErrorMessage = question.querySelector(".ls-question-mandatory-initial");
+      if (initialErrorMessage) {
+        initialErrorMessage.style.display = "none";
+      }
+      const arrayErrorMessage = question.querySelector(".ls-question-mandatory-array");
+      if (arrayErrorMessage && !arrayErrorMessage.classList.contains("fr-message")) {
+        const dsfrMessage = document.createElement("p");
+        dsfrMessage.className = "fr-message fr-message--error";
+        dsfrMessage.textContent = arrayErrorMessage.textContent.trim().replace(/\s+/g, " ");
+        dsfrMessage.setAttribute("role", "alert");
+        arrayErrorMessage.style.display = "none";
+        arrayErrorMessage.parentNode.insertBefore(dsfrMessage, arrayErrorMessage.nextSibling);
+      }
+      const numericInputs = question.querySelectorAll('input.numeric[data-number="1"]');
+      numericInputs.forEach(function(input) {
+        const listItem = input.closest("li.question-item");
+        if (!listItem) return;
+        let inputGroup = input.closest(".fr-input-group");
+        if (!inputGroup) {
+          inputGroup = document.createElement("div");
+          inputGroup.className = "fr-input-group";
+          const parent = input.parentNode;
+          parent.insertBefore(inputGroup, input);
+          inputGroup.appendChild(input);
+          const messagesGroup = document.createElement("div");
+          messagesGroup.className = "fr-messages-group";
+          messagesGroup.id = input.id + "-messages";
+          messagesGroup.setAttribute("aria-live", "polite");
+          inputGroup.appendChild(messagesGroup);
+          input.setAttribute("aria-describedby", messagesGroup.id);
+        }
+        if (listItem.classList.contains("ls-error-mandatory") || listItem.classList.contains("has-error")) {
+          input.classList.add("fr-input--error");
+          if (inputGroup) {
+            inputGroup.classList.add("fr-input-group--error");
+          }
+          const messagesGroup = inputGroup.querySelector(".fr-messages-group");
+          if (messagesGroup && (!input.value || input.value.trim() === "")) {
+            let errorMsg = messagesGroup.querySelector(".fr-message--error");
+            if (!errorMsg) {
+              errorMsg = document.createElement("p");
+              errorMsg.className = "fr-message fr-message--error";
+              errorMsg.setAttribute("role", "alert");
+              messagesGroup.appendChild(errorMsg);
+            }
+            errorMsg.textContent = "Ce champ est obligatoire";
+          }
+          const lsEmError = listItem.querySelector(".ls-em-error");
+          if (lsEmError) {
+            lsEmError.style.display = "none";
+          }
+        }
+        if (input.dataset.numericMultiListenerAttached) {
+          return;
+        }
+        input.dataset.numericMultiListenerAttached = "true";
+        input.addEventListener("input", function() {
+          const value = this.value.trim();
+          const messagesGroup = inputGroup.querySelector(".fr-messages-group");
+          const lsEmError = listItem.querySelector(".ls-em-error");
+          if (lsEmError) {
+            lsEmError.style.display = "none";
+          }
+          if (value === "") {
+            this.classList.add("fr-input--error");
+            this.classList.remove("fr-input--valid");
+            inputGroup.classList.add("fr-input-group--error");
+            inputGroup.classList.remove("fr-input-group--valid");
+            const errorMsg = messagesGroup.querySelector(".fr-message--error");
+            if (errorMsg) errorMsg.remove();
+            const validMsg = messagesGroup.querySelector(".fr-message--valid");
+            if (validMsg) validMsg.remove();
+            return;
+          }
+          const isValidNumber2 = /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
+          if (!isValidNumber2) {
+            this.classList.add("fr-input--error");
+            this.classList.remove("fr-input--valid");
+            inputGroup.classList.add("fr-input-group--error");
+            inputGroup.classList.remove("fr-input-group--valid");
+            const validMsg = messagesGroup.querySelector(".fr-message--valid");
+            if (validMsg) validMsg.remove();
+            let errorMsg = messagesGroup.querySelector(".fr-message--error");
+            if (!errorMsg) {
+              errorMsg = document.createElement("p");
+              errorMsg.className = "fr-message fr-message--error";
+              errorMsg.setAttribute("role", "alert");
+              messagesGroup.appendChild(errorMsg);
+            }
+            errorMsg.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
+            question.dataset.hadError = "true";
+          } else {
+            this.classList.remove("fr-input--error");
+            inputGroup.classList.remove("fr-input-group--error");
+            const errorMsg = messagesGroup.querySelector(".fr-message--error");
+            if (errorMsg) {
+              errorMsg.remove();
+              question.dataset.hadError = "true";
+            }
+            var hasSumConstraint = !!question.querySelector(".dynamic-total");
+            if (!hasSumConstraint && question.dataset.hadError === "true") {
+              this.classList.add("fr-input--valid");
+              inputGroup.classList.add("fr-input-group--valid");
+              let validMsg = messagesGroup.querySelector(".fr-message--valid");
+              if (!validMsg) {
+                validMsg = document.createElement("p");
+                validMsg.className = "fr-message fr-message--valid";
+                messagesGroup.appendChild(validMsg);
+              }
+              validMsg.textContent = "Merci d'avoir répondu";
+            }
+          }
+          setTimeout(function() {
+            var allInputs = question.querySelectorAll('input.numeric[data-number="1"]');
+            var allFormatValid = true;
+            var allFilled = true;
+            allInputs.forEach(function(inp) {
+              var val = inp.value ? inp.value.trim() : "";
+              if (val === "") {
+                allFilled = false;
+                allFormatValid = false;
+              } else {
+                var isValid = /^-?\d+([.,]\d*)?$/.test(val) || /^-?\d*[.,]\d+$/.test(val);
+                if (!isValid) allFormatValid = false;
+              }
+            });
+            var totalEl = question.querySelector(".dynamic-total");
+            var hasSumConstraint2 = false;
+            var isSumValid = true;
+            if (totalEl) {
+              var qId = totalEl.id ? totalEl.id.replace("totalvalue_", "") : null;
+              var sumRangeMsg = qId ? document.getElementById("vmsg_" + qId + "_sum_range-dsfr") : null;
+              if (sumRangeMsg) {
+                hasSumConstraint2 = true;
+                var rangeMatch = sumRangeMsg.textContent.match(/(\d+)\s+.+\s+(\d+)/);
+                if (rangeMatch) {
+                  var minSum = parseFloat(rangeMatch[1]);
+                  var maxSum = parseFloat(rangeMatch[2]);
+                  var currentSum = 0;
+                  allInputs.forEach(function(inp) {
+                    var val = inp.value ? inp.value.trim().replace(",", ".") : "";
+                    if (val !== "" && !isNaN(parseFloat(val))) {
+                      currentSum += parseFloat(val);
+                    }
+                  });
+                  isSumValid = currentSum >= minSum && currentSum <= maxSum;
+                }
+              }
+            }
+            if (allFormatValid && allFilled && isSumValid) {
+              question.classList.remove("input-error", "fr-input-group--error");
+              question.classList.add("input-valid");
+              if (question.dataset.hadError === "true") {
+                allInputs.forEach(function(inp) {
+                  var grp = inp.closest(".fr-input-group");
+                  if (grp) {
+                    grp.classList.remove("fr-input-group--error");
+                    grp.classList.add("fr-input-group--valid");
+                    inp.classList.remove("fr-input--error");
+                    inp.classList.add("fr-input--valid");
+                    var msgs = grp.querySelector(".fr-messages-group");
+                    if (msgs) {
+                      var vMsg = msgs.querySelector(".fr-message--valid");
+                      if (!vMsg) {
+                        vMsg = document.createElement("p");
+                        vMsg.className = "fr-message fr-message--valid";
+                        msgs.appendChild(vMsg);
+                      }
+                      vMsg.textContent = "Merci d'avoir répondu";
+                    }
+                  }
+                });
+              }
+              var dsfrErrorMsg = question.querySelector(".question-valid-container .fr-message--error");
+              if (dsfrErrorMsg) dsfrErrorMsg.remove();
+              if (typeof updateErrorSummary === "function") {
+                setTimeout(updateErrorSummary, 50);
+              }
+            } else if (allFormatValid && hasSumConstraint2 && !isSumValid) {
+              question.classList.remove("input-valid");
+              question.classList.add("input-error");
+              allInputs.forEach(function(inp) {
+                var grp = inp.closest(".fr-input-group");
+                if (grp) {
+                  grp.classList.remove("fr-input-group--error", "fr-input-group--valid");
+                  inp.classList.remove("fr-input--error", "fr-input--valid");
+                  var msgs = grp.querySelector(".fr-messages-group");
+                  if (msgs) {
+                    var vMsg = msgs.querySelector(".fr-message--valid");
+                    if (vMsg) vMsg.remove();
+                    var eMsg = msgs.querySelector(".fr-message--error");
+                    if (eMsg) eMsg.remove();
+                  }
+                }
+              });
+              question.dataset.hadError = "true";
+            } else if (!allFormatValid) {
+              question.classList.add("input-error");
+              question.classList.remove("input-valid");
+            }
+          }, 200);
+        });
+      });
+    });
+  }
+  function observeNumericMultiSumValidation() {
+    var numericMultiQuestions = document.querySelectorAll(".question-container.numeric-multi");
+    console.log("[DSFR SumValidation] Questions numeric-multi trouvées:", numericMultiQuestions.length);
+    numericMultiQuestions.forEach(function(question) {
+      var totalEl = question.querySelector(".dynamic-total");
+      console.log("[DSFR SumValidation] totalEl:", totalEl ? totalEl.id : "NON TROUVÉ");
+      if (!totalEl) return;
+      var qId = totalEl.id ? totalEl.id.replace("totalvalue_", "") : null;
+      console.log("[DSFR SumValidation] qId:", qId);
+      if (!qId) return;
+      var sumRangeMsgId = "vmsg_" + qId + "_sum_range-dsfr";
+      var sumRangeMsg = document.getElementById(sumRangeMsgId);
+      console.log("[DSFR SumValidation] sumRangeMsg (" + sumRangeMsgId + "):", sumRangeMsg ? sumRangeMsg.textContent : "NON TROUVÉ");
+      if (!sumRangeMsg) {
+        sumRangeMsg = document.getElementById("vmsg_" + qId + "_sum_range");
+        console.log("[DSFR SumValidation] fallback vmsg_" + qId + "_sum_range:", sumRangeMsg ? sumRangeMsg.textContent : "NON TROUVÉ");
+      }
+      if (!sumRangeMsg) return;
+      if (totalEl.dataset.dsfrSumObserver) return;
+      totalEl.dataset.dsfrSumObserver = "true";
+      var rangeMatch = sumRangeMsg.textContent.match(/(\d+)\s+.+\s+(\d+)/);
+      console.log("[DSFR SumValidation] rangeMatch:", rangeMatch);
+      if (!rangeMatch) return;
+      var minSum = parseFloat(rangeMatch[1]);
+      var maxSum = parseFloat(rangeMatch[2]);
+      var totalRow = totalEl.closest(".ls-group-total");
+      function checkSumAndUpdate() {
+        var allInputs2 = question.querySelectorAll('input.numeric[data-number="1"]');
+        var currentSum = 0;
+        var anyFilled = false;
+        allInputs2.forEach(function(inp) {
+          var val = inp.value ? inp.value.trim().replace(",", ".") : "";
+          if (val !== "" && !isNaN(parseFloat(val))) {
+            currentSum += parseFloat(val);
+            anyFilled = true;
+          }
+        });
+        var isSumError = anyFilled && (currentSum < minSum || currentSum > maxSum);
+        if (isSumError) {
+          sumRangeMsg.classList.remove("fr-message--info", "fr-message--valid");
+          sumRangeMsg.classList.add("fr-message--error");
+          sumRangeMsg.setAttribute("role", "alert");
+          if (totalRow) {
+            var totalErrMsg = totalRow.querySelector(".sum-range-error");
+            if (!totalErrMsg) {
+              totalErrMsg = document.createElement("p");
+              totalErrMsg.className = "fr-message fr-message--error sum-range-error";
+              totalErrMsg.setAttribute("role", "alert");
+              totalErrMsg.textContent = sumRangeMsg.textContent;
+              var totalInputGroup = totalRow.querySelector(".ls-input-group");
+              if (totalInputGroup) {
+                totalInputGroup.appendChild(totalErrMsg);
+              } else {
+                totalRow.appendChild(totalErrMsg);
+              }
+            }
+          }
+          question.classList.remove("input-valid");
+          question.classList.add("input-error");
+          allInputs2.forEach(function(inp) {
+            var grp = inp.closest(".fr-input-group");
+            if (grp) {
+              grp.classList.remove("fr-input-group--valid");
+              inp.classList.remove("fr-input--valid");
+              var msgs = grp.querySelector(".fr-messages-group");
+              if (msgs) {
+                var vMsg = msgs.querySelector(".fr-message--valid");
+                if (vMsg) vMsg.remove();
+              }
+            }
+          });
+          question.dataset.hadError = "true";
+        } else {
+          sumRangeMsg.classList.remove("fr-message--error");
+          sumRangeMsg.classList.add("fr-message--info");
+          sumRangeMsg.removeAttribute("role");
+          if (totalRow) {
+            var totalErrMsg = totalRow.querySelector(".sum-range-error");
+            if (totalErrMsg) totalErrMsg.remove();
+          }
+        }
+      }
+      checkSumAndUpdate();
+      var allInputs = question.querySelectorAll('input.numeric[data-number="1"]');
+      allInputs.forEach(function(inp) {
+        inp.addEventListener("input", function() {
+          setTimeout(checkSumAndUpdate, 250);
+        });
+      });
+    });
+  }
+
+  // modules/theme-dsfr/src/validation/array-validation.js
+  function handleArrayValidation2() {
+    var arrayQuestions = document.querySelectorAll('.question-container.input-error[class*="array-"]');
+    arrayQuestions.forEach(function(question) {
+      if (question.dataset.arrayValidationAttached) {
+        return;
+      }
+      question.dataset.arrayValidationAttached = "true";
+      var legacyMessages = question.querySelectorAll(
+        ".ls-question-mandatory, .ls-question-mandatory-initial, .ls-question-mandatory-array, .ls-question-mandatory-arraycolumn"
+      );
+      legacyMessages.forEach(function(msg) {
+        msg.style.display = "none";
+      });
+      var validContainer = question.querySelector(".question-valid-container");
+      if (validContainer) {
+        validContainer.style.display = "none";
+      }
+      var allInputs = question.querySelectorAll('table input[type="text"], table textarea, table select');
+      allInputs.forEach(function(input) {
+        input.classList.remove("fr-input--error", "error");
+        var cell = input.closest(".fr-input-group");
+        if (cell) {
+          cell.classList.remove("fr-input-group--error");
+        }
+      });
+      var errorRows = question.querySelectorAll("tr.ls-mandatory-error");
+      errorRows.forEach(function(row) {
+        row.classList.remove("ls-mandatory-error");
+        var th = row.querySelector("th.fr-text--error");
+        if (th) th.classList.remove("fr-text--error");
+      });
+      var errorCells = question.querySelectorAll("td.has-error");
+      errorCells.forEach(function(td) {
+        td.classList.remove("has-error");
+      });
+      var counterContainer = document.createElement("div");
+      counterContainer.className = "fr-messages-group fr-mt-2w";
+      counterContainer.setAttribute("aria-live", "polite");
+      counterContainer.id = "mandatory-counter-" + (question.id || Math.random().toString(36).substring(2, 11));
+      var counterMessage = document.createElement("p");
+      counterMessage.className = "fr-message fr-message--error";
+      counterMessage.setAttribute("role", "status");
+      counterContainer.appendChild(counterMessage);
+      var tableWrapper = question.querySelector(".fr-table");
+      if (tableWrapper) {
+        tableWrapper.parentNode.insertBefore(counterContainer, tableWrapper.nextSibling);
+      }
+      function updateCounter() {
+        var totalFields = allInputs.length;
+        var emptyCount = 0;
+        allInputs.forEach(function(input) {
+          var value = input.value ? input.value.trim() : "";
+          var inputGroup = input.closest(".fr-input-group");
+          if (value === "") {
+            emptyCount++;
+            input.classList.remove("fr-input--error", "fr-input--valid");
+            if (inputGroup) {
+              inputGroup.classList.remove("fr-input-group--error", "fr-input-group--valid");
+            }
+          } else {
+            var isNumberOnly = input.dataset.number === "1";
+            var isInvalidNumber = isNumberOnly && !isValidNumber(value);
+            if (isInvalidNumber) {
+              emptyCount++;
+              input.classList.add("fr-input--error");
+              input.classList.remove("fr-input--valid");
+              if (inputGroup) {
+                inputGroup.classList.add("fr-input-group--error");
+                inputGroup.classList.remove("fr-input-group--valid");
+              }
+            } else {
+              input.classList.remove("fr-input--error");
+              input.classList.add("fr-input--valid");
+              if (inputGroup) {
+                inputGroup.classList.remove("fr-input-group--error");
+                inputGroup.classList.add("fr-input-group--valid");
+              }
+            }
+          }
+        });
+        if (emptyCount === 0) {
+          counterContainer.remove();
+          question.classList.remove("input-error", "fr-input-group--error");
+          question.classList.add("input-valid");
+          if (typeof updateErrorSummary === "function") {
+            setTimeout(updateErrorSummary, 50);
+          }
+        } else {
+          question.classList.add("input-error");
+          question.classList.remove("input-valid");
+          if (emptyCount === totalFields) {
+            counterMessage.textContent = tMandatory("fields_all_required", null, totalFields);
+          } else if (emptyCount === 1) {
+            counterMessage.textContent = tMandatory("fields_remaining_singular");
+          } else {
+            counterMessage.textContent = tMandatory("fields_remaining_plural", emptyCount, totalFields);
+          }
+          if (typeof updateErrorSummary === "function") {
+            setTimeout(updateErrorSummary, 50);
+          }
+        }
+      }
+      updateCounter();
+      allInputs.forEach(function(input) {
+        if (input.dataset.arrayInputListener) return;
+        input.dataset.arrayInputListener = "true";
+        input.addEventListener("input", updateCounter);
+      });
+    });
+  }
+  function handleSimpleQuestionValidation() {
+    const simpleQuestions = document.querySelectorAll(".question-container.input-error");
+    simpleQuestions.forEach(function(question) {
+      if (question.classList.contains("numeric-multi") || question.classList.contains("multiple-short-txt") || question.dataset.simpleValidationAttached || question.classList.toString().match(/array-/)) {
+        return;
+      }
+      question.dataset.simpleValidationAttached = "true";
+      const allLsMessages = question.querySelectorAll(".ls-question-mandatory, .ls-question-mandatory-initial, .ls-question-mandatory-other");
+      allLsMessages.forEach(function(msg) {
+        msg.style.display = "none";
+      });
+      const radios = question.querySelectorAll('input[type="radio"]');
+      const checkboxes = question.querySelectorAll('input[type="checkbox"]');
+      const selects = question.querySelectorAll("select");
+      const dateInputs = question.querySelectorAll('input[type="date"], input[type="text"].date');
+      function markQuestionValid() {
+        question.classList.remove("input-error", "fr-input-group--error");
+        question.classList.add("input-valid");
+        const allErrors = question.querySelectorAll(".ls-question-mandatory, .ls-question-mandatory-initial, .ls-question-mandatory-other");
+        allErrors.forEach(function(error) {
+          error.style.display = "none";
+        });
+        const dsfrError = question.querySelector(".fr-message--error");
+        if (dsfrError) {
+          dsfrError.remove();
+        }
+        if (typeof updateErrorSummary === "function") {
+          setTimeout(updateErrorSummary, 50);
+        }
+      }
+      radios.forEach(function(radio) {
+        radio.addEventListener("change", function() {
+          if (this.checked) {
+            markQuestionValid();
+          }
+        });
+      });
+      checkboxes.forEach(function(checkbox) {
+        checkbox.addEventListener("change", function() {
+          const anyChecked = Array.from(checkboxes).some((cb) => cb.checked);
+          if (anyChecked) {
+            markQuestionValid();
+          }
+        });
+      });
+      selects.forEach(function(select) {
+        select.addEventListener("change", function() {
+          if (this.value && this.value !== "" && this.value !== "-oth-") {
+            markQuestionValid();
+          }
+        });
+      });
+      dateInputs.forEach(function(dateInput) {
+        dateInput.addEventListener("change", function() {
+          if (this.value && this.value.trim() !== "") {
+            markQuestionValid();
+          }
+        });
+      });
+    });
+  }
+
+  // modules/theme-dsfr/src/validation/validation-messages.js
+  function transformValidationMessages() {
+    const emMessages = document.querySelectorAll(".ls-question-message");
+    emMessages.forEach((message) => {
+      if (message.classList.contains("fr-message")) {
+        return;
+      }
+      let messageType = "info";
+      if (message.classList.contains("ls-em-error")) {
+        messageType = "error";
+      } else if (message.classList.contains("ls-em-warning")) {
+        messageType = "warning";
+      } else if (message.classList.contains("ls-em-success") || message.classList.contains("ls-em-tip")) {
+        messageType = "info";
+      }
+      const dsfrMessage = document.createElement("p");
+      dsfrMessage.className = `fr-message fr-message--${messageType}`;
+      dsfrMessage.textContent = message.textContent.trim();
+      dsfrMessage.id = message.id ? `${message.id}-dsfr` : "";
+      message.replaceWith(dsfrMessage);
+    });
+  }
+
+  // modules/theme-dsfr/src/dropdowns/dropdown-array.js
+  var styleObserver = null;
+  function fixDropdownArrayInlineStyles() {
+    if (window.innerWidth >= 768) {
+      return;
+    }
+    const dropdownArrays = document.querySelectorAll("table.dropdown-array");
+    dropdownArrays.forEach((table) => {
+      const cells = table.querySelectorAll('tbody tr td[style*="display"]');
+      cells.forEach((cell) => {
+        cell.removeAttribute("style");
+      });
+    });
+  }
+  function setupStyleObserver() {
+    if (window.innerWidth >= 768) {
+      if (styleObserver) {
+        styleObserver.disconnect();
+        styleObserver = null;
+      }
+      return;
+    }
+    if (styleObserver) {
+      return;
+    }
+    styleObserver = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.type === "attributes" && mutation.attributeName === "style") {
+          const target = mutation.target;
+          if (target.tagName === "TD" && target.closest("table.dropdown-array")) {
+            target.removeAttribute("style");
+          }
+        }
+      });
+    });
+    const dropdownArrays = document.querySelectorAll("table.dropdown-array");
+    dropdownArrays.forEach(function(table) {
+      styleObserver.observe(table, {
+        attributes: true,
+        attributeFilter: ["style"],
+        subtree: true
+      });
+    });
+  }
+
   // modules/theme-dsfr/src/index.js
   window.DSFRSanitizeRTEContent = sanitizeRTEContent;
   window.updateErrorSummary = updateErrorSummary;
@@ -2667,7 +2607,16 @@
     observeErrorChanges();
     initAriaInvalidSync();
     initErrorSummaryObserver();
+    initNumericValidation();
+    handleArrayValidation2();
+    handleNumericMultiValidation();
+    handleSimpleQuestionValidation();
+    transformValidationMessages();
+    setTimeout(transformValidationMessages, 100);
+    setTimeout(observeNumericMultiSumValidation, 200);
     setTimeout(createErrorSummary, 100);
+    fixDropdownArrayInlineStyles();
+    setupStyleObserver();
     const forms = document.querySelectorAll('form#limesurvey, form[name="limesurvey"]');
     forms.forEach((form) => {
       form.addEventListener("submit", () => {
@@ -2686,10 +2635,26 @@
     handleRequiredFields();
     transformErrorsToDsfr();
     handleMultipleShortTextErrors();
+    initNumericValidation();
+    handleArrayValidation2();
+    handleNumericMultiValidation();
+    handleSimpleQuestionValidation();
+    transformValidationMessages();
+    fixDropdownArrayInlineStyles();
+    setupStyleObserver();
     setTimeout(fixTableAccessibility, 200);
+    setTimeout(observeNumericMultiSumValidation, 200);
     setTimeout(createErrorSummary, 100);
   });
   onPjax(() => {
     setTimeout(sanitizeRTEContent, 100);
+  });
+  var dropdownResizeTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(dropdownResizeTimer);
+    dropdownResizeTimer = setTimeout(() => {
+      fixDropdownArrayInlineStyles();
+      setupStyleObserver();
+    }, 250);
   });
 })();

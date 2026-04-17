@@ -25,12 +25,16 @@ import { transformErrorsToDsfr, observeErrorChanges } from './validation/errors-
 import { handleMultipleShortTextErrors } from './validation/mst-errors.js';
 import { initAriaInvalidSync } from './validation/aria-invalid-sync.js';
 import { createErrorSummary, updateErrorSummary, initErrorSummaryObserver } from './validation/error-summary.js';
+import { initNumericValidation, handleNumericMultiValidation, observeNumericMultiSumValidation } from './validation/numeric-validation.js';
+import { handleArrayValidation, handleSimpleQuestionValidation } from './validation/array-validation.js';
+import { transformValidationMessages } from './validation/validation-messages.js';
+import { fixDropdownArrayInlineStyles, setupStyleObserver } from './dropdowns/dropdown-array.js';
 
 // --- Contrat global : exposition sur window ---
 window.DSFRSanitizeRTEContent = sanitizeRTEContent;
 // Exposé temporairement pour que les appels encore présents dans legacy.js
-// (initNumericValidation, handleArrayValidation, etc. — sessions 5+) le
-// trouvent via leur scope. À retirer quand ces modules seront extraits.
+// (fonctions non-encore-extraites) le trouvent via leur scope. À retirer
+// quand tout le code l'importe via ES modules.
 window.updateErrorSummary = updateErrorSummary;
 
 // --- Initialisation au chargement de la page ---
@@ -49,8 +53,21 @@ onReady(() => {
     observeErrorChanges();
     initAriaInvalidSync();
     initErrorSummaryObserver();
-    // Créer le récapitulatif si des erreurs sont déjà présentes au chargement.
+    initNumericValidation();
+    handleArrayValidation();
+    handleNumericMultiValidation();
+    handleSimpleQuestionValidation();
+    transformValidationMessages();
+    // Laisser un petit délai aux messages d'Expression Manager pour se peupler
+    setTimeout(transformValidationMessages, 100);
+    // L'observer de somme des numeric-multi a besoin que le DOM soit stable
+    setTimeout(observeNumericMultiSumValidation, 200);
+    // Créer le récapitulatif si des erreurs sont déjà présentes au chargement
     setTimeout(createErrorSummary, 100);
+
+    // Tableaux dropdown-array : nettoyage mobile + observer
+    fixDropdownArrayInlineStyles();
+    setupStyleObserver();
 
     // Re-déclencher la transformation + le récapitulatif après soumission
     // LimeSurvey (cas de validation côté serveur qui ne passe pas par pjax).
@@ -74,13 +91,31 @@ onQuestionsLoaded(() => {
     handleRequiredFields();
     transformErrorsToDsfr();
     handleMultipleShortTextErrors();
+    initNumericValidation();
+    handleArrayValidation();
+    handleNumericMultiValidation();
+    handleSimpleQuestionValidation();
+    transformValidationMessages();
+    fixDropdownArrayInlineStyles();
+    setupStyleObserver();
     // fixTableAccessibility a historiquement un délai de 200ms après
     // questionsLoaded pour laisser le DOM se stabiliser.
     setTimeout(fixTableAccessibility, 200);
+    setTimeout(observeNumericMultiSumValidation, 200);
     setTimeout(createErrorSummary, 100);
 });
 
 // --- Re-initialisation sur navigation pjax ---
 onPjax(() => {
     setTimeout(sanitizeRTEContent, 100);
+});
+
+// --- Redimensionnement : dropdown-array selon largeur de fenêtre ---
+let dropdownResizeTimer;
+window.addEventListener('resize', () => {
+    clearTimeout(dropdownResizeTimer);
+    dropdownResizeTimer = setTimeout(() => {
+        fixDropdownArrayInlineStyles();
+        setupStyleObserver();
+    }, 250);
 });
