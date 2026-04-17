@@ -30,7 +30,6 @@
                     id="answer{{ myfname }}cbox"
                     {{ checkedState }}
                     aria-controls="answer{{ myfname }}"
-                    aria-expanded="{{ checkedState ? 'true' : 'false' }}"
                 />
                 <label for="answer{{ myfname }}cbox" class="fr-label"
                        id="label-{{ myfname }}-other">{{ processString(othertext) }}</label>
@@ -66,7 +65,6 @@
         $('#answer{{ myfname }}').on('keyup focusout', function (event) {
             var isChecked = $.trim($(this).val()).length > 0;
             $("#answer{{ myfname }}cbox").prop("checked", isChecked);
-            $("#answer{{ myfname }}cbox").attr("aria-expanded", isChecked ? "true" : "false");
             $("#java{{ myfname }}").val($(this).val());
             LEMflagMandOther("{{ myfname }}", $('#answer{{ myfname }}cbox').is(":checked"));
             {{ oth_checkconditionFunction }}(this.value, this.name, this.type);
@@ -74,7 +72,6 @@
 
         $('#answer{{ myfname }}cbox').click(function (event) {
             var isChecked = $(this).is(':checked');
-            $(this).attr("aria-expanded", isChecked ? "true" : "false");
 
             if (isChecked && $.trim($("#answer{{ myfname }}").val()).length == 0) {
                 $("#answer{{ myfname }}").focus();

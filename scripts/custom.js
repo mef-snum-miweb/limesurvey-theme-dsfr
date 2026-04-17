@@ -593,6 +593,14 @@ console.log('%c\n' +
         // Trouver toutes les questions en erreur
         const errorQuestions = document.querySelectorAll('.question-container.input-error');
 
+        // Passe systématique : poser aria-invalid sur TOUS les champs en erreur,
+        // indépendamment du handler spécialisé qui gère le message d'erreur.
+        errorQuestions.forEach(function(question) {
+            question.querySelectorAll('input:not([type="hidden"]), textarea, select').forEach(function(field) {
+                field.setAttribute('aria-invalid', 'true');
+            });
+        });
+
         errorQuestions.forEach(function(question) {
             // Ignorer les questions gérées par leurs propres handlers spécialisés
             if (question.classList.contains('multiple-short-txt')) {
@@ -718,6 +726,7 @@ console.log('%c\n' +
                 // Ajouter la classe d'erreur à l'input
                 input.classList.add('fr-input--error');
                 input.classList.remove('fr-input--valid');
+                input.setAttribute('aria-invalid', 'true');
 
                 // Retirer le message de succès s'il existe
                 const validMessage = messagesGroup.querySelector('.fr-message--valid');
@@ -751,6 +760,7 @@ console.log('%c\n' +
                     // Ajouter la classe d'erreur à l'input
                     input.classList.add('fr-input--error');
                     input.classList.remove('fr-input--valid');
+                    input.setAttribute('aria-invalid', 'true');
 
                     // Retirer le message de succès
                     const validMessage = messagesGroup.querySelector('.fr-message--valid');
@@ -780,6 +790,7 @@ console.log('%c\n' +
 
             // Retirer la classe d'erreur de l'input
             input.classList.remove('fr-input--error');
+            input.removeAttribute('aria-invalid');
 
             // Retirer le message d'erreur et marquer qu'une erreur a été corrigée
             const errorMsg = messagesGroup.querySelector('.fr-message--error');
@@ -829,6 +840,11 @@ console.log('%c\n' +
                 // Pour radio/checkbox, retirer les erreurs
                 inputGroup.classList.remove('fr-input-group--error');
                 question.classList.remove('input-error');
+
+                // Retirer aria-invalid de tous les champs de la question
+                question.querySelectorAll('[aria-invalid]').forEach(function(f) {
+                    f.removeAttribute('aria-invalid');
+                });
 
                 // Retirer le message d'erreur et marquer qu'une erreur a été corrigée
                 const errorMsg = messagesGroup.querySelector('.fr-message--error');
@@ -1147,14 +1163,22 @@ console.log('%c\n' +
         }
 
         // 1. Traiter les champs déjà en erreur au chargement
-        // Champs individuels en erreur
-        document.querySelectorAll('.fr-input--error, input.error, textarea.error, select.error').forEach(function(input) {
-            input.setAttribute('aria-invalid', 'true');
-        });
-        // Conteneurs en erreur (radio, checkbox, tableaux, etc.)
-        document.querySelectorAll('.question-container.input-error, .fr-input-group--error').forEach(function(container) {
-            syncAriaInvalidInContainer(container, true);
-        });
+        function syncAllErrorFields() {
+            // Champs individuels en erreur
+            document.querySelectorAll('.fr-input--error, input.error, textarea.error, select.error').forEach(function(input) {
+                input.setAttribute('aria-invalid', 'true');
+            });
+            // Conteneurs en erreur (radio, checkbox, tableaux, etc.)
+            document.querySelectorAll('.question-container.input-error, .fr-input-group--error').forEach(function(container) {
+                syncAriaInvalidInContainer(container, true);
+            });
+        }
+        // Exécuter immédiatement, après un tick, et après un court délai
+        // pour couvrir les handlers EM et MutationObserver qui peuvent
+        // modifier les classes d'erreur après DOMContentLoaded.
+        syncAllErrorFields();
+        setTimeout(syncAllErrorFields, 0);
+        setTimeout(syncAllErrorFields, 50);
 
         // 2. Observer les changements de classe sur les champs ET les conteneurs
         var observer = new MutationObserver(function(mutations) {
@@ -1164,8 +1188,11 @@ console.log('%c\n' +
 
                 // Cas 1 : changement directement sur un champ de formulaire
                 if (el.matches('input, textarea, select')) {
-                    var hasError = el.classList.contains('fr-input--error') || el.classList.contains('error');
-                    if (hasError) {
+                    var hasFieldError = el.classList.contains('fr-input--error') || el.classList.contains('error');
+                    // Vérifier aussi si le conteneur parent est en erreur
+                    var parentContainer = el.closest('.question-container');
+                    var hasContainerError = parentContainer && parentContainer.classList.contains('input-error');
+                    if (hasFieldError || hasContainerError) {
                         el.setAttribute('aria-invalid', 'true');
                     } else {
                         el.removeAttribute('aria-invalid');
@@ -2661,18 +2688,37 @@ console.log('%c\n' +
     }
 
     /**
-     * Initialise le système de liaison des questions conditionnelles
+     * Initialise le système de liaison des questions conditionnelles.
+     *
+     * Détection via deux sources :
+     * 1. data-relevance (si LimeSurvey le pose — rare selon les versions)
+     * 2. .ls-irrelevant / .ls-hidden (toujours présentes sur les questions masquées)
+     *
+     * Pour les questions détectées par classe seule (sans data-relevance),
+     * on utilise une description générique car l'expression de relevance
+     * n'est pas disponible côté client.
      */
     function initConditionalQuestionsAria() {
-        // Trouver toutes les questions avec attribut data-relevance
-        const conditionalQuestions = document.querySelectorAll('[data-relevance]');
+        // Source 1 : questions avec data-relevance explicite
+        var conditionalQuestions = document.querySelectorAll('.question-container[data-relevance]');
 
-        if (conditionalQuestions.length === 0) {
-            return;
-        }
+        // Source 2 : questions avec classes ls-irrelevant/ls-hidden (signal LimeSurvey)
+        var hiddenQuestions = document.querySelectorAll('.question-container.ls-irrelevant, .question-container.ls-hidden');
+        hiddenQuestions.forEach(function(q) {
+            // Marquer comme conditionnelle si pas déjà traitée
+            if (!q.hasAttribute('data-relevance') && !q.dataset.dsfrConditionalProcessed) {
+                q.dataset.dsfrConditionalProcessed = 'true';
+                var questionId = q.id || 'q-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7);
+                var descElement = createConditionalDescription(questionId, []);
+                q.insertBefore(descElement, q.firstChild);
+                addAriaDescribedBy(q, descElement.id);
+            }
+        });
 
-        // Traiter chaque question conditionnelle
-        conditionalQuestions.forEach(questionElement => {
+        // Traiter les questions avec data-relevance (description enrichie)
+        conditionalQuestions.forEach(function(questionElement) {
+            if (questionElement.dataset.dsfrConditionalProcessed) return;
+            questionElement.dataset.dsfrConditionalProcessed = 'true';
             try {
                 processConditionalQuestion(questionElement);
             } catch (error) {
@@ -2682,30 +2728,44 @@ console.log('%c\n' +
     }
 
     /**
-     * Observer pour détecter les nouvelles questions ajoutées dynamiquement
-     * (utile si LimeSurvey charge des questions via AJAX)
+     * Observer pour détecter les nouvelles questions conditionnelles
+     * ajoutées dynamiquement ou dont la classe change.
      */
     function setupConditionalQuestionsObserver() {
-        const observer = new MutationObserver(mutations => {
-            mutations.forEach(mutation => {
-                mutation.addedNodes.forEach(node => {
-                    if (node.nodeType === Node.ELEMENT_NODE) {
-                        // Si le noeud ajouté est une question conditionnelle
-                        if (node.hasAttribute && node.hasAttribute('data-relevance')) {
-                            processConditionalQuestion(node);
-                        }
-                        // Ou si le noeud contient des questions conditionnelles
-                        const conditionalQuestions = node.querySelectorAll && node.querySelectorAll('[data-relevance]');
-                        if (conditionalQuestions && conditionalQuestions.length > 0) {
-                            conditionalQuestions.forEach(processConditionalQuestion);
-                        }
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                // Nouvelles questions ajoutées au DOM
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+                    var targets = [];
+                    if (node.classList && node.classList.contains('question-container')) {
+                        targets.push(node);
                     }
+                    var nested = node.querySelectorAll && node.querySelectorAll('.question-container');
+                    if (nested) {
+                        nested.forEach(function(n) { targets.push(n); });
+                    }
+
+                    targets.forEach(function(q) {
+                        if (q.dataset.dsfrConditionalProcessed) return;
+                        if (q.hasAttribute('data-relevance') || q.classList.contains('ls-irrelevant') || q.classList.contains('ls-hidden')) {
+                            q.dataset.dsfrConditionalProcessed = 'true';
+                            if (q.hasAttribute('data-relevance')) {
+                                try { processConditionalQuestion(q); } catch (e) {}
+                            } else {
+                                var qId = q.id || 'q-' + Date.now();
+                                var desc = createConditionalDescription(qId, []);
+                                q.insertBefore(desc, q.firstChild);
+                                addAriaDescribedBy(q, desc.id);
+                            }
+                        }
+                    });
                 });
             });
         });
 
-        // Observer les changements dans le conteneur principal du questionnaire
-        const surveyContainer = document.getElementById('limesurvey') || document.body;
+        var surveyContainer = document.getElementById('limesurvey') || document.body;
         observer.observe(surveyContainer, {
             childList: true,
             subtree: true
@@ -2744,6 +2804,13 @@ console.log('%c\n' +
             return 'Une question';
         }
 
+        function isQuestionHidden(el) {
+            return el.style.display === 'none' ||
+                   el.classList.contains('ls-irrelevant') ||
+                   el.classList.contains('ls-hidden') ||
+                   el.classList.contains('d-none');
+        }
+
         // Timer pour regrouper les annonces (éviter le spam)
         var announceTimer = null;
         var pendingAnnouncements = [];
@@ -2759,20 +2826,16 @@ console.log('%c\n' +
             }, 300);
         }
 
-        // Observer les changements de style et de classe sur les questions conditionnelles
+        // Observer les changements de style et de classe sur TOUTES les questions.
+        // On détecte les transitions ls-irrelevant/ls-hidden ↔ visible,
+        // sans dépendre de l'attribut data-relevance (absent dans LS).
         var observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
                 var el = mutation.target;
-                // Ne traiter que les conteneurs de questions conditionnelles
                 if (!el.classList || !el.classList.contains('question-container')) return;
-                if (!el.hasAttribute('data-relevance')) return;
 
                 if (mutation.type === 'attributes') {
-                    var isHidden = el.style.display === 'none' ||
-                                   el.classList.contains('ls-irrelevant') ||
-                                   el.classList.contains('ls-hidden') ||
-                                   el.classList.contains('d-none');
-
+                    var isHidden = isQuestionHidden(el);
                     var wasHidden = el.dataset.conditionalWasHidden === 'true';
 
                     if (isHidden && !wasHidden) {
@@ -2788,24 +2851,28 @@ console.log('%c\n' +
             });
         });
 
-        // Observer toutes les questions conditionnelles
-        var conditionalQuestions = document.querySelectorAll('[data-relevance]');
-        conditionalQuestions.forEach(function(q) {
-            // Ajouter aria-live="polite" sur chaque conteneur conditionnel (RGAA 7.4.1)
-            if (!q.hasAttribute('aria-live')) {
-                q.setAttribute('aria-live', 'polite');
-            }
-
+        // Observer toutes les questions de la page (pas seulement [data-relevance])
+        var allQuestions = document.querySelectorAll('.question-container');
+        allQuestions.forEach(function(q) {
             // Initialiser l'état courant
-            var isCurrentlyHidden = q.style.display === 'none' ||
-                                    q.classList.contains('ls-irrelevant') ||
-                                    q.classList.contains('ls-hidden') ||
-                                    q.classList.contains('d-none');
-            q.dataset.conditionalWasHidden = isCurrentlyHidden ? 'true' : 'false';
+            q.dataset.conditionalWasHidden = isQuestionHidden(q) ? 'true' : 'false';
 
             observer.observe(q, {
                 attributes: true,
                 attributeFilter: ['style', 'class']
+            });
+        });
+    }
+
+    /**
+     * Exclut du tab order les inputs des questions déjà masquées au chargement.
+     * Complète le handler relevance:off qui ne couvre que les transitions dynamiques.
+     */
+    function excludeIrrelevantInputsFromTabOrder() {
+        var irrelevant = document.querySelectorAll('.question-container.ls-irrelevant, .question-container.ls-hidden');
+        irrelevant.forEach(function(q) {
+            q.querySelectorAll('input:not([type="hidden"]), textarea, select').forEach(function(field) {
+                field.setAttribute('tabindex', '-1');
             });
         });
     }
@@ -2818,12 +2885,14 @@ console.log('%c\n' +
             initConditionalQuestionsAria();
             setupConditionalQuestionsObserver();
             initConditionalVisibilityNotifier();
+            excludeIrrelevantInputsFromTabOrder();
         });
     } else {
         // DOM déjà chargé
         initConditionalQuestionsAria();
         setupConditionalQuestionsObserver();
         initConditionalVisibilityNotifier();
+        excludeIrrelevantInputsFromTabOrder();
     }
 
 })();
@@ -3742,10 +3811,19 @@ function triggerEmRelevanceQuestion() {
     $("[id^='question']").on('relevance:on', function(event, data) {
         if (event.target != this) return;
         $(this).removeClass("ls-irrelevant ls-hidden");
+        // Réactiver les inputs pour qu'ils soient focusables
+        $(this).find('input, textarea, select').each(function() {
+            $(this).prop('disabled', false);
+            $(this).removeAttr('tabindex');
+        });
     });
     $("[id^='question']").on('relevance:off', function(event, data) {
         if (event.target != this) return;
         $(this).addClass("ls-irrelevant ls-hidden");
+        // Exclure les inputs du tab order et de la soumission
+        $(this).find('input, textarea, select').each(function() {
+            $(this).attr('tabindex', '-1');
+        });
     });
     /* En mode All-in-one : besoin de mettre à jour le groupe aussi */
     $(".allinone [id^='group-']:not(.ls-irrelevant) [id^='question']").on('relevance:on', function(event, data) {
