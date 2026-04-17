@@ -67,6 +67,160 @@
     return el.style.display === "none" || el.classList.contains("ls-irrelevant") || el.classList.contains("ls-hidden") || el.classList.contains("d-none");
   }
 
+  // modules/theme-dsfr/src/validation/error-summary.js
+  function createErrorSummary() {
+    const oldSummary = document.getElementById("dsfr-error-summary");
+    if (oldSummary) {
+      oldSummary.remove();
+    }
+    const errorQuestions = document.querySelectorAll(".question-container.input-error, .question-container.fr-input-group--error");
+    if (errorQuestions.length === 0) {
+      return;
+    }
+    const errorList = [];
+    errorQuestions.forEach(function(question) {
+      const questionId = question.id;
+      const questionTextElement = question.querySelector(".ls-label-question, .question-text");
+      let questionText = questionTextElement ? questionTextElement.textContent.trim() : "Question sans titre";
+      const questionNumberElement = question.querySelector(".question-number");
+      let questionNumber = questionNumberElement ? questionNumberElement.textContent.trim() : "";
+      const errorMessageElement = question.querySelector(".fr-message--error");
+      let errorMessage = errorMessageElement ? errorMessageElement.textContent.trim() : "";
+      let label = questionText;
+      if (errorMessage) {
+        label += " : " + errorMessage;
+      }
+      if (label.length > 150) {
+        label = label.substring(0, 147) + "...";
+      }
+      errorList.push({
+        id: questionId,
+        label
+      });
+    });
+    const summary = document.createElement("div");
+    summary.id = "dsfr-error-summary";
+    summary.className = "fr-alert fr-alert--error fr-mb-4w";
+    summary.setAttribute("role", "alert");
+    summary.setAttribute("tabindex", "-1");
+    let html = '<h3 class="fr-alert__title">';
+    html += errorList.length === 1 ? "Une erreur a été détectée" : errorList.length + " erreurs ont été détectées";
+    html += "</h3>";
+    html += "<p>Veuillez corriger les erreurs suivantes :</p>";
+    html += '<ul class="fr-mb-0">';
+    errorList.forEach(function(error) {
+      html += '<li class="error-item" data-question-id="' + error.id + '">';
+      html += '<a href="#' + error.id + '" class="fr-link fr-icon-error-warning-line fr-link--icon-left">' + error.label + "</a>";
+      html += "</li>";
+    });
+    html += "</ul>";
+    summary.innerHTML = html;
+    summary.querySelectorAll('a[href^="#"]').forEach(function(link) {
+      link.addEventListener("click", function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute("href").substring(1);
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+          setTimeout(function() {
+            const firstInput = targetElement.querySelector(".fr-input, input, textarea, select");
+            if (firstInput) {
+              firstInput.focus();
+            }
+          }, 300);
+        }
+      });
+    });
+    const questionContainer = document.querySelector(".questions-container, .survey-question-container, #question-container, .question-container");
+    const firstQuestion = document.querySelector(".question-container");
+    if (questionContainer && questionContainer.parentNode) {
+      questionContainer.parentNode.insertBefore(summary, questionContainer);
+    } else if (firstQuestion && firstQuestion.parentNode) {
+      firstQuestion.parentNode.insertBefore(summary, firstQuestion);
+    } else {
+      const form = document.querySelector('form#limesurvey, form[name="limesurvey"]');
+      if (form) {
+        form.insertBefore(summary, form.firstChild);
+      }
+    }
+    setTimeout(function() {
+      summary.scrollIntoView({ behavior: "smooth", block: "start" });
+      summary.focus();
+    }, 100);
+  }
+  function updateErrorSummary() {
+    const summary = document.getElementById("dsfr-error-summary");
+    if (!summary) {
+      return;
+    }
+    const errorItems = summary.querySelectorAll(".error-item");
+    let totalErrors = errorItems.length;
+    let correctedCount = 0;
+    errorItems.forEach(function(item) {
+      const questionId = item.getAttribute("data-question-id");
+      const question = document.getElementById(questionId);
+      if (!question) return;
+      const isError = question.classList.contains("input-error");
+      const isValid = question.classList.contains("input-valid");
+      const inputs = question.querySelectorAll('.fr-input, input[type="text"], input[type="number"], textarea, select');
+      let allInputsValid = inputs.length > 0;
+      inputs.forEach(function(input) {
+        if (input.classList.contains("fr-input--error") || !input.value || input.value.trim() === "") {
+          allInputsValid = false;
+        }
+      });
+      if (isValid && !isError || allInputsValid) {
+        if (!item.classList.contains("corrected")) {
+          item.classList.add("corrected");
+          const link = item.querySelector("a");
+          if (link) {
+            link.classList.remove("fr-icon-error-warning-line");
+            link.classList.add("fr-icon-checkbox-circle-line");
+          }
+        }
+        correctedCount++;
+      }
+    });
+    const title = summary.querySelector(".fr-alert__title");
+    const description = summary.querySelector("p");
+    if (correctedCount === totalErrors) {
+      summary.className = "fr-alert fr-alert--success fr-mb-4w";
+      if (title) {
+        title.textContent = "Toutes les erreurs ont été corrigées !";
+      }
+      if (description) {
+        description.textContent = "Vous pouvez maintenant soumettre le formulaire.";
+      }
+    } else if (correctedCount > 0) {
+      summary.className = "fr-alert fr-alert--warning fr-mb-4w";
+      if (title) {
+        const remaining = totalErrors - correctedCount;
+        title.textContent = remaining + " erreur" + (remaining > 1 ? "s" : "") + " restante" + (remaining > 1 ? "s" : "");
+      }
+      if (description) {
+        description.textContent = "Continuez à corriger les erreurs suivantes :";
+      }
+    }
+  }
+  function initErrorSummaryObserver() {
+    if (!document.body) return;
+    const observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.type === "attributes" && mutation.attributeName === "class") {
+          const target = mutation.target;
+          if (target.classList && target.classList.contains("question-container") && target.classList.contains("input-error")) {
+            setTimeout(createErrorSummary, 100);
+          }
+        }
+      });
+    });
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"],
+      subtree: true
+    });
+  }
+
   // modules/theme-dsfr/src/legacy.js
   console.log(
     "%c\n             Développé avec ❤️ par la                   \n                                                        \n       ███╗   ███╗██╗██╗    ██╗███████╗██████╗           \n       ████╗ ████║██║██║    ██║██╔════╝██╔══██╗          \n       ██╔████╔██║██║██║ █╗ ██║█████╗  ██████╔╝          \n       ██║╚██╔╝██║██║██║███╗██║██╔══╝  ██╔══██╗          \n       ██║ ╚═╝ ██║██║╚███╔███╔╝███████╗██████╔╝          \n       ╚═╝     ╚═╝╚═╝ ╚══╝╚══╝ ╚══════╝╚═════╝           \n                                                        \n           Mission Ingénierie du Web                   \n    Ministère de l'Économie et des Finances         \n    https://github.com/bmatge/limesurvey-theme-dsfr  \n    Thème DSFR pour LimeSurvey - 2025 - Etalab 2.0    \n",
@@ -265,745 +419,6 @@
       initCaptchaReload();
       initCaptchaValidation();
     });
-    function handleRequiredFields() {
-      const requiredFields = document.querySelectorAll('input[required], textarea[required], select[required], input[aria-required="true"], textarea[aria-required="true"], select[aria-required="true"]');
-      const mandatoryQuestions = document.querySelectorAll('.mandatory.question-container, .mandatory[id^="question"], .question-container:has(.mandatory-question)');
-      const mandatoryBadges = document.querySelectorAll('.fr-badge[aria-label*="Mandatory"], .fr-badge[aria-label*="Obligatoire"]');
-      if (requiredFields.length === 0 && mandatoryQuestions.length === 0 && mandatoryBadges.length === 0) {
-        return;
-      }
-      requiredFields.forEach((field) => {
-        let label = null;
-        if (field.id) {
-          label = document.querySelector(`label[for="${field.id}"]`);
-        }
-        if (!label) {
-          label = field.closest("label");
-        }
-        if (!label) {
-          const inputGroup = field.closest(".fr-input-group, .fr-fieldset__element");
-          if (inputGroup) {
-            label = inputGroup.querySelector(".fr-label, .fr-fieldset__legend");
-          }
-        }
-        if (!label) {
-          const fieldset = field.closest("fieldset");
-          if (fieldset) {
-            label = fieldset.querySelector(".fr-fieldset__legend");
-          }
-        }
-        if (!label && field.getAttribute("aria-labelledby")) {
-          const labelId = field.getAttribute("aria-labelledby");
-          label = document.getElementById(labelId);
-        }
-        if (label && !label.classList.contains("has-required-field")) {
-          label.classList.add("has-required-field");
-        }
-      });
-      mandatoryQuestions.forEach((question) => {
-        let questionLabel = question.querySelector(".question-text");
-        if (!questionLabel) {
-          questionLabel = question.querySelector(".ls-label-question");
-        }
-        if (!questionLabel) return;
-        const alreadyHasAsterisk = questionLabel.classList.contains("asterisk-injected") || questionLabel.querySelector(".required-asterisk") || questionLabel.querySelector(".asterisk");
-        if (!alreadyHasAsterisk) {
-          questionLabel.classList.add("asterisk-injected");
-          const asterisk = document.createElement("span");
-          asterisk.className = "required-asterisk";
-          asterisk.style.color = "var(--text-default-error)";
-          asterisk.style.fontWeight = "700";
-          asterisk.style.marginRight = "0.25rem";
-          asterisk.setAttribute("aria-hidden", "true");
-          asterisk.textContent = "* ";
-          const lastStructuralElement = questionLabel.querySelector(".question-code") || questionLabel.querySelector(".question-number");
-          if (lastStructuralElement && lastStructuralElement.nextSibling) {
-            questionLabel.insertBefore(asterisk, lastStructuralElement.nextSibling);
-          } else {
-            questionLabel.insertBefore(asterisk, questionLabel.firstChild);
-          }
-        }
-        const inputs = question.querySelectorAll('input[type="text"], input[type="number"], input[type="email"], input[type="tel"], textarea, select');
-        inputs.forEach((input) => {
-          if (input.type !== "hidden" && !input.disabled && !input.hasAttribute("aria-required")) {
-            input.setAttribute("aria-required", "true");
-          }
-        });
-      });
-      if (document.getElementById("required-fields-notice")) {
-        return;
-      }
-      const noticeHTML = `<p class="fr-text--sm" style="color: var(--text-mention-grey);"><span class="fr-icon-error-warning-line" aria-hidden="true" style="margin-right: 0.5rem;"></span>Les champs marqués d'un <span style="color: var(--text-default-error); font-weight: 700;">*</span> sont obligatoires</p>`;
-      const antibotContainer = document.querySelector("#antibot-challenge-container");
-      if (antibotContainer) {
-        const centeredCol = antibotContainer.querySelector(".fr-mx-auto, .fr-col-md-8");
-        if (centeredCol) {
-          const notice2 = document.createElement("div");
-          notice2.id = "required-fields-notice";
-          notice2.className = "fr-mb-2w";
-          notice2.innerHTML = noticeHTML;
-          centeredCol.insertBefore(notice2, centeredCol.firstChild);
-          return;
-        }
-      }
-      const welcomeContainer = document.querySelector('#welcome-page-wrapper .fr-container, [id*="welcome"] .fr-col-12, [class*="welcomecontainer"]');
-      if (welcomeContainer) {
-        const innerCol = welcomeContainer.querySelector(".fr-col-12") || welcomeContainer;
-        const firstTitle = innerCol.querySelector("h1, h2");
-        if (firstTitle) {
-          const notice2 = document.createElement("div");
-          notice2.id = "required-fields-notice";
-          notice2.className = "fr-mb-2w";
-          notice2.innerHTML = noticeHTML;
-          innerCol.insertBefore(notice2, firstTitle);
-          return;
-        }
-      }
-      const saveMessage = document.querySelector(".save-message");
-      if (saveMessage) {
-        const notice2 = document.createElement("div");
-        notice2.id = "required-fields-notice";
-        notice2.className = "fr-mb-2w";
-        notice2.innerHTML = noticeHTML;
-        saveMessage.parentElement.insertBefore(notice2, saveMessage);
-        return;
-      }
-      const captchaForm = document.querySelector(".form-captcha");
-      if (captchaForm) {
-        const notice2 = document.createElement("div");
-        notice2.id = "required-fields-notice";
-        notice2.className = "fr-container fr-my-2w";
-        notice2.innerHTML = noticeHTML;
-        const formParent = captchaForm.parentElement;
-        if (formParent) {
-          formParent.insertBefore(notice2, captchaForm);
-          return;
-        }
-      }
-      const notice = document.createElement("div");
-      notice.id = "required-fields-notice";
-      notice.className = "fr-my-3w";
-      notice.innerHTML = noticeHTML;
-      const firstGroup = document.querySelector('[id^="group-"]');
-      if (firstGroup) {
-        const firstQuestion2 = firstGroup.querySelector('[id^="question"]');
-        if (firstQuestion2) {
-          firstQuestion2.parentElement.insertBefore(notice, firstQuestion2);
-          return;
-        }
-      }
-      const firstQuestion = document.querySelector('[id^="question"], .question-container, .ls-question, .question-item');
-      if (firstQuestion) {
-        firstQuestion.parentElement.insertBefore(notice, firstQuestion);
-        return;
-      }
-      const mainContent = document.querySelector("#main-col, .ls-survey-content, .survey-content, .main-content");
-      if (mainContent) {
-        const lastAlert = mainContent.querySelector(".fr-alert:last-of-type, .error-messages:last-of-type");
-        if (lastAlert) {
-          lastAlert.insertAdjacentElement("afterend", notice);
-        } else {
-          mainContent.insertBefore(notice, mainContent.firstChild);
-        }
-        return;
-      }
-      const firstContainer = document.querySelector('[id^="group-"], .fr-container');
-      if (firstContainer) {
-        firstContainer.insertBefore(notice, firstContainer.firstChild);
-      }
-    }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", handleRequiredFields);
-    } else {
-      handleRequiredFields();
-    }
-    document.addEventListener("limesurvey:questionsLoaded", handleRequiredFields);
-    function transformErrorsToDsfr() {
-      const errorQuestions = document.querySelectorAll(".question-container.input-error");
-      errorQuestions.forEach(function(question) {
-        question.querySelectorAll('input:not([type="hidden"]), textarea, select').forEach(function(field) {
-          field.setAttribute("aria-invalid", "true");
-        });
-      });
-      errorQuestions.forEach(function(question) {
-        if (question.classList.contains("multiple-short-txt")) {
-          return;
-        }
-        if (question.className.match(/array-/)) {
-          return;
-        }
-        const inputGroup = question.querySelector(".fr-input-group");
-        if (!inputGroup) {
-          return;
-        }
-        const messagesGroup = inputGroup.querySelector(".fr-messages-group");
-        if (!messagesGroup) {
-          return;
-        }
-        const existingError = messagesGroup.querySelector(".fr-message--error");
-        if (existingError) {
-          return;
-        }
-        inputGroup.classList.add("fr-input-group--error");
-        let lsErrorContainer = null;
-        let errorText = "";
-        const inputElement = question.querySelector(".fr-input, input, textarea, select");
-        const isEmpty = !inputElement || !inputElement.value || inputElement.value.trim() === "";
-        const mandatoryError = question.querySelector(".ls-question-mandatory");
-        const validationErrors = question.querySelectorAll(".ls-em-tip, .em_num_answers, .ls-em-error");
-        if (isEmpty && mandatoryError) {
-          lsErrorContainer = mandatoryError;
-        } else {
-          for (let i = 0; i < validationErrors.length; i++) {
-            const error = validationErrors[i];
-            if (error.offsetParent !== null) {
-              lsErrorContainer = error;
-              break;
-            }
-          }
-          if (!lsErrorContainer && mandatoryError) {
-            lsErrorContainer = mandatoryError;
-          }
-        }
-        if (!lsErrorContainer) {
-          return;
-        }
-        errorText = lsErrorContainer.textContent.trim();
-        errorText = errorText.replace(/\s+/g, " ").trim();
-        if (!errorText) {
-          return;
-        }
-        const errorMessage = document.createElement("p");
-        errorMessage.className = "fr-message fr-message--error";
-        errorMessage.id = messagesGroup.id + "-error";
-        errorMessage.textContent = errorText;
-        errorMessage.setAttribute("role", "alert");
-        messagesGroup.appendChild(errorMessage);
-        const questionValidContainer = question.querySelector(".question-valid-container");
-        if (questionValidContainer) {
-          questionValidContainer.style.display = "none";
-        }
-        attachErrorRemovalListeners(question, inputGroup, messagesGroup);
-      });
-    }
-    function attachErrorRemovalListeners(question, inputGroup, messagesGroup) {
-      if (question.dataset.dsfrErrorListeners) {
-        return;
-      }
-      question.dataset.dsfrErrorListeners = "true";
-      function validateAndUpdateState(input) {
-        const value = input.value ? input.value.trim() : "";
-        const isNumberOnly = input.dataset.number === "1";
-        if (value === "") {
-          inputGroup.classList.add("fr-input-group--error");
-          inputGroup.classList.remove("fr-input-group--valid");
-          question.classList.add("input-error");
-          question.classList.remove("input-valid");
-          input.classList.add("fr-input--error");
-          input.classList.remove("fr-input--valid");
-          input.setAttribute("aria-invalid", "true");
-          const validMessage = messagesGroup.querySelector(".fr-message--valid");
-          if (validMessage) {
-            validMessage.remove();
-          }
-          if (!messagesGroup.querySelector(".fr-message--error")) {
-            const newErrorMessage = document.createElement("p");
-            newErrorMessage.className = "fr-message fr-message--error";
-            newErrorMessage.id = messagesGroup.id + "-error";
-            newErrorMessage.textContent = "Ce champ est obligatoire";
-            newErrorMessage.setAttribute("role", "alert");
-            messagesGroup.appendChild(newErrorMessage);
-          }
-          return;
-        }
-        if (isNumberOnly) {
-          const isValidNumber2 = /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
-          if (!isValidNumber2) {
-            inputGroup.classList.add("fr-input-group--error");
-            inputGroup.classList.remove("fr-input-group--valid");
-            question.classList.add("input-error");
-            question.classList.remove("input-valid");
-            input.classList.add("fr-input--error");
-            input.classList.remove("fr-input--valid");
-            input.setAttribute("aria-invalid", "true");
-            const validMessage = messagesGroup.querySelector(".fr-message--valid");
-            if (validMessage) {
-              validMessage.remove();
-            }
-            let errorMsg2 = messagesGroup.querySelector(".fr-message--error");
-            if (!errorMsg2) {
-              errorMsg2 = document.createElement("p");
-              errorMsg2.className = "fr-message fr-message--error";
-              errorMsg2.id = messagesGroup.id + "-error";
-              errorMsg2.setAttribute("role", "alert");
-              messagesGroup.appendChild(errorMsg2);
-            }
-            errorMsg2.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
-            setTimeout(updateErrorSummary, 50);
-            return;
-          }
-        }
-        inputGroup.classList.remove("fr-input-group--error");
-        question.classList.remove("input-error");
-        input.classList.remove("fr-input--error");
-        input.removeAttribute("aria-invalid");
-        const errorMsg = messagesGroup.querySelector(".fr-message--error");
-        if (errorMsg) {
-          errorMsg.remove();
-          question.dataset.hadError = "true";
-        }
-        if (question.dataset.hadError === "true") {
-          inputGroup.classList.add("fr-input-group--valid");
-          question.classList.add("input-valid");
-          input.classList.add("fr-input--valid");
-          let validMessage = messagesGroup.querySelector(".fr-message--valid");
-          if (!validMessage) {
-            validMessage = document.createElement("p");
-            validMessage.className = "fr-message fr-message--valid";
-            validMessage.id = messagesGroup.id + "-valid";
-            messagesGroup.appendChild(validMessage);
-          }
-          validMessage.textContent = "Merci d'avoir répondu";
-        }
-        setTimeout(updateErrorSummary, 50);
-      }
-      const inputs = question.querySelectorAll('.fr-input, input[type="text"], input[type="number"], textarea, select');
-      inputs.forEach(function(input) {
-        input.addEventListener("input", function() {
-          validateAndUpdateState(input);
-        });
-        input.addEventListener("change", function() {
-          validateAndUpdateState(input);
-        });
-      });
-      const radiosCheckboxes = question.querySelectorAll('input[type="radio"], input[type="checkbox"]');
-      radiosCheckboxes.forEach(function(input) {
-        input.addEventListener("change", function() {
-          inputGroup.classList.remove("fr-input-group--error");
-          question.classList.remove("input-error");
-          question.querySelectorAll("[aria-invalid]").forEach(function(f) {
-            f.removeAttribute("aria-invalid");
-          });
-          const errorMsg = messagesGroup.querySelector(".fr-message--error");
-          if (errorMsg) {
-            errorMsg.remove();
-            question.dataset.hadError = "true";
-          }
-          if (question.dataset.hadError === "true") {
-            inputGroup.classList.add("fr-input-group--valid");
-            question.classList.add("input-valid");
-            let validMessage = messagesGroup.querySelector(".fr-message--valid");
-            if (!validMessage) {
-              validMessage = document.createElement("p");
-              validMessage.className = "fr-message fr-message--valid";
-              validMessage.id = messagesGroup.id + "-valid";
-              messagesGroup.appendChild(validMessage);
-            }
-            validMessage.textContent = "Merci d'avoir répondu";
-          }
-          setTimeout(updateErrorSummary, 50);
-        }, { once: true });
-      });
-    }
-    function observeErrorChanges() {
-      const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-          if (mutation.type === "attributes" && mutation.attributeName === "class") {
-            const target = mutation.target;
-            if (target.classList.contains("question-container") && target.classList.contains("input-error")) {
-              setTimeout(function() {
-                transformErrorsToDsfr();
-                handleMultipleShortTextErrors();
-                handleArrayValidation();
-              }, 100);
-            }
-          }
-          if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
-            mutation.addedNodes.forEach(function(node) {
-              if (node.nodeType === 1 && node.classList && node.classList.contains("input-error")) {
-                setTimeout(function() {
-                  transformErrorsToDsfr();
-                  handleMultipleShortTextErrors();
-                  handleArrayValidation();
-                }, 100);
-              }
-            });
-          }
-        });
-      });
-      observer.observe(document.body, {
-        attributes: true,
-        attributeFilter: ["class"],
-        childList: true,
-        subtree: true
-      });
-    }
-    function handleMultipleShortTextErrors() {
-      var multipleQuestions = document.querySelectorAll(".question-container.multiple-short-txt");
-      multipleQuestions.forEach(function(question) {
-        if (!question.classList.contains("input-error")) {
-          return;
-        }
-        if (question.dataset.mandatoryCounterAttached) {
-          return;
-        }
-        question.dataset.mandatoryCounterAttached = "true";
-        var legacyMessages = question.querySelectorAll(
-          ".ls-question-mandatory, .ls-question-mandatory-initial, .ls-question-mandatory-array"
-        );
-        legacyMessages.forEach(function(msg) {
-          msg.style.display = "none";
-        });
-        var validContainer = question.querySelector(".question-valid-container");
-        if (validContainer) {
-          validContainer.style.display = "none";
-        }
-        var allItems = question.querySelectorAll(".answer-item:not(.d-none)");
-        allItems.forEach(function(item) {
-          var inputGroup = item.querySelector(".fr-input-group");
-          var messagesGroup = item.querySelector(".fr-messages-group");
-          if (inputGroup) {
-            inputGroup.classList.remove("fr-input-group--error");
-          }
-          if (messagesGroup) {
-            var existingError = messagesGroup.querySelector(".fr-message--error");
-            if (existingError) existingError.remove();
-          }
-          item.classList.remove("input-error", "ls-error-mandatory", "has-error");
-        });
-        var counterContainer = document.createElement("div");
-        counterContainer.className = "fr-messages-group fr-mt-2w";
-        counterContainer.setAttribute("aria-live", "polite");
-        counterContainer.id = "mandatory-counter-" + (question.id || Math.random().toString(36).substring(2, 11));
-        var counterMessage = document.createElement("p");
-        counterMessage.className = "fr-message fr-message--error";
-        counterMessage.setAttribute("role", "status");
-        counterContainer.appendChild(counterMessage);
-        var answersList = question.querySelector(".ls-answers, .subquestion-list");
-        if (answersList) {
-          answersList.parentNode.insertBefore(counterContainer, answersList.nextSibling);
-        } else {
-          question.appendChild(counterContainer);
-        }
-        function updateCounter() {
-          var visibleItems = question.querySelectorAll(".answer-item:not(.d-none)");
-          var totalFields = visibleItems.length;
-          var emptyCount = 0;
-          visibleItems.forEach(function(item) {
-            var input = item.querySelector("input, textarea");
-            if (!input) return;
-            var value = input.value ? input.value.trim() : "";
-            var inputGroup = item.querySelector(".fr-input-group");
-            var messagesGroup = item.querySelector(".fr-messages-group");
-            if (value === "") {
-              emptyCount++;
-              if (inputGroup) {
-                inputGroup.classList.remove("fr-input-group--valid", "fr-input-group--error");
-              }
-              if (messagesGroup) {
-                var fmtErr = messagesGroup.querySelector(".fr-message--error");
-                if (fmtErr) fmtErr.remove();
-                var fmtOk = messagesGroup.querySelector(".fr-message--valid");
-                if (fmtOk) fmtOk.remove();
-              }
-              input.classList.remove("fr-input--error", "fr-input--valid", "error");
-            } else {
-              var isNumberOnly = input.dataset.number === "1";
-              var isInvalidNumber = isNumberOnly && !/^-?\d*[.,]?\d+$/.test(value);
-              if (isInvalidNumber) {
-                emptyCount++;
-                if (inputGroup) {
-                  inputGroup.classList.add("fr-input-group--error");
-                  inputGroup.classList.remove("fr-input-group--valid");
-                }
-                input.classList.add("fr-input--error");
-                input.classList.remove("fr-input--valid");
-                if (messagesGroup && !messagesGroup.querySelector(".fr-message--error")) {
-                  var fmtMsg = document.createElement("p");
-                  fmtMsg.className = "fr-message fr-message--error";
-                  fmtMsg.textContent = tMandatory("numeric_only");
-                  messagesGroup.appendChild(fmtMsg);
-                }
-              } else {
-                if (inputGroup) {
-                  inputGroup.classList.remove("fr-input-group--error");
-                  inputGroup.classList.add("fr-input-group--valid");
-                }
-                input.classList.remove("fr-input--error", "error");
-                input.classList.add("fr-input--valid");
-                if (messagesGroup) {
-                  var fmtErr2 = messagesGroup.querySelector(".fr-message--error");
-                  if (fmtErr2) fmtErr2.remove();
-                }
-              }
-            }
-          });
-          if (emptyCount === 0) {
-            counterContainer.remove();
-            question.classList.remove("input-error", "fr-input-group--error");
-            question.classList.add("input-valid");
-            if (typeof updateErrorSummary === "function") {
-              setTimeout(updateErrorSummary, 50);
-            }
-          } else {
-            question.classList.add("input-error");
-            question.classList.remove("input-valid");
-            if (emptyCount === totalFields) {
-              counterMessage.textContent = tMandatory("fields_all_required", null, totalFields);
-            } else if (emptyCount === 1) {
-              counterMessage.textContent = tMandatory("fields_remaining_singular");
-            } else {
-              counterMessage.textContent = tMandatory("fields_remaining_plural", emptyCount, totalFields);
-            }
-            if (typeof updateErrorSummary === "function") {
-              setTimeout(updateErrorSummary, 50);
-            }
-          }
-        }
-        updateCounter();
-        allItems.forEach(function(item) {
-          var input = item.querySelector("input, textarea");
-          if (!input || input.dataset.errorListenerAdded) return;
-          input.dataset.errorListenerAdded = "true";
-          input.addEventListener("input", updateCounter);
-        });
-      });
-    }
-    function initAriaInvalidSync() {
-      function syncAriaInvalidInContainer(container, hasError) {
-        var fields = container.querySelectorAll("input, textarea, select");
-        fields.forEach(function(field) {
-          if (field.type === "hidden" || field.id && field.id.indexOf("java") === 0) return;
-          if (hasError) {
-            field.setAttribute("aria-invalid", "true");
-          } else {
-            field.removeAttribute("aria-invalid");
-          }
-        });
-      }
-      function syncAllErrorFields() {
-        document.querySelectorAll(".fr-input--error, input.error, textarea.error, select.error").forEach(function(input) {
-          input.setAttribute("aria-invalid", "true");
-        });
-        document.querySelectorAll(".question-container.input-error, .fr-input-group--error").forEach(function(container) {
-          syncAriaInvalidInContainer(container, true);
-        });
-      }
-      syncAllErrorFields();
-      setTimeout(syncAllErrorFields, 0);
-      setTimeout(syncAllErrorFields, 50);
-      var observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-          if (mutation.type !== "attributes" || mutation.attributeName !== "class") return;
-          var el = mutation.target;
-          if (el.matches("input, textarea, select")) {
-            var hasFieldError = el.classList.contains("fr-input--error") || el.classList.contains("error");
-            var parentContainer = el.closest(".question-container");
-            var hasContainerError = parentContainer && parentContainer.classList.contains("input-error");
-            if (hasFieldError || hasContainerError) {
-              el.setAttribute("aria-invalid", "true");
-            } else {
-              el.removeAttribute("aria-invalid");
-            }
-          }
-          if (el.classList && el.classList.contains("question-container")) {
-            var containerError = el.classList.contains("input-error");
-            syncAriaInvalidInContainer(el, containerError);
-          }
-          if (el.classList && el.classList.contains("fr-input-group")) {
-            var groupError = el.classList.contains("fr-input-group--error");
-            syncAriaInvalidInContainer(el, groupError);
-          }
-        });
-      });
-      observer.observe(document.body, {
-        attributes: true,
-        attributeFilter: ["class"],
-        subtree: true
-      });
-    }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", function() {
-        transformErrorsToDsfr();
-        handleMultipleShortTextErrors();
-        observeErrorChanges();
-        initAriaInvalidSync();
-        setTimeout(createErrorSummary, 100);
-      });
-    } else {
-      transformErrorsToDsfr();
-      handleMultipleShortTextErrors();
-      observeErrorChanges();
-      initAriaInvalidSync();
-      setTimeout(createErrorSummary, 100);
-    }
-    document.addEventListener("limesurvey:questionsLoaded", function() {
-      transformErrorsToDsfr();
-      handleMultipleShortTextErrors();
-      setTimeout(createErrorSummary, 100);
-    });
-    document.addEventListener("DOMContentLoaded", function() {
-      const forms = document.querySelectorAll('form#limesurvey, form[name="limesurvey"]');
-      forms.forEach(function(form) {
-        form.addEventListener("submit", function() {
-          setTimeout(function() {
-            transformErrorsToDsfr();
-            createErrorSummary();
-          }, 500);
-        });
-      });
-    });
-    function createErrorSummary() {
-      const oldSummary = document.getElementById("dsfr-error-summary");
-      if (oldSummary) {
-        oldSummary.remove();
-      }
-      const errorQuestions = document.querySelectorAll(".question-container.input-error, .question-container.fr-input-group--error");
-      if (errorQuestions.length === 0) {
-        return;
-      }
-      const errorList = [];
-      errorQuestions.forEach(function(question) {
-        const questionId = question.id;
-        const questionTextElement = question.querySelector(".ls-label-question, .question-text");
-        let questionText = questionTextElement ? questionTextElement.textContent.trim() : "Question sans titre";
-        const questionNumberElement = question.querySelector(".question-number");
-        let questionNumber = questionNumberElement ? questionNumberElement.textContent.trim() : "";
-        const errorMessageElement = question.querySelector(".fr-message--error");
-        let errorMessage = errorMessageElement ? errorMessageElement.textContent.trim() : "";
-        let label = questionText;
-        if (errorMessage) {
-          label += " : " + errorMessage;
-        }
-        if (label.length > 150) {
-          label = label.substring(0, 147) + "...";
-        }
-        errorList.push({
-          id: questionId,
-          label
-        });
-      });
-      const summary = document.createElement("div");
-      summary.id = "dsfr-error-summary";
-      summary.className = "fr-alert fr-alert--error fr-mb-4w";
-      summary.setAttribute("role", "alert");
-      summary.setAttribute("tabindex", "-1");
-      let html = '<h3 class="fr-alert__title">';
-      html += errorList.length === 1 ? "Une erreur a été détectée" : errorList.length + " erreurs ont été détectées";
-      html += "</h3>";
-      html += "<p>Veuillez corriger les erreurs suivantes :</p>";
-      html += '<ul class="fr-mb-0">';
-      errorList.forEach(function(error) {
-        html += '<li class="error-item" data-question-id="' + error.id + '">';
-        html += '<a href="#' + error.id + '" class="fr-link fr-icon-error-warning-line fr-link--icon-left">' + error.label + "</a>";
-        html += "</li>";
-      });
-      html += "</ul>";
-      summary.innerHTML = html;
-      summary.querySelectorAll('a[href^="#"]').forEach(function(link) {
-        link.addEventListener("click", function(e) {
-          e.preventDefault();
-          const targetId = this.getAttribute("href").substring(1);
-          const targetElement = document.getElementById(targetId);
-          if (targetElement) {
-            targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
-            setTimeout(function() {
-              const firstInput = targetElement.querySelector(".fr-input, input, textarea, select");
-              if (firstInput) {
-                firstInput.focus();
-              }
-            }, 300);
-          }
-        });
-      });
-      const questionContainer = document.querySelector(".questions-container, .survey-question-container, #question-container, .question-container");
-      const firstQuestion = document.querySelector(".question-container");
-      if (questionContainer && questionContainer.parentNode) {
-        questionContainer.parentNode.insertBefore(summary, questionContainer);
-      } else if (firstQuestion && firstQuestion.parentNode) {
-        firstQuestion.parentNode.insertBefore(summary, firstQuestion);
-      } else {
-        const form = document.querySelector('form#limesurvey, form[name="limesurvey"]');
-        if (form) {
-          form.insertBefore(summary, form.firstChild);
-        }
-      }
-      setTimeout(function() {
-        summary.scrollIntoView({ behavior: "smooth", block: "start" });
-        summary.focus();
-      }, 100);
-    }
-    function updateErrorSummary() {
-      const summary = document.getElementById("dsfr-error-summary");
-      if (!summary) {
-        return;
-      }
-      const errorItems = summary.querySelectorAll(".error-item");
-      let totalErrors = errorItems.length;
-      let correctedCount = 0;
-      errorItems.forEach(function(item) {
-        const questionId = item.getAttribute("data-question-id");
-        const question = document.getElementById(questionId);
-        if (!question) return;
-        const isError = question.classList.contains("input-error");
-        const isValid = question.classList.contains("input-valid");
-        const inputs = question.querySelectorAll('.fr-input, input[type="text"], input[type="number"], textarea, select');
-        let allInputsValid = inputs.length > 0;
-        inputs.forEach(function(input) {
-          if (input.classList.contains("fr-input--error") || !input.value || input.value.trim() === "") {
-            allInputsValid = false;
-          }
-        });
-        if (isValid && !isError || allInputsValid) {
-          if (!item.classList.contains("corrected")) {
-            item.classList.add("corrected");
-            const link = item.querySelector("a");
-            if (link) {
-              link.classList.remove("fr-icon-error-warning-line");
-              link.classList.add("fr-icon-checkbox-circle-line");
-            }
-          }
-          correctedCount++;
-        }
-      });
-      const title = summary.querySelector(".fr-alert__title");
-      const description = summary.querySelector("p");
-      if (correctedCount === totalErrors) {
-        summary.className = "fr-alert fr-alert--success fr-mb-4w";
-        if (title) {
-          title.textContent = "Toutes les erreurs ont été corrigées !";
-        }
-        if (description) {
-          description.textContent = "Vous pouvez maintenant soumettre le formulaire.";
-        }
-      } else if (correctedCount > 0) {
-        summary.className = "fr-alert fr-alert--warning fr-mb-4w";
-        if (title) {
-          const remaining = totalErrors - correctedCount;
-          title.textContent = remaining + " erreur" + (remaining > 1 ? "s" : "") + " restante" + (remaining > 1 ? "s" : "");
-        }
-        if (description) {
-          description.textContent = "Continuez à corriger les erreurs suivantes :";
-        }
-      }
-    }
-    const errorSummaryObserver = new MutationObserver(function(mutations) {
-      mutations.forEach(function(mutation) {
-        if (mutation.type === "attributes" && mutation.attributeName === "class") {
-          const target = mutation.target;
-          if (target.classList.contains("question-container") && target.classList.contains("input-error")) {
-            setTimeout(createErrorSummary, 100);
-          }
-        }
-      });
-    });
-    if (document.body) {
-      errorSummaryObserver.observe(document.body, {
-        attributes: true,
-        attributeFilter: ["class"],
-        subtree: true
-      });
-    }
     function initNumericValidation() {
       const numericInputs = document.querySelectorAll('input[data-number="1"]');
       numericInputs.forEach(function(input) {
@@ -1083,7 +498,7 @@
       initNumericValidation();
     }
     document.addEventListener("limesurvey:questionsLoaded", initNumericValidation);
-    function handleArrayValidation() {
+    function handleArrayValidation2() {
       var arrayQuestions = document.querySelectorAll('.question-container.input-error[class*="array-"]');
       arrayQuestions.forEach(function(question) {
         if (question.dataset.arrayValidationAttached) {
@@ -1194,11 +609,11 @@
       });
     }
     if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", handleArrayValidation);
+      document.addEventListener("DOMContentLoaded", handleArrayValidation2);
     } else {
-      handleArrayValidation();
+      handleArrayValidation2();
     }
-    document.addEventListener("limesurvey:questionsLoaded", handleArrayValidation);
+    document.addEventListener("limesurvey:questionsLoaded", handleArrayValidation2);
     function handleNumericMultiValidation() {
       const numericMultiQuestions = document.querySelectorAll(".question-container.numeric-multi");
       numericMultiQuestions.forEach(function(question) {
@@ -2677,8 +2092,568 @@
     });
   }
 
+  // modules/theme-dsfr/src/validation/required-fields.js
+  function handleRequiredFields() {
+    const requiredFields = document.querySelectorAll('input[required], textarea[required], select[required], input[aria-required="true"], textarea[aria-required="true"], select[aria-required="true"]');
+    const mandatoryQuestions = document.querySelectorAll('.mandatory.question-container, .mandatory[id^="question"], .question-container:has(.mandatory-question)');
+    const mandatoryBadges = document.querySelectorAll('.fr-badge[aria-label*="Mandatory"], .fr-badge[aria-label*="Obligatoire"]');
+    if (requiredFields.length === 0 && mandatoryQuestions.length === 0 && mandatoryBadges.length === 0) {
+      return;
+    }
+    requiredFields.forEach((field) => {
+      let label = null;
+      if (field.id) {
+        label = document.querySelector(`label[for="${field.id}"]`);
+      }
+      if (!label) {
+        label = field.closest("label");
+      }
+      if (!label) {
+        const inputGroup = field.closest(".fr-input-group, .fr-fieldset__element");
+        if (inputGroup) {
+          label = inputGroup.querySelector(".fr-label, .fr-fieldset__legend");
+        }
+      }
+      if (!label) {
+        const fieldset = field.closest("fieldset");
+        if (fieldset) {
+          label = fieldset.querySelector(".fr-fieldset__legend");
+        }
+      }
+      if (!label && field.getAttribute("aria-labelledby")) {
+        const labelId = field.getAttribute("aria-labelledby");
+        label = document.getElementById(labelId);
+      }
+      if (label && !label.classList.contains("has-required-field")) {
+        label.classList.add("has-required-field");
+      }
+    });
+    mandatoryQuestions.forEach((question) => {
+      let questionLabel = question.querySelector(".question-text");
+      if (!questionLabel) {
+        questionLabel = question.querySelector(".ls-label-question");
+      }
+      if (!questionLabel) return;
+      const alreadyHasAsterisk = questionLabel.classList.contains("asterisk-injected") || questionLabel.querySelector(".required-asterisk") || questionLabel.querySelector(".asterisk");
+      if (!alreadyHasAsterisk) {
+        questionLabel.classList.add("asterisk-injected");
+        const asterisk = document.createElement("span");
+        asterisk.className = "required-asterisk";
+        asterisk.style.color = "var(--text-default-error)";
+        asterisk.style.fontWeight = "700";
+        asterisk.style.marginRight = "0.25rem";
+        asterisk.setAttribute("aria-hidden", "true");
+        asterisk.textContent = "* ";
+        const lastStructuralElement = questionLabel.querySelector(".question-code") || questionLabel.querySelector(".question-number");
+        if (lastStructuralElement && lastStructuralElement.nextSibling) {
+          questionLabel.insertBefore(asterisk, lastStructuralElement.nextSibling);
+        } else {
+          questionLabel.insertBefore(asterisk, questionLabel.firstChild);
+        }
+      }
+      const inputs = question.querySelectorAll('input[type="text"], input[type="number"], input[type="email"], input[type="tel"], textarea, select');
+      inputs.forEach((input) => {
+        if (input.type !== "hidden" && !input.disabled && !input.hasAttribute("aria-required")) {
+          input.setAttribute("aria-required", "true");
+        }
+      });
+    });
+    if (document.getElementById("required-fields-notice")) {
+      return;
+    }
+    const noticeHTML = `<p class="fr-text--sm" style="color: var(--text-mention-grey);"><span class="fr-icon-error-warning-line" aria-hidden="true" style="margin-right: 0.5rem;"></span>Les champs marqués d'un <span style="color: var(--text-default-error); font-weight: 700;">*</span> sont obligatoires</p>`;
+    const antibotContainer = document.querySelector("#antibot-challenge-container");
+    if (antibotContainer) {
+      const centeredCol = antibotContainer.querySelector(".fr-mx-auto, .fr-col-md-8");
+      if (centeredCol) {
+        const notice2 = document.createElement("div");
+        notice2.id = "required-fields-notice";
+        notice2.className = "fr-mb-2w";
+        notice2.innerHTML = noticeHTML;
+        centeredCol.insertBefore(notice2, centeredCol.firstChild);
+        return;
+      }
+    }
+    const welcomeContainer = document.querySelector('#welcome-page-wrapper .fr-container, [id*="welcome"] .fr-col-12, [class*="welcomecontainer"]');
+    if (welcomeContainer) {
+      const innerCol = welcomeContainer.querySelector(".fr-col-12") || welcomeContainer;
+      const firstTitle = innerCol.querySelector("h1, h2");
+      if (firstTitle) {
+        const notice2 = document.createElement("div");
+        notice2.id = "required-fields-notice";
+        notice2.className = "fr-mb-2w";
+        notice2.innerHTML = noticeHTML;
+        innerCol.insertBefore(notice2, firstTitle);
+        return;
+      }
+    }
+    const saveMessage = document.querySelector(".save-message");
+    if (saveMessage) {
+      const notice2 = document.createElement("div");
+      notice2.id = "required-fields-notice";
+      notice2.className = "fr-mb-2w";
+      notice2.innerHTML = noticeHTML;
+      saveMessage.parentElement.insertBefore(notice2, saveMessage);
+      return;
+    }
+    const captchaForm = document.querySelector(".form-captcha");
+    if (captchaForm) {
+      const notice2 = document.createElement("div");
+      notice2.id = "required-fields-notice";
+      notice2.className = "fr-container fr-my-2w";
+      notice2.innerHTML = noticeHTML;
+      const formParent = captchaForm.parentElement;
+      if (formParent) {
+        formParent.insertBefore(notice2, captchaForm);
+        return;
+      }
+    }
+    const notice = document.createElement("div");
+    notice.id = "required-fields-notice";
+    notice.className = "fr-my-3w";
+    notice.innerHTML = noticeHTML;
+    const firstGroup = document.querySelector('[id^="group-"]');
+    if (firstGroup) {
+      const firstQuestion2 = firstGroup.querySelector('[id^="question"]');
+      if (firstQuestion2) {
+        firstQuestion2.parentElement.insertBefore(notice, firstQuestion2);
+        return;
+      }
+    }
+    const firstQuestion = document.querySelector('[id^="question"], .question-container, .ls-question, .question-item');
+    if (firstQuestion) {
+      firstQuestion.parentElement.insertBefore(notice, firstQuestion);
+      return;
+    }
+    const mainContent = document.querySelector("#main-col, .ls-survey-content, .survey-content, .main-content");
+    if (mainContent) {
+      const lastAlert = mainContent.querySelector(".fr-alert:last-of-type, .error-messages:last-of-type");
+      if (lastAlert) {
+        lastAlert.insertAdjacentElement("afterend", notice);
+      } else {
+        mainContent.insertBefore(notice, mainContent.firstChild);
+      }
+      return;
+    }
+    const firstContainer = document.querySelector('[id^="group-"], .fr-container');
+    if (firstContainer) {
+      firstContainer.insertBefore(notice, firstContainer.firstChild);
+    }
+  }
+
+  // modules/theme-dsfr/src/validation/mst-errors.js
+  function handleMultipleShortTextErrors() {
+    var multipleQuestions = document.querySelectorAll(".question-container.multiple-short-txt");
+    multipleQuestions.forEach(function(question) {
+      if (!question.classList.contains("input-error")) {
+        return;
+      }
+      if (question.dataset.mandatoryCounterAttached) {
+        return;
+      }
+      question.dataset.mandatoryCounterAttached = "true";
+      var legacyMessages = question.querySelectorAll(
+        ".ls-question-mandatory, .ls-question-mandatory-initial, .ls-question-mandatory-array"
+      );
+      legacyMessages.forEach(function(msg) {
+        msg.style.display = "none";
+      });
+      var validContainer = question.querySelector(".question-valid-container");
+      if (validContainer) {
+        validContainer.style.display = "none";
+      }
+      var allItems = question.querySelectorAll(".answer-item:not(.d-none)");
+      allItems.forEach(function(item) {
+        var inputGroup = item.querySelector(".fr-input-group");
+        var messagesGroup = item.querySelector(".fr-messages-group");
+        if (inputGroup) {
+          inputGroup.classList.remove("fr-input-group--error");
+        }
+        if (messagesGroup) {
+          var existingError = messagesGroup.querySelector(".fr-message--error");
+          if (existingError) existingError.remove();
+        }
+        item.classList.remove("input-error", "ls-error-mandatory", "has-error");
+      });
+      var counterContainer = document.createElement("div");
+      counterContainer.className = "fr-messages-group fr-mt-2w";
+      counterContainer.setAttribute("aria-live", "polite");
+      counterContainer.id = "mandatory-counter-" + (question.id || Math.random().toString(36).substring(2, 11));
+      var counterMessage = document.createElement("p");
+      counterMessage.className = "fr-message fr-message--error";
+      counterMessage.setAttribute("role", "status");
+      counterContainer.appendChild(counterMessage);
+      var answersList = question.querySelector(".ls-answers, .subquestion-list");
+      if (answersList) {
+        answersList.parentNode.insertBefore(counterContainer, answersList.nextSibling);
+      } else {
+        question.appendChild(counterContainer);
+      }
+      function updateCounter() {
+        var visibleItems = question.querySelectorAll(".answer-item:not(.d-none)");
+        var totalFields = visibleItems.length;
+        var emptyCount = 0;
+        visibleItems.forEach(function(item) {
+          var input = item.querySelector("input, textarea");
+          if (!input) return;
+          var value = input.value ? input.value.trim() : "";
+          var inputGroup = item.querySelector(".fr-input-group");
+          var messagesGroup = item.querySelector(".fr-messages-group");
+          if (value === "") {
+            emptyCount++;
+            if (inputGroup) {
+              inputGroup.classList.remove("fr-input-group--valid", "fr-input-group--error");
+            }
+            if (messagesGroup) {
+              var fmtErr = messagesGroup.querySelector(".fr-message--error");
+              if (fmtErr) fmtErr.remove();
+              var fmtOk = messagesGroup.querySelector(".fr-message--valid");
+              if (fmtOk) fmtOk.remove();
+            }
+            input.classList.remove("fr-input--error", "fr-input--valid", "error");
+          } else {
+            var isNumberOnly = input.dataset.number === "1";
+            var isInvalidNumber = isNumberOnly && !/^-?\d*[.,]?\d+$/.test(value);
+            if (isInvalidNumber) {
+              emptyCount++;
+              if (inputGroup) {
+                inputGroup.classList.add("fr-input-group--error");
+                inputGroup.classList.remove("fr-input-group--valid");
+              }
+              input.classList.add("fr-input--error");
+              input.classList.remove("fr-input--valid");
+              if (messagesGroup && !messagesGroup.querySelector(".fr-message--error")) {
+                var fmtMsg = document.createElement("p");
+                fmtMsg.className = "fr-message fr-message--error";
+                fmtMsg.textContent = tMandatory("numeric_only");
+                messagesGroup.appendChild(fmtMsg);
+              }
+            } else {
+              if (inputGroup) {
+                inputGroup.classList.remove("fr-input-group--error");
+                inputGroup.classList.add("fr-input-group--valid");
+              }
+              input.classList.remove("fr-input--error", "error");
+              input.classList.add("fr-input--valid");
+              if (messagesGroup) {
+                var fmtErr2 = messagesGroup.querySelector(".fr-message--error");
+                if (fmtErr2) fmtErr2.remove();
+              }
+            }
+          }
+        });
+        if (emptyCount === 0) {
+          counterContainer.remove();
+          question.classList.remove("input-error", "fr-input-group--error");
+          question.classList.add("input-valid");
+          if (typeof updateErrorSummary === "function") {
+            setTimeout(updateErrorSummary, 50);
+          }
+        } else {
+          question.classList.add("input-error");
+          question.classList.remove("input-valid");
+          if (emptyCount === totalFields) {
+            counterMessage.textContent = tMandatory("fields_all_required", null, totalFields);
+          } else if (emptyCount === 1) {
+            counterMessage.textContent = tMandatory("fields_remaining_singular");
+          } else {
+            counterMessage.textContent = tMandatory("fields_remaining_plural", emptyCount, totalFields);
+          }
+          if (typeof updateErrorSummary === "function") {
+            setTimeout(updateErrorSummary, 50);
+          }
+        }
+      }
+      updateCounter();
+      allItems.forEach(function(item) {
+        var input = item.querySelector("input, textarea");
+        if (!input || input.dataset.errorListenerAdded) return;
+        input.dataset.errorListenerAdded = "true";
+        input.addEventListener("input", updateCounter);
+      });
+    });
+  }
+
+  // modules/theme-dsfr/src/validation/errors-dsfr.js
+  function transformErrorsToDsfr() {
+    const errorQuestions = document.querySelectorAll(".question-container.input-error");
+    errorQuestions.forEach(function(question) {
+      question.querySelectorAll('input:not([type="hidden"]), textarea, select').forEach(function(field) {
+        field.setAttribute("aria-invalid", "true");
+      });
+    });
+    errorQuestions.forEach(function(question) {
+      if (question.classList.contains("multiple-short-txt")) {
+        return;
+      }
+      if (question.className.match(/array-/)) {
+        return;
+      }
+      const inputGroup = question.querySelector(".fr-input-group");
+      if (!inputGroup) {
+        return;
+      }
+      const messagesGroup = inputGroup.querySelector(".fr-messages-group");
+      if (!messagesGroup) {
+        return;
+      }
+      const existingError = messagesGroup.querySelector(".fr-message--error");
+      if (existingError) {
+        return;
+      }
+      inputGroup.classList.add("fr-input-group--error");
+      let lsErrorContainer = null;
+      let errorText = "";
+      const inputElement = question.querySelector(".fr-input, input, textarea, select");
+      const isEmpty = !inputElement || !inputElement.value || inputElement.value.trim() === "";
+      const mandatoryError = question.querySelector(".ls-question-mandatory");
+      const validationErrors = question.querySelectorAll(".ls-em-tip, .em_num_answers, .ls-em-error");
+      if (isEmpty && mandatoryError) {
+        lsErrorContainer = mandatoryError;
+      } else {
+        for (let i = 0; i < validationErrors.length; i++) {
+          const error = validationErrors[i];
+          if (error.offsetParent !== null) {
+            lsErrorContainer = error;
+            break;
+          }
+        }
+        if (!lsErrorContainer && mandatoryError) {
+          lsErrorContainer = mandatoryError;
+        }
+      }
+      if (!lsErrorContainer) {
+        return;
+      }
+      errorText = lsErrorContainer.textContent.trim();
+      errorText = errorText.replace(/\s+/g, " ").trim();
+      if (!errorText) {
+        return;
+      }
+      const errorMessage = document.createElement("p");
+      errorMessage.className = "fr-message fr-message--error";
+      errorMessage.id = messagesGroup.id + "-error";
+      errorMessage.textContent = errorText;
+      errorMessage.setAttribute("role", "alert");
+      messagesGroup.appendChild(errorMessage);
+      const questionValidContainer = question.querySelector(".question-valid-container");
+      if (questionValidContainer) {
+        questionValidContainer.style.display = "none";
+      }
+      attachErrorRemovalListeners(question, inputGroup, messagesGroup);
+    });
+  }
+  function attachErrorRemovalListeners(question, inputGroup, messagesGroup) {
+    if (question.dataset.dsfrErrorListeners) {
+      return;
+    }
+    question.dataset.dsfrErrorListeners = "true";
+    function validateAndUpdateState(input) {
+      const value = input.value ? input.value.trim() : "";
+      const isNumberOnly = input.dataset.number === "1";
+      if (value === "") {
+        inputGroup.classList.add("fr-input-group--error");
+        inputGroup.classList.remove("fr-input-group--valid");
+        question.classList.add("input-error");
+        question.classList.remove("input-valid");
+        input.classList.add("fr-input--error");
+        input.classList.remove("fr-input--valid");
+        input.setAttribute("aria-invalid", "true");
+        const validMessage = messagesGroup.querySelector(".fr-message--valid");
+        if (validMessage) {
+          validMessage.remove();
+        }
+        if (!messagesGroup.querySelector(".fr-message--error")) {
+          const newErrorMessage = document.createElement("p");
+          newErrorMessage.className = "fr-message fr-message--error";
+          newErrorMessage.id = messagesGroup.id + "-error";
+          newErrorMessage.textContent = "Ce champ est obligatoire";
+          newErrorMessage.setAttribute("role", "alert");
+          messagesGroup.appendChild(newErrorMessage);
+        }
+        return;
+      }
+      if (isNumberOnly) {
+        const isValidNumber2 = /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
+        if (!isValidNumber2) {
+          inputGroup.classList.add("fr-input-group--error");
+          inputGroup.classList.remove("fr-input-group--valid");
+          question.classList.add("input-error");
+          question.classList.remove("input-valid");
+          input.classList.add("fr-input--error");
+          input.classList.remove("fr-input--valid");
+          input.setAttribute("aria-invalid", "true");
+          const validMessage = messagesGroup.querySelector(".fr-message--valid");
+          if (validMessage) {
+            validMessage.remove();
+          }
+          let errorMsg2 = messagesGroup.querySelector(".fr-message--error");
+          if (!errorMsg2) {
+            errorMsg2 = document.createElement("p");
+            errorMsg2.className = "fr-message fr-message--error";
+            errorMsg2.id = messagesGroup.id + "-error";
+            errorMsg2.setAttribute("role", "alert");
+            messagesGroup.appendChild(errorMsg2);
+          }
+          errorMsg2.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
+          setTimeout(updateErrorSummary, 50);
+          return;
+        }
+      }
+      inputGroup.classList.remove("fr-input-group--error");
+      question.classList.remove("input-error");
+      input.classList.remove("fr-input--error");
+      input.removeAttribute("aria-invalid");
+      const errorMsg = messagesGroup.querySelector(".fr-message--error");
+      if (errorMsg) {
+        errorMsg.remove();
+        question.dataset.hadError = "true";
+      }
+      if (question.dataset.hadError === "true") {
+        inputGroup.classList.add("fr-input-group--valid");
+        question.classList.add("input-valid");
+        input.classList.add("fr-input--valid");
+        let validMessage = messagesGroup.querySelector(".fr-message--valid");
+        if (!validMessage) {
+          validMessage = document.createElement("p");
+          validMessage.className = "fr-message fr-message--valid";
+          validMessage.id = messagesGroup.id + "-valid";
+          messagesGroup.appendChild(validMessage);
+        }
+        validMessage.textContent = "Merci d'avoir répondu";
+      }
+      setTimeout(updateErrorSummary, 50);
+    }
+    const inputs = question.querySelectorAll('.fr-input, input[type="text"], input[type="number"], textarea, select');
+    inputs.forEach(function(input) {
+      input.addEventListener("input", function() {
+        validateAndUpdateState(input);
+      });
+      input.addEventListener("change", function() {
+        validateAndUpdateState(input);
+      });
+    });
+    const radiosCheckboxes = question.querySelectorAll('input[type="radio"], input[type="checkbox"]');
+    radiosCheckboxes.forEach(function(input) {
+      input.addEventListener("change", function() {
+        inputGroup.classList.remove("fr-input-group--error");
+        question.classList.remove("input-error");
+        question.querySelectorAll("[aria-invalid]").forEach(function(f) {
+          f.removeAttribute("aria-invalid");
+        });
+        const errorMsg = messagesGroup.querySelector(".fr-message--error");
+        if (errorMsg) {
+          errorMsg.remove();
+          question.dataset.hadError = "true";
+        }
+        if (question.dataset.hadError === "true") {
+          inputGroup.classList.add("fr-input-group--valid");
+          question.classList.add("input-valid");
+          let validMessage = messagesGroup.querySelector(".fr-message--valid");
+          if (!validMessage) {
+            validMessage = document.createElement("p");
+            validMessage.className = "fr-message fr-message--valid";
+            validMessage.id = messagesGroup.id + "-valid";
+            messagesGroup.appendChild(validMessage);
+          }
+          validMessage.textContent = "Merci d'avoir répondu";
+        }
+        setTimeout(updateErrorSummary, 50);
+      }, { once: true });
+    });
+  }
+  function observeErrorChanges() {
+    const observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.type === "attributes" && mutation.attributeName === "class") {
+          const target = mutation.target;
+          if (target.classList.contains("question-container") && target.classList.contains("input-error")) {
+            setTimeout(function() {
+              transformErrorsToDsfr();
+              handleMultipleShortTextErrors();
+              handleArrayValidation();
+            }, 100);
+          }
+        }
+        if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
+          mutation.addedNodes.forEach(function(node) {
+            if (node.nodeType === 1 && node.classList && node.classList.contains("input-error")) {
+              setTimeout(function() {
+                transformErrorsToDsfr();
+                handleMultipleShortTextErrors();
+                handleArrayValidation();
+              }, 100);
+            }
+          });
+        }
+      });
+    });
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"],
+      childList: true,
+      subtree: true
+    });
+  }
+
+  // modules/theme-dsfr/src/validation/aria-invalid-sync.js
+  function syncAriaInvalidInContainer(container, hasError) {
+    var fields = container.querySelectorAll("input, textarea, select");
+    fields.forEach(function(field) {
+      if (field.type === "hidden" || field.id && field.id.indexOf("java") === 0) return;
+      if (hasError) {
+        field.setAttribute("aria-invalid", "true");
+      } else {
+        field.removeAttribute("aria-invalid");
+      }
+    });
+  }
+  function syncAllErrorFields() {
+    document.querySelectorAll(".fr-input--error, input.error, textarea.error, select.error").forEach(function(input) {
+      input.setAttribute("aria-invalid", "true");
+    });
+    document.querySelectorAll(".question-container.input-error, .fr-input-group--error").forEach(function(container) {
+      syncAriaInvalidInContainer(container, true);
+    });
+  }
+  function initAriaInvalidSync() {
+    syncAllErrorFields();
+    setTimeout(syncAllErrorFields, 0);
+    setTimeout(syncAllErrorFields, 50);
+    var observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.type !== "attributes" || mutation.attributeName !== "class") return;
+        var el = mutation.target;
+        if (el.matches && el.matches("input, textarea, select")) {
+          var hasFieldError = el.classList.contains("fr-input--error") || el.classList.contains("error");
+          var parentContainer = el.closest(".question-container");
+          var hasContainerError = parentContainer && parentContainer.classList.contains("input-error");
+          if (hasFieldError || hasContainerError) {
+            el.setAttribute("aria-invalid", "true");
+          } else {
+            el.removeAttribute("aria-invalid");
+          }
+        }
+        if (el.classList && el.classList.contains("question-container")) {
+          var containerError = el.classList.contains("input-error");
+          syncAriaInvalidInContainer(el, containerError);
+        }
+        if (el.classList && el.classList.contains("fr-input-group")) {
+          var groupError = el.classList.contains("fr-input-group--error");
+          syncAriaInvalidInContainer(el, groupError);
+        }
+      });
+    });
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"],
+      subtree: true
+    });
+  }
+
   // modules/theme-dsfr/src/index.js
   window.DSFRSanitizeRTEContent = sanitizeRTEContent;
+  window.updateErrorSummary = updateErrorSummary;
   onReady(() => {
     sanitizeRTEContent();
     enableImageLazyLoading();
@@ -2686,13 +2661,33 @@
     addInputmodeNumericToNumericFields();
     reorderListRadioNoAnswer();
     fixTableAccessibility();
+    handleRequiredFields();
+    transformErrorsToDsfr();
+    handleMultipleShortTextErrors();
+    observeErrorChanges();
+    initAriaInvalidSync();
+    initErrorSummaryObserver();
+    setTimeout(createErrorSummary, 100);
+    const forms = document.querySelectorAll('form#limesurvey, form[name="limesurvey"]');
+    forms.forEach((form) => {
+      form.addEventListener("submit", () => {
+        setTimeout(() => {
+          transformErrorsToDsfr();
+          createErrorSummary();
+        }, 500);
+      });
+    });
   });
   onQuestionsLoaded(() => {
     enableImageLazyLoading();
     extendDescribedByForValidationTips();
     addInputmodeNumericToNumericFields();
     reorderListRadioNoAnswer();
+    handleRequiredFields();
+    transformErrorsToDsfr();
+    handleMultipleShortTextErrors();
     setTimeout(fixTableAccessibility, 200);
+    setTimeout(createErrorSummary, 100);
   });
   onPjax(() => {
     setTimeout(sanitizeRTEContent, 100);
