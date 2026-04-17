@@ -226,357 +226,6 @@
     "%c\n             Développé avec ❤️ par la                   \n                                                        \n       ███╗   ███╗██╗██╗    ██╗███████╗██████╗           \n       ████╗ ████║██║██║    ██║██╔════╝██╔══██╗          \n       ██╔████╔██║██║██║ █╗ ██║█████╗  ██████╔╝          \n       ██║╚██╔╝██║██║██║███╗██║██╔══╝  ██╔══██╗          \n       ██║ ╚═╝ ██║██║╚███╔███╔╝███████╗██████╔╝          \n       ╚═╝     ╚═╝╚═╝ ╚══╝╚══╝ ╚══════╝╚═════╝           \n                                                        \n           Mission Ingénierie du Web                   \n    Ministère de l'Économie et des Finances         \n    https://github.com/bmatge/limesurvey-theme-dsfr  \n    Thème DSFR pour LimeSurvey - 2025 - Etalab 2.0    \n",
     "color: #000091; font-weight: bold;"
   );
-  (function() {
-    "use strict";
-    function getItemLabel(item) {
-      var textSpan = item.querySelector(".ranking-item-text");
-      if (textSpan) return textSpan.textContent.trim();
-      return item.dataset.label || item.textContent.trim();
-    }
-    function announce(qId, message) {
-      var liveRegion = document.getElementById("ranking-live-" + qId);
-      if (!liveRegion) return;
-      liveRegion.textContent = "";
-      setTimeout(function() {
-        liveRegion.textContent = message;
-      }, 50);
-    }
-    function syncHiddenSelects(qId) {
-      var questionEl = document.getElementById("question" + qId);
-      if (!questionEl) return;
-      var rankedItems = document.querySelectorAll("#sortable-rank-" + qId + " li:not(.ls-remove):not(.d-none)");
-      var selects = questionEl.querySelectorAll(".select-list .select-item select");
-      selects.forEach(function(select) {
-        select.value = "";
-      });
-      rankedItems.forEach(function(item, index) {
-        if (index < selects.length) {
-          var oldVal = selects[index].value;
-          selects[index].value = item.dataset.value;
-          if (oldVal !== item.dataset.value) {
-            if (typeof $ !== "undefined") {
-              $(selects[index]).trigger("change", { source: "dragdrop" });
-            }
-          }
-        }
-      });
-      var rankingName = questionEl.querySelector(".ranking-question-dsfr") ? questionEl.querySelector(".ranking-question-dsfr").dataset.rankingName : null;
-      if (!rankingName) {
-        var container = questionEl.querySelector("[data-ranking-name]");
-        if (container) rankingName = container.dataset.rankingName;
-      }
-      if (rankingName) {
-        var relevanceInputs = document.querySelectorAll('[id^="relevance' + rankingName + '"]');
-        relevanceInputs.forEach(function(input) {
-          input.value = "0";
-        });
-        rankedItems.forEach(function(item, index) {
-          var relInput = document.getElementById("relevance" + rankingName + (index + 1));
-          if (relInput) {
-            relInput.value = "1";
-          }
-        });
-      }
-    }
-    function createControlButtons(item, qId) {
-      if (item.querySelector(".ranking-controls")) return;
-      var label = getItemLabel(item);
-      var controls = document.createElement("span");
-      controls.className = "ranking-controls";
-      controls.setAttribute("role", "group");
-      controls.setAttribute("aria-label", tRanking("ranking_actions_for", label));
-      var btnUp = document.createElement("button");
-      btnUp.type = "button";
-      btnUp.className = "fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-arrow-up-line ranking-btn-up";
-      btnUp.setAttribute("aria-label", tRanking("ranking_up_aria", label));
-      btnUp.setAttribute("title", tRanking("ranking_up"));
-      btnUp.textContent = tRanking("ranking_up");
-      var btnDown = document.createElement("button");
-      btnDown.type = "button";
-      btnDown.className = "fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-arrow-down-line ranking-btn-down";
-      btnDown.setAttribute("aria-label", tRanking("ranking_down_aria", label));
-      btnDown.setAttribute("title", tRanking("ranking_down"));
-      btnDown.textContent = tRanking("ranking_down");
-      var btnRemove = document.createElement("button");
-      btnRemove.type = "button";
-      btnRemove.className = "fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-close-line ranking-btn-remove";
-      btnRemove.setAttribute("aria-label", tRanking("ranking_remove_aria", label));
-      btnRemove.setAttribute("title", tRanking("ranking_remove"));
-      btnRemove.textContent = tRanking("ranking_remove");
-      controls.appendChild(btnUp);
-      controls.appendChild(btnDown);
-      controls.appendChild(btnRemove);
-      item.appendChild(controls);
-      btnUp.addEventListener("click", function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        moveItemUp(item, qId);
-      });
-      btnDown.addEventListener("click", function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        moveItemDown(item, qId);
-      });
-      btnRemove.addEventListener("click", function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        removeItemFromRank(item, qId);
-      });
-    }
-    function updateControlButtonStates(qId) {
-      var rankList = document.getElementById("sortable-rank-" + qId);
-      if (!rankList) return;
-      var items = rankList.querySelectorAll("li:not(.ls-remove):not(.d-none)");
-      items.forEach(function(item, index) {
-        var btnUp = item.querySelector(".ranking-btn-up");
-        var btnDown = item.querySelector(".ranking-btn-down");
-        if (btnUp) {
-          btnUp.disabled = index === 0;
-        }
-        if (btnDown) {
-          btnDown.disabled = index === items.length - 1;
-        }
-      });
-    }
-    function createChoiceControlButtons(item, qId) {
-      if (item.querySelector(".ranking-choice-controls")) return;
-      var label = getItemLabel(item);
-      var controls = document.createElement("span");
-      controls.className = "ranking-choice-controls";
-      controls.setAttribute("role", "group");
-      controls.setAttribute("aria-label", tRanking("ranking_actions_for", label));
-      var btnAdd = document.createElement("button");
-      btnAdd.type = "button";
-      btnAdd.className = "fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-arrow-right-line ranking-btn-add";
-      btnAdd.setAttribute("aria-label", tRanking("ranking_add_aria", label));
-      btnAdd.setAttribute("title", tRanking("ranking_add"));
-      btnAdd.textContent = tRanking("ranking_add");
-      controls.appendChild(btnAdd);
-      item.appendChild(controls);
-      btnAdd.addEventListener("click", function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        addItemToRank(item, qId);
-      });
-    }
-    function updateChoiceControlButtonStates(qId) {
-      var container = document.querySelector('[data-ranking-qid="' + qId + '"]');
-      if (!container) return;
-      var maxAnswers = parseInt(container.dataset.maxAnswers) || 0;
-      var rankList = document.getElementById("sortable-rank-" + qId);
-      var choiceList = document.getElementById("sortable-choice-" + qId);
-      if (!rankList || !choiceList) return;
-      var rankedCount = rankList.querySelectorAll("li:not(.ls-remove):not(.d-none)").length;
-      var isFull = maxAnswers > 0 && rankedCount >= maxAnswers;
-      choiceList.querySelectorAll(".ranking-btn-add").forEach(function(btn) {
-        btn.disabled = isFull;
-      });
-    }
-    function updateRankNumbers(qId) {
-      var rankList = document.getElementById("sortable-rank-" + qId);
-      if (!rankList) return;
-      var items = rankList.querySelectorAll("li:not(.ls-remove):not(.d-none)");
-      var total = items.length;
-      items.forEach(function(item, index) {
-        var rank = index + 1;
-        var badge = item.querySelector(".ranking-rank-badge");
-        if (!badge) {
-          badge = document.createElement("span");
-          badge.className = "ranking-rank-badge";
-          badge.setAttribute("aria-hidden", "true");
-          item.insertBefore(badge, item.firstChild);
-        }
-        badge.textContent = "#" + rank;
-        var label = getItemLabel(item);
-        item.setAttribute("aria-label", label + " - Rang " + rank + " sur " + total + ". Entrée pour retirer, Alt+Flèches pour réordonner");
-      });
-      var choiceList = document.getElementById("sortable-choice-" + qId);
-      if (choiceList) {
-        choiceList.querySelectorAll(".ranking-rank-badge").forEach(function(badge) {
-          badge.remove();
-        });
-        choiceList.querySelectorAll("li:not(.ls-remove):not(.d-none)").forEach(function(item) {
-          var label = getItemLabel(item);
-          item.setAttribute("aria-label", label + " - Appuyez sur Entrée pour ajouter au classement");
-          item.setAttribute("aria-selected", "false");
-        });
-      }
-      items.forEach(function(item) {
-        item.setAttribute("aria-selected", "true");
-      });
-    }
-    function addItemToRank(item, qId) {
-      var maxAnswers = parseInt(document.querySelector('[data-ranking-qid="' + qId + '"]').dataset.maxAnswers) || 0;
-      var rankList = document.getElementById("sortable-rank-" + qId);
-      var currentCount = rankList.querySelectorAll("li:not(.ls-remove):not(.d-none)").length;
-      if (maxAnswers > 0 && currentCount >= maxAnswers) {
-        announce(qId, "Nombre maximum de réponses atteint");
-        return;
-      }
-      rankList.appendChild(item);
-      var label = getItemLabel(item);
-      var newPos = rankList.querySelectorAll("li:not(.ls-remove):not(.d-none)").length;
-      announce(qId, label + " ajouté au classement en position " + newPos);
-      syncHiddenSelects(qId);
-      refreshAllItems(qId);
-      var choiceList = document.getElementById("sortable-choice-" + qId);
-      var nextItem = choiceList.querySelector("li:not(.ls-remove):not(.d-none):not(.ls-irrelevant)");
-      if (nextItem) {
-        nextItem.focus();
-      } else {
-        item.focus();
-      }
-    }
-    function removeItemFromRank(item, qId) {
-      var choiceList = document.getElementById("sortable-choice-" + qId);
-      var rankList = document.getElementById("sortable-rank-" + qId);
-      var items = Array.from(rankList.querySelectorAll("li:not(.ls-remove):not(.d-none)"));
-      var currentIndex = items.indexOf(item);
-      var nextFocusItem = items[currentIndex + 1] || items[currentIndex - 1];
-      choiceList.appendChild(item);
-      var label = getItemLabel(item);
-      announce(qId, label + " retiré du classement");
-      syncHiddenSelects(qId);
-      refreshAllItems(qId);
-      if (nextFocusItem) {
-        nextFocusItem.focus();
-      } else {
-        item.focus();
-      }
-    }
-    function moveItemUp(item, qId) {
-      var prev = item.previousElementSibling;
-      while (prev && (prev.classList.contains("ls-remove") || prev.classList.contains("d-none"))) {
-        prev = prev.previousElementSibling;
-      }
-      if (!prev) return;
-      item.parentNode.insertBefore(item, prev);
-      var label = getItemLabel(item);
-      var items = item.parentNode.querySelectorAll("li:not(.ls-remove):not(.d-none)");
-      var newPos = Array.from(items).indexOf(item) + 1;
-      announce(qId, label + " déplacé en position " + newPos);
-      syncHiddenSelects(qId);
-      refreshAllItems(qId);
-      item.focus();
-    }
-    function moveItemDown(item, qId) {
-      var next = item.nextElementSibling;
-      while (next && (next.classList.contains("ls-remove") || next.classList.contains("d-none"))) {
-        next = next.nextElementSibling;
-      }
-      if (!next) return;
-      item.parentNode.insertBefore(item, next.nextSibling);
-      var label = getItemLabel(item);
-      var items = item.parentNode.querySelectorAll("li:not(.ls-remove):not(.d-none)");
-      var newPos = Array.from(items).indexOf(item) + 1;
-      announce(qId, label + " déplacé en position " + newPos);
-      syncHiddenSelects(qId);
-      refreshAllItems(qId);
-      item.focus();
-    }
-    function refreshAllItems(qId) {
-      var rankList = document.getElementById("sortable-rank-" + qId);
-      if (!rankList) return;
-      _isInternalUpdate = true;
-      try {
-        rankList.querySelectorAll(".ranking-choice-controls").forEach(function(ctrl) {
-          ctrl.remove();
-        });
-        rankList.querySelectorAll("li:not(.ls-remove):not(.d-none)").forEach(function(item) {
-          createControlButtons(item, qId);
-        });
-        var choiceList = document.getElementById("sortable-choice-" + qId);
-        if (choiceList) {
-          choiceList.querySelectorAll(".ranking-controls").forEach(function(ctrl) {
-            ctrl.remove();
-          });
-          choiceList.querySelectorAll("li:not(.ls-remove):not(.d-none)").forEach(function(item) {
-            createChoiceControlButtons(item, qId);
-          });
-        }
-        updateControlButtonStates(qId);
-        updateChoiceControlButtonStates(qId);
-        updateRankNumbers(qId);
-      } finally {
-        _isInternalUpdate = false;
-      }
-    }
-    function bindKeyboardEvents(qId) {
-      var choiceList = document.getElementById("sortable-choice-" + qId);
-      var rankList = document.getElementById("sortable-rank-" + qId);
-      if (!choiceList || !rankList) return;
-      choiceList.addEventListener("keydown", function(e) {
-        var item = e.target.closest("li:not(.ls-remove):not(.d-none)");
-        if (!item) return;
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          addItemToRank(item, qId);
-        }
-      });
-      rankList.addEventListener("keydown", function(e) {
-        var item = e.target.closest("li:not(.ls-remove):not(.d-none)");
-        if (!item) return;
-        if (e.target.tagName === "BUTTON") return;
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          removeItemFromRank(item, qId);
-        } else if (e.key === "ArrowUp" && e.altKey) {
-          e.preventDefault();
-          moveItemUp(item, qId);
-        } else if (e.key === "ArrowDown" && e.altKey) {
-          e.preventDefault();
-          moveItemDown(item, qId);
-        }
-      });
-    }
-    var _isInternalUpdate = false;
-    function observeRankingLists(qId) {
-      var rankList = document.getElementById("sortable-rank-" + qId);
-      var choiceList = document.getElementById("sortable-choice-" + qId);
-      if (!rankList || !choiceList) return;
-      var observer = new MutationObserver(function(mutations) {
-        if (_isInternalUpdate) return;
-        var hasChildChange = mutations.some(function(m) {
-          return m.type === "childList" && (m.addedNodes.length > 0 || m.removedNodes.length > 0);
-        });
-        if (hasChildChange) {
-          refreshAllItems(qId);
-        }
-      });
-      observer.observe(rankList, { childList: true });
-      observer.observe(choiceList, { childList: true });
-    }
-    function initAccessibleRanking(qId) {
-      bindKeyboardEvents(qId);
-      observeRankingLists(qId);
-      refreshAllItems(qId);
-    }
-    function initAllRankingQuestions() {
-      var questions = document.querySelectorAll(".ranking-question-dsfr[data-ranking-qid]");
-      questions.forEach(function(q) {
-        var qId = q.dataset.rankingQid;
-        if (qId && !q.dataset.accessibleRankingInit) {
-          q.dataset.accessibleRankingInit = "true";
-          setTimeout(function() {
-            initAccessibleRanking(qId);
-          }, 200);
-        }
-      });
-    }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", initAllRankingQuestions);
-    } else {
-      initAllRankingQuestions();
-    }
-    document.addEventListener("limesurvey:questionsLoaded", function() {
-      setTimeout(initAllRankingQuestions, 300);
-    });
-    if (typeof $ !== "undefined") {
-      $(document).on("pjax:complete", function() {
-        setTimeout(initAllRankingQuestions, 300);
-      });
-    }
-  })();
   function triggerEmRelevance() {
     triggerEmRelevanceQuestion();
     triggerEmRelevanceGroup();
@@ -2552,6 +2201,343 @@
     });
   }
 
+  // modules/theme-dsfr/src/ranking/ranking.js
+  var _isInternalUpdate = false;
+  function getItemLabel(item) {
+    var textSpan = item.querySelector(".ranking-item-text");
+    if (textSpan) return textSpan.textContent.trim();
+    return item.dataset.label || item.textContent.trim();
+  }
+  function announce(qId, message) {
+    var liveRegion = document.getElementById("ranking-live-" + qId);
+    if (!liveRegion) return;
+    liveRegion.textContent = "";
+    setTimeout(function() {
+      liveRegion.textContent = message;
+    }, 50);
+  }
+  function syncHiddenSelects(qId) {
+    var questionEl = document.getElementById("question" + qId);
+    if (!questionEl) return;
+    var rankedItems = document.querySelectorAll("#sortable-rank-" + qId + " li:not(.ls-remove):not(.d-none)");
+    var selects = questionEl.querySelectorAll(".select-list .select-item select");
+    selects.forEach(function(select) {
+      select.value = "";
+    });
+    rankedItems.forEach(function(item, index) {
+      if (index < selects.length) {
+        var oldVal = selects[index].value;
+        selects[index].value = item.dataset.value;
+        if (oldVal !== item.dataset.value) {
+          if (typeof $ !== "undefined") {
+            $(selects[index]).trigger("change", { source: "dragdrop" });
+          }
+        }
+      }
+    });
+    var rankingName = questionEl.querySelector(".ranking-question-dsfr") ? questionEl.querySelector(".ranking-question-dsfr").dataset.rankingName : null;
+    if (!rankingName) {
+      var container = questionEl.querySelector("[data-ranking-name]");
+      if (container) rankingName = container.dataset.rankingName;
+    }
+    if (rankingName) {
+      var relevanceInputs = document.querySelectorAll('[id^="relevance' + rankingName + '"]');
+      relevanceInputs.forEach(function(input) {
+        input.value = "0";
+      });
+      rankedItems.forEach(function(item, index) {
+        var relInput = document.getElementById("relevance" + rankingName + (index + 1));
+        if (relInput) {
+          relInput.value = "1";
+        }
+      });
+    }
+  }
+  function createControlButtons(item, qId) {
+    if (item.querySelector(".ranking-controls")) return;
+    var label = getItemLabel(item);
+    var controls = document.createElement("span");
+    controls.className = "ranking-controls";
+    controls.setAttribute("role", "group");
+    controls.setAttribute("aria-label", tRanking("ranking_actions_for", label));
+    var btnUp = document.createElement("button");
+    btnUp.type = "button";
+    btnUp.className = "fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-arrow-up-line ranking-btn-up";
+    btnUp.setAttribute("aria-label", tRanking("ranking_up_aria", label));
+    btnUp.setAttribute("title", tRanking("ranking_up"));
+    btnUp.textContent = tRanking("ranking_up");
+    var btnDown = document.createElement("button");
+    btnDown.type = "button";
+    btnDown.className = "fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-arrow-down-line ranking-btn-down";
+    btnDown.setAttribute("aria-label", tRanking("ranking_down_aria", label));
+    btnDown.setAttribute("title", tRanking("ranking_down"));
+    btnDown.textContent = tRanking("ranking_down");
+    var btnRemove = document.createElement("button");
+    btnRemove.type = "button";
+    btnRemove.className = "fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-close-line ranking-btn-remove";
+    btnRemove.setAttribute("aria-label", tRanking("ranking_remove_aria", label));
+    btnRemove.setAttribute("title", tRanking("ranking_remove"));
+    btnRemove.textContent = tRanking("ranking_remove");
+    controls.appendChild(btnUp);
+    controls.appendChild(btnDown);
+    controls.appendChild(btnRemove);
+    item.appendChild(controls);
+    btnUp.addEventListener("click", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      moveItemUp(item, qId);
+    });
+    btnDown.addEventListener("click", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      moveItemDown(item, qId);
+    });
+    btnRemove.addEventListener("click", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      removeItemFromRank(item, qId);
+    });
+  }
+  function updateControlButtonStates(qId) {
+    var rankList = document.getElementById("sortable-rank-" + qId);
+    if (!rankList) return;
+    var items = rankList.querySelectorAll("li:not(.ls-remove):not(.d-none)");
+    items.forEach(function(item, index) {
+      var btnUp = item.querySelector(".ranking-btn-up");
+      var btnDown = item.querySelector(".ranking-btn-down");
+      if (btnUp) {
+        btnUp.disabled = index === 0;
+      }
+      if (btnDown) {
+        btnDown.disabled = index === items.length - 1;
+      }
+    });
+  }
+  function createChoiceControlButtons(item, qId) {
+    if (item.querySelector(".ranking-choice-controls")) return;
+    var label = getItemLabel(item);
+    var controls = document.createElement("span");
+    controls.className = "ranking-choice-controls";
+    controls.setAttribute("role", "group");
+    controls.setAttribute("aria-label", tRanking("ranking_actions_for", label));
+    var btnAdd = document.createElement("button");
+    btnAdd.type = "button";
+    btnAdd.className = "fr-btn fr-btn--tertiary-no-outline fr-btn--sm fr-icon-arrow-right-line ranking-btn-add";
+    btnAdd.setAttribute("aria-label", tRanking("ranking_add_aria", label));
+    btnAdd.setAttribute("title", tRanking("ranking_add"));
+    btnAdd.textContent = tRanking("ranking_add");
+    controls.appendChild(btnAdd);
+    item.appendChild(controls);
+    btnAdd.addEventListener("click", function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      addItemToRank(item, qId);
+    });
+  }
+  function updateChoiceControlButtonStates(qId) {
+    var container = document.querySelector('[data-ranking-qid="' + qId + '"]');
+    if (!container) return;
+    var maxAnswers = parseInt(container.dataset.maxAnswers) || 0;
+    var rankList = document.getElementById("sortable-rank-" + qId);
+    var choiceList = document.getElementById("sortable-choice-" + qId);
+    if (!rankList || !choiceList) return;
+    var rankedCount = rankList.querySelectorAll("li:not(.ls-remove):not(.d-none)").length;
+    var isFull = maxAnswers > 0 && rankedCount >= maxAnswers;
+    choiceList.querySelectorAll(".ranking-btn-add").forEach(function(btn) {
+      btn.disabled = isFull;
+    });
+  }
+  function updateRankNumbers(qId) {
+    var rankList = document.getElementById("sortable-rank-" + qId);
+    if (!rankList) return;
+    var items = rankList.querySelectorAll("li:not(.ls-remove):not(.d-none)");
+    var total = items.length;
+    items.forEach(function(item, index) {
+      var rank = index + 1;
+      var badge = item.querySelector(".ranking-rank-badge");
+      if (!badge) {
+        badge = document.createElement("span");
+        badge.className = "ranking-rank-badge";
+        badge.setAttribute("aria-hidden", "true");
+        item.insertBefore(badge, item.firstChild);
+      }
+      badge.textContent = "#" + rank;
+      var label = getItemLabel(item);
+      item.setAttribute("aria-label", label + " - Rang " + rank + " sur " + total + ". Entrée pour retirer, Alt+Flèches pour réordonner");
+    });
+    var choiceList = document.getElementById("sortable-choice-" + qId);
+    if (choiceList) {
+      choiceList.querySelectorAll(".ranking-rank-badge").forEach(function(badge) {
+        badge.remove();
+      });
+      choiceList.querySelectorAll("li:not(.ls-remove):not(.d-none)").forEach(function(item) {
+        var label = getItemLabel(item);
+        item.setAttribute("aria-label", label + " - Appuyez sur Entrée pour ajouter au classement");
+        item.setAttribute("aria-selected", "false");
+      });
+    }
+    items.forEach(function(item) {
+      item.setAttribute("aria-selected", "true");
+    });
+  }
+  function addItemToRank(item, qId) {
+    var maxAnswers = parseInt(document.querySelector('[data-ranking-qid="' + qId + '"]').dataset.maxAnswers) || 0;
+    var rankList = document.getElementById("sortable-rank-" + qId);
+    var currentCount = rankList.querySelectorAll("li:not(.ls-remove):not(.d-none)").length;
+    if (maxAnswers > 0 && currentCount >= maxAnswers) {
+      announce(qId, "Nombre maximum de réponses atteint");
+      return;
+    }
+    rankList.appendChild(item);
+    var label = getItemLabel(item);
+    var newPos = rankList.querySelectorAll("li:not(.ls-remove):not(.d-none)").length;
+    announce(qId, label + " ajouté au classement en position " + newPos);
+    syncHiddenSelects(qId);
+    refreshAllItems(qId);
+    var choiceList = document.getElementById("sortable-choice-" + qId);
+    var nextItem = choiceList.querySelector("li:not(.ls-remove):not(.d-none):not(.ls-irrelevant)");
+    if (nextItem) {
+      nextItem.focus();
+    } else {
+      item.focus();
+    }
+  }
+  function removeItemFromRank(item, qId) {
+    var choiceList = document.getElementById("sortable-choice-" + qId);
+    var rankList = document.getElementById("sortable-rank-" + qId);
+    var items = Array.from(rankList.querySelectorAll("li:not(.ls-remove):not(.d-none)"));
+    var currentIndex = items.indexOf(item);
+    var nextFocusItem = items[currentIndex + 1] || items[currentIndex - 1];
+    choiceList.appendChild(item);
+    var label = getItemLabel(item);
+    announce(qId, label + " retiré du classement");
+    syncHiddenSelects(qId);
+    refreshAllItems(qId);
+    if (nextFocusItem) {
+      nextFocusItem.focus();
+    } else {
+      item.focus();
+    }
+  }
+  function moveItemUp(item, qId) {
+    var prev = item.previousElementSibling;
+    while (prev && (prev.classList.contains("ls-remove") || prev.classList.contains("d-none"))) {
+      prev = prev.previousElementSibling;
+    }
+    if (!prev) return;
+    item.parentNode.insertBefore(item, prev);
+    var label = getItemLabel(item);
+    var items = item.parentNode.querySelectorAll("li:not(.ls-remove):not(.d-none)");
+    var newPos = Array.from(items).indexOf(item) + 1;
+    announce(qId, label + " déplacé en position " + newPos);
+    syncHiddenSelects(qId);
+    refreshAllItems(qId);
+    item.focus();
+  }
+  function moveItemDown(item, qId) {
+    var next = item.nextElementSibling;
+    while (next && (next.classList.contains("ls-remove") || next.classList.contains("d-none"))) {
+      next = next.nextElementSibling;
+    }
+    if (!next) return;
+    item.parentNode.insertBefore(item, next.nextSibling);
+    var label = getItemLabel(item);
+    var items = item.parentNode.querySelectorAll("li:not(.ls-remove):not(.d-none)");
+    var newPos = Array.from(items).indexOf(item) + 1;
+    announce(qId, label + " déplacé en position " + newPos);
+    syncHiddenSelects(qId);
+    refreshAllItems(qId);
+    item.focus();
+  }
+  function refreshAllItems(qId) {
+    var rankList = document.getElementById("sortable-rank-" + qId);
+    if (!rankList) return;
+    _isInternalUpdate = true;
+    try {
+      rankList.querySelectorAll(".ranking-choice-controls").forEach(function(ctrl) {
+        ctrl.remove();
+      });
+      rankList.querySelectorAll("li:not(.ls-remove):not(.d-none)").forEach(function(item) {
+        createControlButtons(item, qId);
+      });
+      var choiceList = document.getElementById("sortable-choice-" + qId);
+      if (choiceList) {
+        choiceList.querySelectorAll(".ranking-controls").forEach(function(ctrl) {
+          ctrl.remove();
+        });
+        choiceList.querySelectorAll("li:not(.ls-remove):not(.d-none)").forEach(function(item) {
+          createChoiceControlButtons(item, qId);
+        });
+      }
+      updateControlButtonStates(qId);
+      updateChoiceControlButtonStates(qId);
+      updateRankNumbers(qId);
+    } finally {
+      _isInternalUpdate = false;
+    }
+  }
+  function bindKeyboardEvents(qId) {
+    var choiceList = document.getElementById("sortable-choice-" + qId);
+    var rankList = document.getElementById("sortable-rank-" + qId);
+    if (!choiceList || !rankList) return;
+    choiceList.addEventListener("keydown", function(e) {
+      var item = e.target.closest("li:not(.ls-remove):not(.d-none)");
+      if (!item) return;
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        addItemToRank(item, qId);
+      }
+    });
+    rankList.addEventListener("keydown", function(e) {
+      var item = e.target.closest("li:not(.ls-remove):not(.d-none)");
+      if (!item) return;
+      if (e.target.tagName === "BUTTON") return;
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        removeItemFromRank(item, qId);
+      } else if (e.key === "ArrowUp" && e.altKey) {
+        e.preventDefault();
+        moveItemUp(item, qId);
+      } else if (e.key === "ArrowDown" && e.altKey) {
+        e.preventDefault();
+        moveItemDown(item, qId);
+      }
+    });
+  }
+  function observeRankingLists(qId) {
+    var rankList = document.getElementById("sortable-rank-" + qId);
+    var choiceList = document.getElementById("sortable-choice-" + qId);
+    if (!rankList || !choiceList) return;
+    var observer = new MutationObserver(function(mutations) {
+      if (_isInternalUpdate) return;
+      var hasChildChange = mutations.some(function(m) {
+        return m.type === "childList" && (m.addedNodes.length > 0 || m.removedNodes.length > 0);
+      });
+      if (hasChildChange) {
+        refreshAllItems(qId);
+      }
+    });
+    observer.observe(rankList, { childList: true });
+    observer.observe(choiceList, { childList: true });
+  }
+  function initAccessibleRanking(qId) {
+    bindKeyboardEvents(qId);
+    observeRankingLists(qId);
+    refreshAllItems(qId);
+  }
+  function initAllRankingQuestions() {
+    var questions = document.querySelectorAll(".ranking-question-dsfr[data-ranking-qid]");
+    questions.forEach(function(q) {
+      var qId = q.dataset.rankingQid;
+      if (qId && !q.dataset.accessibleRankingInit) {
+        q.dataset.accessibleRankingInit = "true";
+        setTimeout(function() {
+          initAccessibleRanking(qId);
+        }, 200);
+      }
+    });
+  }
+
   // modules/theme-dsfr/src/index.js
   window.DSFRSanitizeRTEContent = sanitizeRTEContent;
   window.updateErrorSummary = updateErrorSummary;
@@ -2587,6 +2573,7 @@
     initRadioOtherField();
     initCaptchaReload();
     initCaptchaValidation();
+    initAllRankingQuestions();
     const forms = document.querySelectorAll('form#limesurvey, form[name="limesurvey"]');
     forms.forEach((form) => {
       form.addEventListener("submit", () => {
@@ -2620,9 +2607,11 @@
     initRadioOtherField();
     initCaptchaReload();
     initCaptchaValidation();
+    setTimeout(initAllRankingQuestions, 300);
   });
   onPjax(() => {
     setTimeout(sanitizeRTEContent, 100);
+    setTimeout(initAllRankingQuestions, 300);
   });
   var dropdownResizeTimer;
   window.addEventListener("resize", () => {

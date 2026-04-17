@@ -38,6 +38,7 @@ import {
 import { initMultipleShortText } from './inputs/input-on-demand.js';
 import { initBootstrapButtonsRadio, initRadioOtherField } from './inputs/radio-buttons.js';
 import { initCaptchaReload, initCaptchaValidation } from './captcha/captcha.js';
+import { initAllRankingQuestions } from './ranking/ranking.js';
 
 // --- Contrat global : exposition sur window ---
 window.DSFRSanitizeRTEContent = sanitizeRTEContent;
@@ -91,6 +92,9 @@ onReady(() => {
     initCaptchaReload();
     initCaptchaValidation();
 
+    // Ranking accessible (SortableJS + clavier + aria-live)
+    initAllRankingQuestions();
+
     // Re-déclencher la transformation + le récapitulatif après soumission
     // LimeSurvey (cas de validation côté serveur qui ne passe pas par pjax).
     const forms = document.querySelectorAll('form#limesurvey, form[name="limesurvey"]');
@@ -132,11 +136,15 @@ onQuestionsLoaded(() => {
     initRadioOtherField();
     initCaptchaReload();
     initCaptchaValidation();
+
+    // Ranking — réexécuté avec un délai pour laisser SortableJS se peupler
+    setTimeout(initAllRankingQuestions, 300);
 });
 
 // --- Re-initialisation sur navigation pjax ---
 onPjax(() => {
     setTimeout(sanitizeRTEContent, 100);
+    setTimeout(initAllRankingQuestions, 300);
 });
 
 // --- Redimensionnement : dropdown-array selon largeur de fenêtre ---
