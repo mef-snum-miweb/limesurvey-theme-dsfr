@@ -1,356 +1,10 @@
 /* Thème DSFR pour LimeSurvey — bundle généré par esbuild depuis src/. Ne pas éditer à la main. */
 (() => {
-  // modules/theme-dsfr/src/core/i18n.js
-  var MANDATORY_I18N_FR = {
-    fields_remaining_plural: "Veuillez compléter les %remaining% champs restants sur %total%.",
-    fields_remaining_singular: "Veuillez compléter le dernier champ.",
-    fields_all_required: "Veuillez compléter tous les champs (%total% champs requis).",
-    field_valid: "Saisie valide",
-    numeric_only: "Ce champ n'accepte que des valeurs numériques."
-  };
-  var MANDATORY_I18N_EN = {
-    fields_remaining_plural: "Please complete the remaining %remaining% of %total% fields.",
-    fields_remaining_singular: "Please complete the last field.",
-    fields_all_required: "Please complete all fields (%total% fields required).",
-    field_valid: "Valid input",
-    numeric_only: "This field only accepts numeric values."
-  };
-  function tMandatory(key, remaining, total) {
-    const lang = (document.documentElement.lang || "fr").toLowerCase().substring(0, 2);
-    const dict = lang === "en" ? MANDATORY_I18N_EN : MANDATORY_I18N_FR;
-    let str = dict[key] || MANDATORY_I18N_FR[key] || key;
-    if (typeof remaining !== "undefined") {
-      str = str.replace("%remaining%", remaining);
-    }
-    if (typeof total !== "undefined") {
-      str = str.replace("%total%", total);
-    }
-    return str;
-  }
-  var RANKING_I18N_FR = {
-    ranking_actions_for: "Actions pour %s",
-    ranking_add: "Ajouter au classement",
-    ranking_add_aria: "Ajouter %s au classement",
-    ranking_up: "Monter",
-    ranking_up_aria: "Monter %s",
-    ranking_down: "Descendre",
-    ranking_down_aria: "Descendre %s",
-    ranking_remove: "Retirer",
-    ranking_remove_aria: "Retirer %s du classement"
-  };
-  var RANKING_I18N_EN = {
-    ranking_actions_for: "Actions for %s",
-    ranking_add: "Add to ranking",
-    ranking_add_aria: "Add %s to ranking",
-    ranking_up: "Move up",
-    ranking_up_aria: "Move %s up",
-    ranking_down: "Move down",
-    ranking_down_aria: "Move %s down",
-    ranking_remove: "Remove",
-    ranking_remove_aria: "Remove %s from ranking"
-  };
-  function tRanking(key, label) {
-    const lang = (document.documentElement.lang || "fr").toLowerCase().substring(0, 2);
-    const dict = lang === "en" ? RANKING_I18N_EN : RANKING_I18N_FR;
-    let str = dict[key] || RANKING_I18N_FR[key] || key;
-    if (typeof label !== "undefined") {
-      str = str.replace("%s", label);
-    }
-    return str;
-  }
-
-  // modules/theme-dsfr/src/core/dom-utils.js
-  function isValidNumber(value) {
-    return /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
-  }
-  function isQuestionHidden(el) {
-    return el.style.display === "none" || el.classList.contains("ls-irrelevant") || el.classList.contains("ls-hidden") || el.classList.contains("d-none");
-  }
-
-  // modules/theme-dsfr/src/validation/error-summary.js
-  function createErrorSummary() {
-    const oldSummary = document.getElementById("dsfr-error-summary");
-    if (oldSummary) {
-      oldSummary.remove();
-    }
-    const errorQuestions = document.querySelectorAll(".question-container.input-error, .question-container.fr-input-group--error");
-    if (errorQuestions.length === 0) {
-      return;
-    }
-    const errorList = [];
-    errorQuestions.forEach(function(question) {
-      const questionId = question.id;
-      const questionTextElement = question.querySelector(".ls-label-question, .question-text");
-      let questionText = questionTextElement ? questionTextElement.textContent.trim() : "Question sans titre";
-      const questionNumberElement = question.querySelector(".question-number");
-      let questionNumber = questionNumberElement ? questionNumberElement.textContent.trim() : "";
-      const errorMessageElement = question.querySelector(".fr-message--error");
-      let errorMessage = errorMessageElement ? errorMessageElement.textContent.trim() : "";
-      let label = questionText;
-      if (errorMessage) {
-        label += " : " + errorMessage;
-      }
-      if (label.length > 150) {
-        label = label.substring(0, 147) + "...";
-      }
-      errorList.push({
-        id: questionId,
-        label
-      });
-    });
-    const summary = document.createElement("div");
-    summary.id = "dsfr-error-summary";
-    summary.className = "fr-alert fr-alert--error fr-mb-4w";
-    summary.setAttribute("role", "alert");
-    summary.setAttribute("tabindex", "-1");
-    let html = '<h3 class="fr-alert__title">';
-    html += errorList.length === 1 ? "Une erreur a été détectée" : errorList.length + " erreurs ont été détectées";
-    html += "</h3>";
-    html += "<p>Veuillez corriger les erreurs suivantes :</p>";
-    html += '<ul class="fr-mb-0">';
-    errorList.forEach(function(error) {
-      html += '<li class="error-item" data-question-id="' + error.id + '">';
-      html += '<a href="#' + error.id + '" class="fr-link fr-icon-error-warning-line fr-link--icon-left">' + error.label + "</a>";
-      html += "</li>";
-    });
-    html += "</ul>";
-    summary.innerHTML = html;
-    summary.querySelectorAll('a[href^="#"]').forEach(function(link) {
-      link.addEventListener("click", function(e) {
-        e.preventDefault();
-        const targetId = this.getAttribute("href").substring(1);
-        const targetElement = document.getElementById(targetId);
-        if (targetElement) {
-          targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
-          setTimeout(function() {
-            const firstInput = targetElement.querySelector(".fr-input, input, textarea, select");
-            if (firstInput) {
-              firstInput.focus();
-            }
-          }, 300);
-        }
-      });
-    });
-    const questionContainer = document.querySelector(".questions-container, .survey-question-container, #question-container, .question-container");
-    const firstQuestion = document.querySelector(".question-container");
-    if (questionContainer && questionContainer.parentNode) {
-      questionContainer.parentNode.insertBefore(summary, questionContainer);
-    } else if (firstQuestion && firstQuestion.parentNode) {
-      firstQuestion.parentNode.insertBefore(summary, firstQuestion);
-    } else {
-      const form = document.querySelector('form#limesurvey, form[name="limesurvey"]');
-      if (form) {
-        form.insertBefore(summary, form.firstChild);
-      }
-    }
-    setTimeout(function() {
-      summary.scrollIntoView({ behavior: "smooth", block: "start" });
-      summary.focus();
-    }, 100);
-  }
-  function updateErrorSummary() {
-    const summary = document.getElementById("dsfr-error-summary");
-    if (!summary) {
-      return;
-    }
-    const errorItems = summary.querySelectorAll(".error-item");
-    let totalErrors = errorItems.length;
-    let correctedCount = 0;
-    errorItems.forEach(function(item) {
-      const questionId = item.getAttribute("data-question-id");
-      const question = document.getElementById(questionId);
-      if (!question) return;
-      const isError = question.classList.contains("input-error");
-      const isValid = question.classList.contains("input-valid");
-      const inputs = question.querySelectorAll('.fr-input, input[type="text"], input[type="number"], textarea, select');
-      let allInputsValid = inputs.length > 0;
-      inputs.forEach(function(input) {
-        if (input.classList.contains("fr-input--error") || !input.value || input.value.trim() === "") {
-          allInputsValid = false;
-        }
-      });
-      if (isValid && !isError || allInputsValid) {
-        if (!item.classList.contains("corrected")) {
-          item.classList.add("corrected");
-          const link = item.querySelector("a");
-          if (link) {
-            link.classList.remove("fr-icon-error-warning-line");
-            link.classList.add("fr-icon-checkbox-circle-line");
-          }
-        }
-        correctedCount++;
-      }
-    });
-    const title = summary.querySelector(".fr-alert__title");
-    const description = summary.querySelector("p");
-    if (correctedCount === totalErrors) {
-      summary.className = "fr-alert fr-alert--success fr-mb-4w";
-      if (title) {
-        title.textContent = "Toutes les erreurs ont été corrigées !";
-      }
-      if (description) {
-        description.textContent = "Vous pouvez maintenant soumettre le formulaire.";
-      }
-    } else if (correctedCount > 0) {
-      summary.className = "fr-alert fr-alert--warning fr-mb-4w";
-      if (title) {
-        const remaining = totalErrors - correctedCount;
-        title.textContent = remaining + " erreur" + (remaining > 1 ? "s" : "") + " restante" + (remaining > 1 ? "s" : "");
-      }
-      if (description) {
-        description.textContent = "Continuez à corriger les erreurs suivantes :";
-      }
-    }
-  }
-  function initErrorSummaryObserver() {
-    if (!document.body) return;
-    const observer = new MutationObserver(function(mutations) {
-      mutations.forEach(function(mutation) {
-        if (mutation.type === "attributes" && mutation.attributeName === "class") {
-          const target = mutation.target;
-          if (target.classList && target.classList.contains("question-container") && target.classList.contains("input-error")) {
-            setTimeout(createErrorSummary, 100);
-          }
-        }
-      });
-    });
-    observer.observe(document.body, {
-      attributes: true,
-      attributeFilter: ["class"],
-      subtree: true
-    });
-  }
-
-  // modules/theme-dsfr/src/legacy.js
+  // modules/theme-dsfr/src/banner.js
   console.log(
     "%c\n             Développé avec ❤️ par la                   \n                                                        \n       ███╗   ███╗██╗██╗    ██╗███████╗██████╗           \n       ████╗ ████║██║██║    ██║██╔════╝██╔══██╗          \n       ██╔████╔██║██║██║ █╗ ██║█████╗  ██████╔╝          \n       ██║╚██╔╝██║██║██║███╗██║██╔══╝  ██╔══██╗          \n       ██║ ╚═╝ ██║██║╚███╔███╔╝███████╗██████╔╝          \n       ╚═╝     ╚═╝╚═╝ ╚══╝╚══╝ ╚══════╝╚═════╝           \n                                                        \n           Mission Ingénierie du Web                   \n    Ministère de l'Économie et des Finances         \n    https://github.com/bmatge/limesurvey-theme-dsfr  \n    Thème DSFR pour LimeSurvey - 2025 - Etalab 2.0    \n",
     "color: #000091; font-weight: bold;"
   );
-  function triggerEmRelevance() {
-    triggerEmRelevanceQuestion();
-    triggerEmRelevanceGroup();
-    triggerEmRelevanceSubQuestion();
-  }
-  function triggerEmRelevanceQuestion() {
-    $("[id^='question']").on("relevance:on", function(event, data) {
-      if (event.target != this) return;
-      $(this).removeClass("ls-irrelevant ls-hidden");
-      $(this).find("input, textarea, select").each(function() {
-        $(this).prop("disabled", false);
-        $(this).removeAttr("tabindex");
-      });
-    });
-    $("[id^='question']").on("relevance:off", function(event, data) {
-      if (event.target != this) return;
-      $(this).addClass("ls-irrelevant ls-hidden");
-      $(this).find("input, textarea, select").each(function() {
-        $(this).attr("tabindex", "-1");
-      });
-    });
-    $(".allinone [id^='group-']:not(.ls-irrelevant) [id^='question']").on("relevance:on", function(event, data) {
-      if (event.target != this) return;
-      $(this).closest("[id^='group-']").removeClass("ls-hidden");
-    });
-    $(".allinone [id^='group-']:not(.ls-irrelevant) [id^='question']").on("relevance:off", function(event, data) {
-      if (event.target != this) return;
-      if ($(this).closest("[id^='group-']").find("[id^='question']").length == $(this).closest("[id^='group-']").find("[id^='question'].ls-hidden").length) {
-        $(this).closest("[id^='group-']").addClass("ls-hidden");
-      }
-    });
-  }
-  function triggerEmRelevanceGroup() {
-    $("[id^='group-']").on("relevance:on", function(event, data) {
-      if (event.target != this) return;
-      $(this).removeClass("ls-irrelevant ls-hidden");
-    });
-    $("[id^='group-']").on("relevance:off", function(event, data) {
-      if (event.target != this) return;
-      $(this).addClass("ls-irrelevant ls-hidden");
-    });
-  }
-  function triggerEmRelevanceSubQuestion() {
-    $("[id^='question']").on("relevance:on", "[id^='javatbd']", function(event, data) {
-      if (event.target != this) return;
-      data = $.extend({ style: "hidden" }, data);
-      $(this).removeClass("ls-irrelevant ls-" + data.style);
-      if (data.style == "disabled") {
-        if ($(event.target).hasClass("answer-item")) {
-          $(event.target).find("input").each(function(itrt, item) {
-            $(item).prop("disabled", false);
-          });
-        } else {
-          $(event.target).find(".answer-item input").each(function(itrt, item) {
-            $(item).prop("disabled", false);
-          });
-        }
-      }
-      if (data.style == "hidden") {
-        updateLineClass($(this));
-        updateRepeatHeading($(this).closest(".ls-answers"));
-      }
-    });
-    $("[id^='question']").on("relevance:off", "[id^='javatbd']", function(event, data) {
-      if (event.target != this) return;
-      data = $.extend({ style: "hidden" }, data);
-      $(this).addClass("ls-irrelevant ls-" + data.style);
-      if (data.style == "disabled") {
-        $(event.target).find("input").each(function(itrt, item) {
-          if ($(item).attr("type") == "checkbox" && $(item).prop("checked")) {
-            $(item).prop("checked", false).trigger("change");
-          }
-          $(item).prop("disabled", true);
-        });
-      }
-      if (data.style == "hidden") {
-        updateLineClass($(this));
-        updateRepeatHeading($(this).closest(".ls-answers"));
-      }
-    });
-  }
-  function updateLineClass(line) {
-    if ($(line).hasClass("ls-odd") || $(line).hasClass("ls-even")) {
-      $(line).closest(".ls-answers").find(".ls-odd:visible,.ls-even:visible").each(function(index) {
-        $(this).removeClass("ls-odd ls-even").addClass((index + 1) % 2 == 0 ? "ls-odd" : "ls-even");
-      });
-    }
-  }
-  function updateRepeatHeading(answers) {
-    $(function() {
-      if ($(answers).data("repeatHeading") || $(answers).find("tbody").find(".ls-heading").length) {
-        if (!$(answers).data("repeatHeading")) {
-          $(answers).data("repeatHeading", $(answers).find("tbody").find(".ls-heading").first().html());
-        }
-        $(answers).find("tbody").find(".ls-heading").remove();
-        var repeatHeading = $(answers).data("repeatHeading");
-        $(answers).find("tbody").find("tr:visible").each(function(index) {
-          if (repeatHeading && index > 0 && index % repeatHeading == 0) {
-            $(this).before("<tr class='ls-heading'>" + repeatHeading + "</tr>");
-          }
-        });
-      }
-    });
-  }
-  (function() {
-    "use strict";
-    function initRelevanceHandlers() {
-      triggerEmRelevance();
-    }
-    if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", initRelevanceHandlers);
-    } else {
-      setTimeout(initRelevanceHandlers, 100);
-    }
-    $(document).on("pjax:complete", initRelevanceHandlers);
-    document.addEventListener("limesurvey:questionsLoaded", initRelevanceHandlers);
-  })();
-  if (typeof window !== "undefined") {
-    window.triggerEmRelevance = triggerEmRelevance;
-    window.triggerEmRelevanceQuestion = triggerEmRelevanceQuestion;
-    window.triggerEmRelevanceGroup = triggerEmRelevanceGroup;
-    window.triggerEmRelevanceSubQuestion = triggerEmRelevanceSubQuestion;
-    window.updateLineClass = updateLineClass;
-    window.updateRepeatHeading = updateRepeatHeading;
-  }
 
   // modules/theme-dsfr/src/core/runtime.js
   function onReady(cb) {
@@ -793,6 +447,219 @@
     }
   }
 
+  // modules/theme-dsfr/src/core/i18n.js
+  var MANDATORY_I18N_FR = {
+    fields_remaining_plural: "Veuillez compléter les %remaining% champs restants sur %total%.",
+    fields_remaining_singular: "Veuillez compléter le dernier champ.",
+    fields_all_required: "Veuillez compléter tous les champs (%total% champs requis).",
+    field_valid: "Saisie valide",
+    numeric_only: "Ce champ n'accepte que des valeurs numériques."
+  };
+  var MANDATORY_I18N_EN = {
+    fields_remaining_plural: "Please complete the remaining %remaining% of %total% fields.",
+    fields_remaining_singular: "Please complete the last field.",
+    fields_all_required: "Please complete all fields (%total% fields required).",
+    field_valid: "Valid input",
+    numeric_only: "This field only accepts numeric values."
+  };
+  function tMandatory(key, remaining, total) {
+    const lang = (document.documentElement.lang || "fr").toLowerCase().substring(0, 2);
+    const dict = lang === "en" ? MANDATORY_I18N_EN : MANDATORY_I18N_FR;
+    let str = dict[key] || MANDATORY_I18N_FR[key] || key;
+    if (typeof remaining !== "undefined") {
+      str = str.replace("%remaining%", remaining);
+    }
+    if (typeof total !== "undefined") {
+      str = str.replace("%total%", total);
+    }
+    return str;
+  }
+  var RANKING_I18N_FR = {
+    ranking_actions_for: "Actions pour %s",
+    ranking_add: "Ajouter au classement",
+    ranking_add_aria: "Ajouter %s au classement",
+    ranking_up: "Monter",
+    ranking_up_aria: "Monter %s",
+    ranking_down: "Descendre",
+    ranking_down_aria: "Descendre %s",
+    ranking_remove: "Retirer",
+    ranking_remove_aria: "Retirer %s du classement"
+  };
+  var RANKING_I18N_EN = {
+    ranking_actions_for: "Actions for %s",
+    ranking_add: "Add to ranking",
+    ranking_add_aria: "Add %s to ranking",
+    ranking_up: "Move up",
+    ranking_up_aria: "Move %s up",
+    ranking_down: "Move down",
+    ranking_down_aria: "Move %s down",
+    ranking_remove: "Remove",
+    ranking_remove_aria: "Remove %s from ranking"
+  };
+  function tRanking(key, label) {
+    const lang = (document.documentElement.lang || "fr").toLowerCase().substring(0, 2);
+    const dict = lang === "en" ? RANKING_I18N_EN : RANKING_I18N_FR;
+    let str = dict[key] || RANKING_I18N_FR[key] || key;
+    if (typeof label !== "undefined") {
+      str = str.replace("%s", label);
+    }
+    return str;
+  }
+
+  // modules/theme-dsfr/src/validation/error-summary.js
+  function createErrorSummary() {
+    const oldSummary = document.getElementById("dsfr-error-summary");
+    if (oldSummary) {
+      oldSummary.remove();
+    }
+    const errorQuestions = document.querySelectorAll(".question-container.input-error, .question-container.fr-input-group--error");
+    if (errorQuestions.length === 0) {
+      return;
+    }
+    const errorList = [];
+    errorQuestions.forEach(function(question) {
+      const questionId = question.id;
+      const questionTextElement = question.querySelector(".ls-label-question, .question-text");
+      let questionText = questionTextElement ? questionTextElement.textContent.trim() : "Question sans titre";
+      const questionNumberElement = question.querySelector(".question-number");
+      let questionNumber = questionNumberElement ? questionNumberElement.textContent.trim() : "";
+      const errorMessageElement = question.querySelector(".fr-message--error");
+      let errorMessage = errorMessageElement ? errorMessageElement.textContent.trim() : "";
+      let label = questionText;
+      if (errorMessage) {
+        label += " : " + errorMessage;
+      }
+      if (label.length > 150) {
+        label = label.substring(0, 147) + "...";
+      }
+      errorList.push({
+        id: questionId,
+        label
+      });
+    });
+    const summary = document.createElement("div");
+    summary.id = "dsfr-error-summary";
+    summary.className = "fr-alert fr-alert--error fr-mb-4w";
+    summary.setAttribute("role", "alert");
+    summary.setAttribute("tabindex", "-1");
+    let html = '<h3 class="fr-alert__title">';
+    html += errorList.length === 1 ? "Une erreur a été détectée" : errorList.length + " erreurs ont été détectées";
+    html += "</h3>";
+    html += "<p>Veuillez corriger les erreurs suivantes :</p>";
+    html += '<ul class="fr-mb-0">';
+    errorList.forEach(function(error) {
+      html += '<li class="error-item" data-question-id="' + error.id + '">';
+      html += '<a href="#' + error.id + '" class="fr-link fr-icon-error-warning-line fr-link--icon-left">' + error.label + "</a>";
+      html += "</li>";
+    });
+    html += "</ul>";
+    summary.innerHTML = html;
+    summary.querySelectorAll('a[href^="#"]').forEach(function(link) {
+      link.addEventListener("click", function(e) {
+        e.preventDefault();
+        const targetId = this.getAttribute("href").substring(1);
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+          targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
+          setTimeout(function() {
+            const firstInput = targetElement.querySelector(".fr-input, input, textarea, select");
+            if (firstInput) {
+              firstInput.focus();
+            }
+          }, 300);
+        }
+      });
+    });
+    const questionContainer = document.querySelector(".questions-container, .survey-question-container, #question-container, .question-container");
+    const firstQuestion = document.querySelector(".question-container");
+    if (questionContainer && questionContainer.parentNode) {
+      questionContainer.parentNode.insertBefore(summary, questionContainer);
+    } else if (firstQuestion && firstQuestion.parentNode) {
+      firstQuestion.parentNode.insertBefore(summary, firstQuestion);
+    } else {
+      const form = document.querySelector('form#limesurvey, form[name="limesurvey"]');
+      if (form) {
+        form.insertBefore(summary, form.firstChild);
+      }
+    }
+    setTimeout(function() {
+      summary.scrollIntoView({ behavior: "smooth", block: "start" });
+      summary.focus();
+    }, 100);
+  }
+  function updateErrorSummary() {
+    const summary = document.getElementById("dsfr-error-summary");
+    if (!summary) {
+      return;
+    }
+    const errorItems = summary.querySelectorAll(".error-item");
+    let totalErrors = errorItems.length;
+    let correctedCount = 0;
+    errorItems.forEach(function(item) {
+      const questionId = item.getAttribute("data-question-id");
+      const question = document.getElementById(questionId);
+      if (!question) return;
+      const isError = question.classList.contains("input-error");
+      const isValid = question.classList.contains("input-valid");
+      const inputs = question.querySelectorAll('.fr-input, input[type="text"], input[type="number"], textarea, select');
+      let allInputsValid = inputs.length > 0;
+      inputs.forEach(function(input) {
+        if (input.classList.contains("fr-input--error") || !input.value || input.value.trim() === "") {
+          allInputsValid = false;
+        }
+      });
+      if (isValid && !isError || allInputsValid) {
+        if (!item.classList.contains("corrected")) {
+          item.classList.add("corrected");
+          const link = item.querySelector("a");
+          if (link) {
+            link.classList.remove("fr-icon-error-warning-line");
+            link.classList.add("fr-icon-checkbox-circle-line");
+          }
+        }
+        correctedCount++;
+      }
+    });
+    const title = summary.querySelector(".fr-alert__title");
+    const description = summary.querySelector("p");
+    if (correctedCount === totalErrors) {
+      summary.className = "fr-alert fr-alert--success fr-mb-4w";
+      if (title) {
+        title.textContent = "Toutes les erreurs ont été corrigées !";
+      }
+      if (description) {
+        description.textContent = "Vous pouvez maintenant soumettre le formulaire.";
+      }
+    } else if (correctedCount > 0) {
+      summary.className = "fr-alert fr-alert--warning fr-mb-4w";
+      if (title) {
+        const remaining = totalErrors - correctedCount;
+        title.textContent = remaining + " erreur" + (remaining > 1 ? "s" : "") + " restante" + (remaining > 1 ? "s" : "");
+      }
+      if (description) {
+        description.textContent = "Continuez à corriger les erreurs suivantes :";
+      }
+    }
+  }
+  function initErrorSummaryObserver() {
+    if (!document.body) return;
+    const observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.type === "attributes" && mutation.attributeName === "class") {
+          const target = mutation.target;
+          if (target.classList && target.classList.contains("question-container") && target.classList.contains("input-error")) {
+            setTimeout(createErrorSummary, 100);
+          }
+        }
+      });
+    });
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class"],
+      subtree: true
+    });
+  }
+
   // modules/theme-dsfr/src/validation/mst-errors.js
   function handleMultipleShortTextErrors() {
     var multipleQuestions = document.querySelectorAll(".question-container.multiple-short-txt");
@@ -1201,6 +1068,14 @@
       attributeFilter: ["class"],
       subtree: true
     });
+  }
+
+  // modules/theme-dsfr/src/core/dom-utils.js
+  function isValidNumber(value) {
+    return /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
+  }
+  function isQuestionHidden(el) {
+    return el.style.display === "none" || el.classList.contains("ls-irrelevant") || el.classList.contains("ls-hidden") || el.classList.contains("d-none");
   }
 
   // modules/theme-dsfr/src/validation/numeric-validation.js
@@ -2538,9 +2413,126 @@
     });
   }
 
+  // modules/theme-dsfr/src/relevance/relevance-jquery.js
+  function triggerEmRelevance() {
+    triggerEmRelevanceQuestion();
+    triggerEmRelevanceGroup();
+    triggerEmRelevanceSubQuestion();
+  }
+  function triggerEmRelevanceQuestion() {
+    $("[id^='question']").on("relevance:on", function(event) {
+      if (event.target != this) return;
+      $(this).removeClass("ls-irrelevant ls-hidden");
+      $(this).find("input, textarea, select").each(function() {
+        $(this).prop("disabled", false);
+        $(this).removeAttr("tabindex");
+      });
+    });
+    $("[id^='question']").on("relevance:off", function(event) {
+      if (event.target != this) return;
+      $(this).addClass("ls-irrelevant ls-hidden");
+      $(this).find("input, textarea, select").each(function() {
+        $(this).attr("tabindex", "-1");
+      });
+    });
+    $(".allinone [id^='group-']:not(.ls-irrelevant) [id^='question']").on("relevance:on", function(event) {
+      if (event.target != this) return;
+      $(this).closest("[id^='group-']").removeClass("ls-hidden");
+    });
+    $(".allinone [id^='group-']:not(.ls-irrelevant) [id^='question']").on("relevance:off", function(event) {
+      if (event.target != this) return;
+      if ($(this).closest("[id^='group-']").find("[id^='question']").length == $(this).closest("[id^='group-']").find("[id^='question'].ls-hidden").length) {
+        $(this).closest("[id^='group-']").addClass("ls-hidden");
+      }
+    });
+  }
+  function triggerEmRelevanceGroup() {
+    $("[id^='group-']").on("relevance:on", function(event) {
+      if (event.target != this) return;
+      $(this).removeClass("ls-irrelevant ls-hidden");
+    });
+    $("[id^='group-']").on("relevance:off", function(event) {
+      if (event.target != this) return;
+      $(this).addClass("ls-irrelevant ls-hidden");
+    });
+  }
+  function triggerEmRelevanceSubQuestion() {
+    $("[id^='question']").on("relevance:on", "[id^='javatbd']", function(event, data) {
+      if (event.target != this) return;
+      data = $.extend({ style: "hidden" }, data);
+      $(this).removeClass("ls-irrelevant ls-" + data.style);
+      if (data.style == "disabled") {
+        if ($(event.target).hasClass("answer-item")) {
+          $(event.target).find("input").each(function(itrt, item) {
+            $(item).prop("disabled", false);
+          });
+        } else {
+          $(event.target).find(".answer-item input").each(function(itrt, item) {
+            $(item).prop("disabled", false);
+          });
+        }
+      }
+      if (data.style == "hidden") {
+        updateLineClass($(this));
+        updateRepeatHeading($(this).closest(".ls-answers"));
+      }
+    });
+    $("[id^='question']").on("relevance:off", "[id^='javatbd']", function(event, data) {
+      if (event.target != this) return;
+      data = $.extend({ style: "hidden" }, data);
+      $(this).addClass("ls-irrelevant ls-" + data.style);
+      if (data.style == "disabled") {
+        $(event.target).find("input").each(function(itrt, item) {
+          if ($(item).attr("type") == "checkbox" && $(item).prop("checked")) {
+            $(item).prop("checked", false).trigger("change");
+          }
+          $(item).prop("disabled", true);
+        });
+      }
+      if (data.style == "hidden") {
+        updateLineClass($(this));
+        updateRepeatHeading($(this).closest(".ls-answers"));
+      }
+    });
+  }
+  function updateLineClass(line) {
+    if ($(line).hasClass("ls-odd") || $(line).hasClass("ls-even")) {
+      $(line).closest(".ls-answers").find(".ls-odd:visible,.ls-even:visible").each(function(index) {
+        $(this).removeClass("ls-odd ls-even").addClass((index + 1) % 2 == 0 ? "ls-odd" : "ls-even");
+      });
+    }
+  }
+  function updateRepeatHeading(answers) {
+    $(function() {
+      if ($(answers).data("repeatHeading") || $(answers).find("tbody").find(".ls-heading").length) {
+        if (!$(answers).data("repeatHeading")) {
+          $(answers).data("repeatHeading", $(answers).find("tbody").find(".ls-heading").first().html());
+        }
+        $(answers).find("tbody").find(".ls-heading").remove();
+        var repeatHeading = $(answers).data("repeatHeading");
+        $(answers).find("tbody").find("tr:visible").each(function(index) {
+          if (repeatHeading && index > 0 && index % repeatHeading == 0) {
+            $(this).before("<tr class='ls-heading'>" + repeatHeading + "</tr>");
+          }
+        });
+      }
+    });
+  }
+  function initRelevanceHandlers() {
+    triggerEmRelevance();
+  }
+  function registerRelevanceGlobals(win = window) {
+    win.triggerEmRelevance = triggerEmRelevance;
+    win.triggerEmRelevanceQuestion = triggerEmRelevanceQuestion;
+    win.triggerEmRelevanceGroup = triggerEmRelevanceGroup;
+    win.triggerEmRelevanceSubQuestion = triggerEmRelevanceSubQuestion;
+    win.updateLineClass = updateLineClass;
+    win.updateRepeatHeading = updateRepeatHeading;
+  }
+
   // modules/theme-dsfr/src/index.js
+  registerRelevanceGlobals(window);
   window.DSFRSanitizeRTEContent = sanitizeRTEContent;
-  window.updateErrorSummary = updateErrorSummary;
   onReady(() => {
     sanitizeRTEContent();
     enableImageLazyLoading();
@@ -2574,6 +2566,7 @@
     initCaptchaReload();
     initCaptchaValidation();
     initAllRankingQuestions();
+    setTimeout(initRelevanceHandlers, 100);
     const forms = document.querySelectorAll('form#limesurvey, form[name="limesurvey"]');
     forms.forEach((form) => {
       form.addEventListener("submit", () => {
@@ -2608,10 +2601,12 @@
     initCaptchaReload();
     initCaptchaValidation();
     setTimeout(initAllRankingQuestions, 300);
+    initRelevanceHandlers();
   });
   onPjax(() => {
     setTimeout(sanitizeRTEContent, 100);
     setTimeout(initAllRankingQuestions, 300);
+    initRelevanceHandlers();
   });
   var dropdownResizeTimer;
   window.addEventListener("resize", () => {

@@ -6,12 +6,11 @@
  * `src/<domaine>/*.js` via les hooks `onReady`, `onQuestionsLoaded` et
  * `onPjax` de `core/runtime.js`.
  *
- * `./legacy.js` contient encore le code non-encore-extrait ; il est
- * vidé progressivement au fil des sessions de refactoring et conserve
- * son propre auto-enregistrement sur `DOMContentLoaded` pour l'instant.
+ * Les contrats globaux LimeSurvey (fonctions attendues sur `window`) sont
+ * exposés ici via `registerRelevanceGlobals` et `window.DSFRSanitizeRTEContent`.
  */
 
-import './legacy.js';
+import './banner.js';
 
 import { onReady, onQuestionsLoaded, onPjax } from './core/runtime.js';
 import { sanitizeRTEContent } from './rte/sanitize.js';
@@ -24,7 +23,7 @@ import { handleRequiredFields } from './validation/required-fields.js';
 import { transformErrorsToDsfr, observeErrorChanges } from './validation/errors-dsfr.js';
 import { handleMultipleShortTextErrors } from './validation/mst-errors.js';
 import { initAriaInvalidSync } from './validation/aria-invalid-sync.js';
-import { createErrorSummary, updateErrorSummary, initErrorSummaryObserver } from './validation/error-summary.js';
+import { createErrorSummary, initErrorSummaryObserver } from './validation/error-summary.js';
 import { initNumericValidation, handleNumericMultiValidation, observeNumericMultiSumValidation } from './validation/numeric-validation.js';
 import { handleArrayValidation, handleSimpleQuestionValidation } from './validation/array-validation.js';
 import { transformValidationMessages } from './validation/validation-messages.js';
@@ -39,13 +38,14 @@ import { initMultipleShortText } from './inputs/input-on-demand.js';
 import { initBootstrapButtonsRadio, initRadioOtherField } from './inputs/radio-buttons.js';
 import { initCaptchaReload, initCaptchaValidation } from './captcha/captcha.js';
 import { initAllRankingQuestions } from './ranking/ranking.js';
+import { initRelevanceHandlers, registerRelevanceGlobals } from './relevance/relevance-jquery.js';
 
-// --- Contrat global : exposition sur window ---
+// --- Contrats globaux LimeSurvey ---
+// Le core et d'éventuels plugins tiers peuvent appeler ces fonctions via
+// `window.<fn>()`. On les expose AVANT onReady pour couvrir le cas où le
+// core les invoque tôt dans le cycle de vie de la page.
+registerRelevanceGlobals(window);
 window.DSFRSanitizeRTEContent = sanitizeRTEContent;
-// Exposé temporairement pour que les appels encore présents dans legacy.js
-// (fonctions non-encore-extraites) le trouvent via leur scope. À retirer
-// quand tout le code l'importe via ES modules.
-window.updateErrorSummary = updateErrorSummary;
 
 // --- Initialisation au chargement de la page ---
 onReady(() => {
@@ -95,6 +95,10 @@ onReady(() => {
     // Ranking accessible (SortableJS + clavier + aria-live)
     initAllRankingQuestions();
 
+    // Relevance jQuery — légère attente pour laisser jQuery se charger
+    // sur les pages où il arrive après DOMContentLoaded.
+    setTimeout(initRelevanceHandlers, 100);
+
     // Re-déclencher la transformation + le récapitulatif après soumission
     // LimeSurvey (cas de validation côté serveur qui ne passe pas par pjax).
     const forms = document.querySelectorAll('form#limesurvey, form[name="limesurvey"]');
@@ -139,12 +143,17 @@ onQuestionsLoaded(() => {
 
     // Ranking — réexécuté avec un délai pour laisser SortableJS se peupler
     setTimeout(initAllRankingQuestions, 300);
+
+    // Relevance — ré-attacher les handlers jQuery (idempotent par design
+    // grâce au jQuery .on qui ignore les doublons de handler pur)
+    initRelevanceHandlers();
 });
 
 // --- Re-initialisation sur navigation pjax ---
 onPjax(() => {
     setTimeout(sanitizeRTEContent, 100);
     setTimeout(initAllRankingQuestions, 300);
+    initRelevanceHandlers();
 });
 
 // --- Redimensionnement : dropdown-array selon largeur de fenêtre ---
