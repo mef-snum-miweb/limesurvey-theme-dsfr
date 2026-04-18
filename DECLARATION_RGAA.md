@@ -87,7 +87,9 @@ Les balises `<p>&nbsp;</p>` vides relevées par l'audit proviennent du **contenu
 
 ## Établissement de cette déclaration d'accessibilité
 
-Cette déclaration a été mise à jour le **16 avril 2026**, sur la base de l'audit initial réalisé par Spécinov (15 avril 2026, commit [`dcef02d`](https://github.com/bmatge/limesurvey-theme-dsfr/commit/dcef02d)) et des corrections apportées jusqu'au commit [`7f5e996`](https://github.com/bmatge/limesurvey-theme-dsfr/commit/7f5e996).
+Cette déclaration a été mise à jour le **18 avril 2026**, sur la base de l'audit initial réalisé par Spécinov (15 avril 2026, commit [`dcef02d`](https://github.com/bmatge/limesurvey-theme-dsfr/commit/dcef02d)) et des corrections apportées jusqu'à la version v1.3.0.
+
+Depuis l'audit initial, le framework **DSFR a été mis à jour de la version 1.11.2 à la version 1.14.4** (release v1.3.0, 18 avril 2026). Cette montée de version a été validée par la suite de tests automatisés du dépôt (481 tests Vitest + Playwright, dont axe-core sur chaque page du questionnaire de référence), sans re-audit Spécinov. Deux régressions introduites par le framework ont été corrigées avant publication : libellé vide sur le champ « Si autre, précisez » des questions à choix (listradio, multiplechoice, list_dropdown) et taille de la zone tactile du bouton *Suivant* en mobile.
 
 ### Environnement de test
 

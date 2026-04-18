@@ -1,6 +1,6 @@
 # Thème DSFR pour LimeSurvey
 
-[![DSFR](https://img.shields.io/badge/DSFR-v1.11-blue)](https://www.systeme-de-design.gouv.fr/)
+[![DSFR](https://img.shields.io/badge/DSFR-v1.14-blue)](https://www.systeme-de-design.gouv.fr/)
 [![LimeSurvey](https://img.shields.io/badge/LimeSurvey-6.0+-green)](https://www.limesurvey.org/)
 [![RGAA](https://img.shields.io/badge/RGAA_4.1-100%25-brightgreen)](DECLARATION_RGAA.md)
 [![Licence](https://img.shields.io/badge/Licence-Etalab_2.0-orange)](https://www.etalab.gouv.fr/licence-ouverte-open-licence/)
@@ -34,6 +34,17 @@ Le thème s'installe directement dans une instance LimeSurvey à partir de l'arc
 3. Activer le thème **DSFR** sur les sondages souhaités
 
 Alternative : copier manuellement le contenu du dépôt dans `upload/themes/survey/dsfr/` de l'instance LimeSurvey, puis l'activer depuis **Configuration > Thèmes**.
+
+### Mise à jour depuis une version ≤ 1.2.x
+
+La release **v1.3.0** supprime le fichier legacy `css/dsfr-no-datauri.min.css` (remplacé par `css/dsfr.min.css` fourni par DSFR ≥ 1.13). LimeSurvey stocke la liste des CSS du thème en base (`lime_template_configuration.files_css`) et peut continuer à référencer l'ancien fichier après mise à jour — résultat : 404 sur le CSS principal, boutons sans style, thème cassé.
+
+Après avoir importé ou remplacé la nouvelle version, il faut **réinitialiser la configuration du thème** :
+
+1. **Configuration > Thèmes > DSFR > Étendre** puis bouton *Réinitialiser ce thème*
+2. (ou en SQL) `UPDATE lime_template_configuration SET files_css = REPLACE(files_css, 'dsfr-no-datauri.min.css', 'dsfr.min.css') WHERE template_name = 'dsfr';` puis purger `tmp/assets/`
+
+Aucune action nécessaire pour une installation neuve.
 
 ### Pour tester ou contribuer
 

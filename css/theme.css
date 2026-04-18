@@ -12,24 +12,24 @@
    ============================================ */
 
 /*
- * DSFR natif v1.11 - RESSOURCES LOCALES
+ * DSFR natif - RESSOURCES LOCALES
  *
  * Les ressources DSFR sont hébergées localement dans les dossiers du thème
  * pour garantir l'autonomie du thème et éviter les dépendances externes.
  * - CSS: ./css/*.min.css
  * - JS: ./js/*.min.js
  * - Fonts: ./fonts/*.woff2
- * - Icons SVG: ./icons/**/*.svg
+ * - Icons SVG: ./icons/**\/*.svg
  *
  * NOTE: On N'utilise PAS DSFR-Connect car nos templates sont déjà
  * en DSFR natif (fr-header, fr-btn, etc.). DSFR-Connect est fait
  * pour convertir les classes Bootstrap, mais on a déjà tout converti.
  *
- * Pour mettre à jour DSFR, voir docs/DSFR-DISTRIBUTION.md
+ * Pour mettre à jour DSFR, lancer ./scripts/update-dsfr.sh (voir CONTRIBUTING.md).
  *
  * Les fichiers DSFR suivants sont chargés automatiquement par LimeSurvey
  * (déclarés dans config.xml, dans l'ordre):
- * 1. dsfr-no-datauri.min.css - CSS principal DSFR
+ * 1. dsfr.min.css - CSS principal DSFR (variante sans data-URI depuis DSFR 1.13)
  * 2. icons.min.css - Icônes DSFR (références SVG)
  * 3. dsfr-grid-helpers.css - Helpers de grille personnalisés
  * 4. theme.css - Ce fichier (styles personnalisés)

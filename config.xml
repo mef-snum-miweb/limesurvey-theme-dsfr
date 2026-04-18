@@ -32,7 +32,7 @@
     <files>
         <css>
             <!-- Fichiers CSS DSFR (doivent être déclarés explicitement) -->
-            <replace>css/dsfr-no-datauri.min.css</replace>
+            <replace>css/dsfr.min.css</replace>
             <replace>css/icons.min.css</replace>
             <replace>css/dsfr-grid-helpers.css</replace>
             <!-- Styles du thème -->

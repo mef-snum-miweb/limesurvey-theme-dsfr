@@ -99,7 +99,7 @@ Détail des critères et audit : [`DECLARATION_RGAA.md`](DECLARATION_RGAA.md).
 ### Navigation
 - **Boutons** `fr-btn` (primary, secondary, tertiary)
 - **Skip links** `fr-skiplinks`
-- **Icônes** Remix Icon via CSS `icons-system` / `icons-utility` (400+ SVG, pas de data-URI)
+- **Icônes** Remix Icon via `icons.min.css` + `icons-system.min.css` (1000+ SVG répartis en 18 catégories, pas de data-URI)
 
 ### Grille
 - `fr-grid-row` + `fr-col-*`

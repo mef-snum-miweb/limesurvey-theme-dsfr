@@ -25,8 +25,6 @@
 # Fichiers PAS touchés :
 #   - scripts/theme.js et custom.js  (JS custom du thème)
 #   - css/theme.css, custom.css, print_theme.css, dsfr-grid-helpers.css  (custom)
-#   - css/dsfr-no-datauri.min.css, icons-embedded.min.css  (héritage v1.11,
-#     à ré-évaluer manuellement s'ils sont encore nécessaires)
 #
 # Le script n'effectue AUCUN commit. Vérifier les changements avec git diff,
 # lancer la suite de tests (cf. TESTING.md du repo parent), puis commiter.
