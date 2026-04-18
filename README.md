@@ -15,7 +15,7 @@ Thème LimeSurvey conforme au [Système de Design de l'État (DSFR)](https://www
 
 | | |
 |---|---|
-| **Accessibilité** | **100 %** RGAA 4.1 hors CAPTCHA — audit Spécinov |
+| **Accessibilité** | **100 %** RGAA 4.1 hors CAPTCHA |
 | **Design** | 100 % DSFR, zéro Bootstrap résiduel, mode clair/sombre natif |
 | **Questions** | 36 types supportés avec templates DSFR dédiés |
 | **Autonomie** | Ressources locales (polices, icônes, JS) — aucun CDN |
@@ -27,16 +27,17 @@ Thème LimeSurvey conforme au [Système de Design de l'État (DSFR)](https://www
 
 ## Installation
 
-Ce thème est fait pour être utilisé via la suite [`limesurvey-dsfr-suite`](https://github.com/bmatge/limesurvey-dsfr-suite) :
+Le thème s'installe directement dans une instance LimeSurvey à partir de l'archive de [release](../../releases/latest) :
 
-```bash
-git clone --recurse-submodules https://github.com/bmatge/limesurvey-dsfr-suite.git
-cd limesurvey-dsfr-suite
-docker compose -f docker-compose.dev.yml up -d
-# http://localhost:8081 (admin / admin)
-```
+1. Télécharger l'archive `.zip` de la dernière release
+2. Depuis l'administration LimeSurvey : **Configuration > Thèmes > Importer**
+3. Activer le thème **DSFR** sur les sondages souhaités
 
-Installation manuelle : copier le dossier dans `upload/themes/survey/` de l'instance LimeSurvey, puis activer le thème **DSFR** depuis **Configuration > Thèmes**.
+Alternative : copier manuellement le contenu du dépôt dans `upload/themes/survey/dsfr/` de l'instance LimeSurvey, puis l'activer depuis **Configuration > Thèmes**.
+
+### Pour tester ou contribuer
+
+Le repo [`bmatge/limesurvey-dsfr-suite`](https://github.com/bmatge/limesurvey-dsfr-suite) fournit un environnement Docker prêt à l'emploi (LimeSurvey 6 + MySQL + questionnaire de test RGAA + suite de tests) qui monte ce thème en direct. Il sert au développement et à la validation a11y ; il n'est **pas** requis pour utiliser le thème en production.
 
 ---
 
@@ -46,10 +47,10 @@ Installation manuelle : copier le dossier dans `upload/themes/survey/` de l'inst
 |---|---|
 | **[`THEME_COVERAGE.md`](THEME_COVERAGE.md)** | Ce que le thème prend en charge : types de questions, composants DSFR, scripts front, ressources |
 | **[`THEME_OPTIONS.md`](THEME_OPTIONS.md)** | Options configurables depuis le back-office LimeSurvey (6 onglets) |
-| **[`DECLARATION_RGAA.md`](DECLARATION_RGAA.md)** | Déclaration d'accessibilité complète (audit Spécinov + corrections) |
-| **[`DECLARATION_RGAA_AUDIT_INITIAL.md`](DECLARATION_RGAA_AUDIT_INITIAL.md)** | Résultat brut de l'audit Spécinov avant corrections |
+| **[`DECLARATION_RGAA.md`](DECLARATION_RGAA.md)** | Déclaration d'accessibilité complète (audit + corrections) |
+| **[`DECLARATION_RGAA_AUDIT_INITIAL.md`](DECLARATION_RGAA_AUDIT_INITIAL.md)** | Résultat brut de l'audit initial |
 | **[`CONTRIBUTING.md`](CONTRIBUTING.md)** | Guide développeur : arbo `src/`, pipeline esbuild, Twig, workflow git |
-| [`../../TESTING.md`](../../TESTING.md) | Couverture, lancement et rapports des tests — dans le repo parent |
+| Tests (couverture, lancement, rapports) | Dans le repo [`bmatge/limesurvey-dsfr-suite`](https://github.com/bmatge/limesurvey-dsfr-suite) |
 
 ---
 
@@ -63,5 +64,4 @@ Installation manuelle : copier le dossier dans `upload/themes/survey/` de l'inst
 
 **Mission Ingénierie du Web, Service du Numérique** — Ministère de l'Économie et des Finances
 
-- Email : conseil.miweb@finances.gouv.fr
 - GitHub : [@bmatge](https://github.com/bmatge)
