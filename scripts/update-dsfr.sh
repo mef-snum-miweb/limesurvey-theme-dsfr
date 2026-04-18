@@ -83,7 +83,6 @@ echo ""
 echo "▶ Mise à jour des CSS..."
 cp -v "${SRC}/dsfr/dsfr.min.css"                              "${THEME_DIR}/css/dsfr.min.css"
 cp -v "${SRC}/utility/icons/icons.min.css"                    "${THEME_DIR}/css/icons.min.css"
-cp -v "${SRC}/utility/icons/icons.min.css"                    "${THEME_DIR}/css/icons-utility.min.css"
 cp -v "${SRC}/utility/icons/icons-system/icons-system.min.css" "${THEME_DIR}/css/icons-system.min.css"
 
 echo ""
