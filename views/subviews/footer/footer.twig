@@ -8,7 +8,15 @@ Les liens pointent vers # - à personnaliser selon votre organisme
         <div class="fr-footer__body">
             <div class="fr-footer__brand fr-enlarge-link">
                 <a href="/" title="Retour à l'accueil - République Française">
-                    <p class="fr-logo">République<br>Française</p>
+                    {# marianne_text est partagé avec l'en-tête (nav_bar.twig) pour cohérence
+                       visuelle — la modifier dans les options se répercute ici aussi. #}
+                    <p class="fr-logo">
+                        {% if aSurveyInfo.options.marianne_text %}
+                            {{ aSurveyInfo.options.marianne_text|raw }}
+                        {% else %}
+                            République<br>Française
+                        {% endif %}
+                    </p>
                 </a>
             </div>
             <div class="fr-footer__content">
@@ -62,7 +70,10 @@ Les liens pointent vers # - à personnaliser selon votre organisme
             </nav>
             <div class="fr-footer__bottom-copy">
                 {% if aSurveyInfo.options.intellectual_property %}
-                    {{ aSurveyInfo.options.intellectual_property|raw }}
+                    {# DSFR attend un <p> direct dans .fr-footer__bottom-copy —
+                       on enveloppe le texte de l'option pour que les admins
+                       puissent saisir du plain text sans se soucier du markup. #}
+                    <p>{{ aSurveyInfo.options.intellectual_property|raw }}</p>
                 {% else %}
                     <p>
                         Sauf mention explicite de propriété intellectuelle détenue par des tiers,

@@ -23,13 +23,42 @@
                         {% if aSurveyInfo.options.accessibility_content %}
                             {{ aSurveyInfo.options.accessibility_content|raw }}
                         {% else %}
-                            <p>Ce site est partiellement conforme au RGAA (Référentiel Général d'Amélioration de l'Accessibilité).</p>
+                            <p>
+                                Le thème DSFR utilisé pour ce formulaire a fait l'objet d'un audit RGAA 4.1
+                                réalisé par <strong>Spécinov</strong>, dont le rapport initial est publié
+                                <a href="https://github.com/mef-snum-miweb/limesurvey-theme-dsfr/blob/main/DECLARATION_RGAA_AUDIT_INITIAL.md" target="_blank" rel="noopener external">sur GitHub</a>.
+                                Après correction des non-conformités imputables au thème, la conformité
+                                est de <strong>100&nbsp;%</strong> sur l'ensemble des types de questions
+                                audités (hors page CAPTCHA).
+                            </p>
 
-                            <h3>État de conformité</h3>
-                            <p>Conformité partielle. Un audit sera réalisé prochainement.</p>
+                            <h3 class="fr-h5">Portée de cette déclaration</h3>
+                            <p>
+                                Ce score mesure la conformité du <em>thème</em>. Il peut être dégradé par
+                                des éléments propres au formulaire que vous consultez — libellés de
+                                question saisis en HTML, images sans alternative textuelle, options
+                                d'affichage non couvertes par l'audit, etc. L'entité en charge de ce
+                                formulaire reste responsable de son contenu éditorial.
+                            </p>
 
-                            <h3>Amélioration et contact</h3>
-                            <p>Si vous n'arrivez pas à accéder à un contenu ou à un service, vous pouvez contacter le responsable du site pour être orienté vers une alternative accessible.</p>
+                            <h3 class="fr-h5">Amélioration et contact</h3>
+                            <p>En cas de difficulté d'accès à un contenu ou à un service&nbsp;:</p>
+                            <ul>
+                                <li>
+                                    <strong>Première ligne</strong> : contacter l'entité organisatrice
+                                    du formulaire (coordonnées en bas de page, onglet
+                                    «&nbsp;Mentions légales&nbsp;»).
+                                </li>
+                                <li>
+                                    <strong>Support accessibilité MIWEB</strong> :
+                                    <a href="mailto:accessibilite.miweb@finances.gouv.fr">accessibilite.miweb@finances.gouv.fr</a>
+                                </li>
+                                <li>
+                                    <strong>Recours ultime</strong> : si aucune solution ne vous est
+                                    apportée, vous pouvez saisir le
+                                    <a href="https://formulaire.defenseurdesdroits.fr/" target="_blank" rel="noopener external">Défenseur des droits</a>.
+                                </li>
+                            </ul>
 
                             <p><strong>Date de publication :</strong> {{ "now"|date("d/m/Y") }}</p>
                         {% endif %}

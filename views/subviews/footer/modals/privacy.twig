@@ -25,28 +25,32 @@
                         {% elseif aSurveyInfo.options.privacy_content %}
                             {{ aSurveyInfo.options.privacy_content|raw }}
                         {% else %}
-                            <h3>Responsable du traitement</h3>
-                            <p>{{ aSurveyInfo.options.data_controller|default('[Rensigner cette information dans les options du thème]') }}</p>
+                            <h3 class="fr-h5">Responsable du traitement</h3>
+                            <p>{{ aSurveyInfo.options.data_controller|default('[Cette information n\'a pas été renseignée par l\'entité en charge de ce formulaire]') }}</p>
 
-                            <h3>Données collectées</h3>
+                            <h3 class="fr-h5">Données collectées</h3>
                             <p>Les données suivantes sont collectées :</p>
                             <ul>
                                 <li>Réponses aux questions du questionnaire</li>
                                 <li>Données techniques de connexion (si applicable)</li>
                             </ul>
 
-                            <h3>Finalité</h3>
-                            <p>Les données collectées servent uniquement à {{ aSurveyInfo.options.survey_purpose|default('[Rensigner cette information dans les options du thème]') }}.</p>
+                            <h3 class="fr-h5">Finalité</h3>
+                            <p>Les données collectées servent uniquement à {{ aSurveyInfo.options.survey_purpose|default('[Cette information n\'a pas été renseignée par l\'entité en charge de ce formulaire]') }}.</p>
 
-                            <h3>Conservation</h3>
-                            <p>Les données sont conservées pendant {{ aSurveyInfo.options.data_retention|default('[Rensigner cette information dans les options du thème]') }} puis supprimées.</p>
+                            <h3 class="fr-h5">Conservation</h3>
+                            <p>Les données sont conservées pendant {{ aSurveyInfo.options.data_retention|default('[Cette information n\'a pas été renseignée par l\'entité en charge de ce formulaire]') }} puis supprimées.</p>
 
-                            <h3>Vos droits</h3>
+                            <h3 class="fr-h5">Vos droits</h3>
                             <p>Conformément au RGPD, vous disposez d'un droit d'accès, de rectification et de suppression de vos données.</p>
                             {% if aSurveyInfo.options.contact_email %}
                             <p>Contact : <a href="mailto:{{ aSurveyInfo.options.contact_email }}">{{ aSurveyInfo.options.contact_email }}</a></p>
                             {% else %}
-                            <p>Contact : [Rensigner cette information dans les options du thème]</p>
+                            <p>
+                                Contact : [Cette information n'a pas été renseignée par l'entité en
+                                charge de ce formulaire ; vous pouvez contacter
+                                <a href="mailto:le-delegue-a-la-protection-des-donnees-personnelles@finances.gouv.fr">le-delegue-a-la-protection-des-donnees-personnelles@finances.gouv.fr</a>]
+                            </p>
                             {% endif %}
                         {% endif %}
                     </div>

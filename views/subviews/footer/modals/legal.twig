@@ -23,25 +23,25 @@
                         {% if aSurveyInfo.options.legal_content %}
                             {{ aSurveyInfo.options.legal_content|raw }}
                         {% else %}
-                            <h3>Éditeur</h3>
+                            <h3 class="fr-h5">Éditeur</h3>
                             {% if aSurveyInfo.options.editor %}
                                 {{ aSurveyInfo.options.editor|raw }}
                             {% else %}
-                                <p>[Rensigner cette information dans les options du thème]</p>
+                                <p>[Cette information n'a pas été renseignée par l'entité en charge de ce formulaire]</p>
                             {% endif %}
 
-                            <h3>Directeur de la publication</h3>
+                            <h3 class="fr-h5">Directeur de la publication</h3>
                             {% if aSurveyInfo.options.publication_director %}
                                 {{ aSurveyInfo.options.publication_director|raw }}
                             {% else %}
-                                <p>[Rensigner cette information dans les options du thème]</p>
+                                <p>[Cette information n'a pas été renseignée par l'entité en charge de ce formulaire]</p>
                             {% endif %}
 
-                            <h3>Hébergeur</h3>
+                            <h3 class="fr-h5">Hébergeur</h3>
                             {% if aSurveyInfo.options.host %}
                                 {{ aSurveyInfo.options.host|raw }}
                             {% else %}
-                                <p>[Rensigner cette information dans les options du thème]</p>
+                                <p>[Cette information n'a pas été renseignée par l'entité en charge de ce formulaire]</p>
                             {% endif %}
                         {% endif %}
                     </div>

@@ -86,9 +86,9 @@
         <!-- Options spécifiques DSFR -->
         <show_marianne type="buttons" category="Header et footer" width="4" title="Afficher Marianne" options="on|off" optionlabels="Oui|Non">on</show_marianne>
         <show_footer_links type="buttons" category="Header et footer" width="4" title="Liens de pied de page" options="on|off" optionlabels="Oui|Non">on</show_footer_links>
-        <marianne_text type="textarea" category="Header et footer" width="6" rows="2" title="Texte Marianne (sous le bloc-marque)">Liberté&#10;Égalité&#10;Fraternité</marianne_text>
-        <header_title type="textarea" category="Header et footer" width="6" rows="2" title="Titre dans l'en-tête (nom du service/site)">Enquêtes et questionnaires</header_title>
-        <footer_text type="textarea" category="Header et footer" width="12" rows="3" title="Texte dans le pied de page (description courte)">Service de questionnaires en ligne</footer_text>
+        <marianne_text type="textarea" category="Header et footer" width="6" rows="2" title="Texte Marianne (sous le bloc-marque, utilisé dans l'en-tête ET le pied de page)">République&lt;br&gt;Française</marianne_text>
+        <header_title type="textarea" category="Header et footer" width="6" rows="2" title="Titre dans l'en-tête (nom du service/site)">Ministères économiques et financiers</header_title>
+        <footer_text type="textarea" category="Header et footer" width="12" rows="3" title="Texte dans le pied de page (description courte)">galileo.finances.gouv.fr est le service en ligne destiné aux enquêtes et formulaires en ligne des ministères économiques et financiers</footer_text>
         <intellectual_property type="textarea" category="Header et footer" width="12" rows="3" title="Propriété intellectuelle (licence, copyright)">Sauf mention explicite de propriété intellectuelle détenue par des tiers, les contenus de ce site sont proposés sous licence etalab-2.0</intellectual_property>
 
         <!-- Onglet Accessibilité -->
