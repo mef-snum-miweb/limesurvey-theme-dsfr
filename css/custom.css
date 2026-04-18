@@ -138,6 +138,30 @@ html, body {
         height: 1px;
         overflow: hidden;
     }
+    /* Entêtes de groupe dualscale (Scale A / Scale B) :
+       masqués sur desktop — les <th colspan> du <thead> portent déjà
+       l'information. Rendus visibles UNIQUEMENT en mobile via .ls-xs-only. */
+    table .ls-xs-only {
+        display: none !important;
+    }
+}
+
+/* Mobile (< 768px) : rendre les séparateurs de groupe visibles et les styler
+   comme des en-têtes de section (bold, border-top, fond). */
+@media (max-width: 767px) {
+    table .ls-xs-only.dualscale-scale-header {
+        display: block !important;
+        width: 100% !important;
+        padding: 0.75rem 0.5rem !important;
+        margin: 0.75rem 0 0.25rem !important;
+        font-weight: 700 !important;
+        font-size: 1rem !important;
+        color: var(--text-title-blue-france, #000091) !important;
+        background-color: var(--background-alt-blue-france, #f5f5fe) !important;
+        border-top: 2px solid var(--border-plain-blue-france, #000091) !important;
+        text-align: left !important;
+        box-sizing: border-box !important;
+    }
 }
 
 /* Centrer radios/checkbox dans cellules */
@@ -1510,6 +1534,34 @@ td.answer-item.radio-item {
         align-items: center !important;
         gap: 0 !important; /* Pas de gap, la marge du label suffit */
         padding: 0.5rem 0 !important;
+    }
+
+    /* Cellules multiflexi (select/text) : label au-dessus, contrôle dessous.
+       Les select/textfield sont trop larges pour être alignés inline avec
+       leur label en mobile — on passe en colonne. */
+    table tbody tr td.answer-item.select-item,
+    table tbody tr td.answer-item.text-item {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0.25rem !important;
+        padding: 0.5rem 0 !important;
+    }
+    /* Le label reprend sa taille normale (plus de marge-gauche, plus d'inline) */
+    table tbody tr td.answer-item.select-item > .ls-label-xs-visibility,
+    table tbody tr td.answer-item.text-item > .ls-label-xs-visibility {
+        display: block !important;
+        margin: 0 !important;
+        font-size: 0.875rem !important;
+        font-weight: 500 !important;
+        color: var(--text-label-grey) !important;
+    }
+    /* Le contrôle (select/input) prend toute la largeur disponible */
+    table tbody tr td.answer-item.select-item .fr-select-group,
+    table tbody tr td.answer-item.select-item .fr-select,
+    table tbody tr td.answer-item.text-item .fr-input-group,
+    table tbody tr td.answer-item.text-item .fr-input {
+        width: 100% !important;
     }
 
     /* Radio avant le label dans l'ordre visuel (flexbox order) */

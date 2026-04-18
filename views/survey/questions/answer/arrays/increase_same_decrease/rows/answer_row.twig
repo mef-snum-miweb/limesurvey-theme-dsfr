@@ -30,6 +30,8 @@
         }}
     </th>
 
+    {# Labels visibles en mode linéarisé mobile ; aria-hidden car le SR lit
+       via aria-labelledby de l'input (column header + row header). #}
     <!-- Increase -->
     <td class="answer_cell_I answer-item radio-item">
         <input
@@ -40,6 +42,7 @@
             value="I"
             {{ Ichecked }}
             />
+        <label for="answer{{ myfname }}-I" class="ls-label-xs-visibility" aria-hidden="true">{{ gT("Increase") }}</label>
     </td>
 
     <!-- Same -->
@@ -52,6 +55,7 @@
             value="S"
             {{ Schecked }}
         />
+        <label for="answer{{ myfname }}-S" class="ls-label-xs-visibility" aria-hidden="true">{{ gT("Same") }}</label>
     </td>
 
     <!-- Decrease -->
@@ -64,6 +68,7 @@
             value="D"
             {{ Dchecked }}
         />
+        <label for="answer{{ myfname }}-D" class="ls-label-xs-visibility" aria-hidden="true">{{ gT("Decrease") }}</label>
     </td>
 
     <!-- No Answer -->
@@ -77,6 +82,7 @@
                 value=""
                 {{ NAchecked }}
             />
+            <label for="answer{{ myfname }}-" class="ls-label-xs-visibility" aria-hidden="true">{{ gT("No answer") }}</label>
         </td>
     {% endif %}
 </tr>

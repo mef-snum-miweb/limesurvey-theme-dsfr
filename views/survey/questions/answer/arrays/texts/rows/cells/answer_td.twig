@@ -20,6 +20,11 @@
 
 <!-- answer_td -->
 <td class="answer_cell_{{ ld }} answer-item text-item" title="{{ processString(labelText)|striptags }}">
+    {# Label visible en mode linéarisé mobile (CSS .ls-label-xs-visibility).
+       aria-hidden : le SR utilise aria-labelledby de l'input. #}
+    <label for="answer{{ myfname2 }}" class="ls-label-xs-visibility" aria-hidden="true">
+        {{ processString(labelText) }}
+    </label>
     <div class="fr-input-group">
         {{ C.Html.textField(myfname2, value, ({
             'id' : "answer"~myfname2,

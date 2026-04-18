@@ -62,6 +62,11 @@
                                 aria-labelledby="label-{{ ansrow.code }} answertext{{ aQuestions[i].myfname }}"
                                 {{ checked[ansrow.code][ld] }}
                             />
+                            {# Label visible en mode linéarisé mobile. aria-hidden :
+                               aria-labelledby porte déjà l'info pour les SR. #}
+                            <label class="ls-label-xs-visibility" aria-hidden="true" for="answer{{ aQuestions[i].myfname }}-{{ ansrow.code }}">
+                                {{ processString(aQuestions[i].question) }}
+                            </label>
                         </td>
                     {% endfor %}
                 </tr>
