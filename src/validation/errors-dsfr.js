@@ -21,6 +21,7 @@
  */
 
 import { handleMultipleShortTextErrors } from './mst-errors.js';
+import { handleArrayValidation } from './array-validation.js';
 import { updateErrorSummary } from './error-summary.js';
 
 export function transformErrorsToDsfr() {

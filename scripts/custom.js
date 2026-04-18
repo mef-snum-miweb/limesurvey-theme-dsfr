@@ -784,6 +784,187 @@
     });
   }
 
+  // modules/theme-dsfr/src/core/dom-utils.js
+  function isValidNumber(value) {
+    return /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
+  }
+  function isQuestionHidden(el) {
+    return el.style.display === "none" || el.classList.contains("ls-irrelevant") || el.classList.contains("ls-hidden") || el.classList.contains("d-none");
+  }
+
+  // modules/theme-dsfr/src/validation/array-validation.js
+  function handleArrayValidation() {
+    var arrayQuestions = document.querySelectorAll('.question-container.input-error[class*="array-"]');
+    arrayQuestions.forEach(function(question) {
+      if (question.dataset.arrayValidationAttached) {
+        return;
+      }
+      question.dataset.arrayValidationAttached = "true";
+      var legacyMessages = question.querySelectorAll(
+        ".ls-question-mandatory, .ls-question-mandatory-initial, .ls-question-mandatory-array, .ls-question-mandatory-arraycolumn"
+      );
+      legacyMessages.forEach(function(msg) {
+        msg.style.display = "none";
+      });
+      var validContainer = question.querySelector(".question-valid-container");
+      if (validContainer) {
+        validContainer.style.display = "none";
+      }
+      var allInputs = question.querySelectorAll('table input[type="text"], table textarea, table select');
+      allInputs.forEach(function(input) {
+        input.classList.remove("fr-input--error", "error");
+        var cell = input.closest(".fr-input-group");
+        if (cell) {
+          cell.classList.remove("fr-input-group--error");
+        }
+      });
+      var errorRows = question.querySelectorAll("tr.ls-mandatory-error");
+      errorRows.forEach(function(row) {
+        row.classList.remove("ls-mandatory-error");
+        var th = row.querySelector("th.fr-text--error");
+        if (th) th.classList.remove("fr-text--error");
+      });
+      var errorCells = question.querySelectorAll("td.has-error");
+      errorCells.forEach(function(td) {
+        td.classList.remove("has-error");
+      });
+      var counterContainer = document.createElement("div");
+      counterContainer.className = "fr-messages-group fr-mt-2w";
+      counterContainer.setAttribute("aria-live", "polite");
+      counterContainer.id = "mandatory-counter-" + (question.id || Math.random().toString(36).substring(2, 11));
+      var counterMessage = document.createElement("p");
+      counterMessage.className = "fr-message fr-message--error";
+      counterMessage.setAttribute("role", "status");
+      counterContainer.appendChild(counterMessage);
+      var tableWrapper = question.querySelector(".fr-table");
+      if (tableWrapper) {
+        tableWrapper.parentNode.insertBefore(counterContainer, tableWrapper.nextSibling);
+      }
+      function updateCounter() {
+        var totalFields = allInputs.length;
+        var emptyCount = 0;
+        allInputs.forEach(function(input) {
+          var value = input.value ? input.value.trim() : "";
+          var inputGroup = input.closest(".fr-input-group");
+          if (value === "") {
+            emptyCount++;
+            input.classList.remove("fr-input--error", "fr-input--valid");
+            if (inputGroup) {
+              inputGroup.classList.remove("fr-input-group--error", "fr-input-group--valid");
+            }
+          } else {
+            var isNumberOnly = input.dataset.number === "1";
+            var isInvalidNumber = isNumberOnly && !isValidNumber(value);
+            if (isInvalidNumber) {
+              emptyCount++;
+              input.classList.add("fr-input--error");
+              input.classList.remove("fr-input--valid");
+              if (inputGroup) {
+                inputGroup.classList.add("fr-input-group--error");
+                inputGroup.classList.remove("fr-input-group--valid");
+              }
+            } else {
+              input.classList.remove("fr-input--error");
+              input.classList.add("fr-input--valid");
+              if (inputGroup) {
+                inputGroup.classList.remove("fr-input-group--error");
+                inputGroup.classList.add("fr-input-group--valid");
+              }
+            }
+          }
+        });
+        if (emptyCount === 0) {
+          counterContainer.remove();
+          question.classList.remove("input-error", "fr-input-group--error");
+          question.classList.add("input-valid");
+          if (typeof updateErrorSummary === "function") {
+            setTimeout(updateErrorSummary, 50);
+          }
+        } else {
+          question.classList.add("input-error");
+          question.classList.remove("input-valid");
+          if (emptyCount === totalFields) {
+            counterMessage.textContent = tMandatory("fields_all_required", null, totalFields);
+          } else if (emptyCount === 1) {
+            counterMessage.textContent = tMandatory("fields_remaining_singular");
+          } else {
+            counterMessage.textContent = tMandatory("fields_remaining_plural", emptyCount, totalFields);
+          }
+          if (typeof updateErrorSummary === "function") {
+            setTimeout(updateErrorSummary, 50);
+          }
+        }
+      }
+      updateCounter();
+      allInputs.forEach(function(input) {
+        if (input.dataset.arrayInputListener) return;
+        input.dataset.arrayInputListener = "true";
+        input.addEventListener("input", updateCounter);
+      });
+    });
+  }
+  function handleSimpleQuestionValidation() {
+    const simpleQuestions = document.querySelectorAll(".question-container.input-error");
+    simpleQuestions.forEach(function(question) {
+      if (question.classList.contains("numeric-multi") || question.classList.contains("multiple-short-txt") || question.dataset.simpleValidationAttached || question.classList.toString().match(/array-/)) {
+        return;
+      }
+      question.dataset.simpleValidationAttached = "true";
+      const allLsMessages = question.querySelectorAll(".ls-question-mandatory, .ls-question-mandatory-initial, .ls-question-mandatory-other");
+      allLsMessages.forEach(function(msg) {
+        msg.style.display = "none";
+      });
+      const radios = question.querySelectorAll('input[type="radio"]');
+      const checkboxes = question.querySelectorAll('input[type="checkbox"]');
+      const selects = question.querySelectorAll("select");
+      const dateInputs = question.querySelectorAll('input[type="date"], input[type="text"].date');
+      function markQuestionValid() {
+        question.classList.remove("input-error", "fr-input-group--error");
+        question.classList.add("input-valid");
+        const allErrors = question.querySelectorAll(".ls-question-mandatory, .ls-question-mandatory-initial, .ls-question-mandatory-other");
+        allErrors.forEach(function(error) {
+          error.style.display = "none";
+        });
+        const dsfrError = question.querySelector(".fr-message--error");
+        if (dsfrError) {
+          dsfrError.remove();
+        }
+        if (typeof updateErrorSummary === "function") {
+          setTimeout(updateErrorSummary, 50);
+        }
+      }
+      radios.forEach(function(radio) {
+        radio.addEventListener("change", function() {
+          if (this.checked) {
+            markQuestionValid();
+          }
+        });
+      });
+      checkboxes.forEach(function(checkbox) {
+        checkbox.addEventListener("change", function() {
+          const anyChecked = Array.from(checkboxes).some((cb) => cb.checked);
+          if (anyChecked) {
+            markQuestionValid();
+          }
+        });
+      });
+      selects.forEach(function(select) {
+        select.addEventListener("change", function() {
+          if (this.value && this.value !== "" && this.value !== "-oth-") {
+            markQuestionValid();
+          }
+        });
+      });
+      dateInputs.forEach(function(dateInput) {
+        dateInput.addEventListener("change", function() {
+          if (this.value && this.value.trim() !== "") {
+            markQuestionValid();
+          }
+        });
+      });
+    });
+  }
+
   // modules/theme-dsfr/src/validation/errors-dsfr.js
   function transformErrorsToDsfr() {
     const errorQuestions = document.querySelectorAll(".question-container.input-error");
@@ -1059,14 +1240,6 @@
       attributeFilter: ["class"],
       subtree: true
     });
-  }
-
-  // modules/theme-dsfr/src/core/dom-utils.js
-  function isValidNumber(value) {
-    return /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
-  }
-  function isQuestionHidden(el) {
-    return el.style.display === "none" || el.classList.contains("ls-irrelevant") || el.classList.contains("ls-hidden") || el.classList.contains("d-none");
   }
 
   // modules/theme-dsfr/src/validation/numeric-validation.js
@@ -1442,179 +1615,6 @@
       allInputs.forEach(function(inp) {
         inp.addEventListener("input", function() {
           setTimeout(checkSumAndUpdate, 250);
-        });
-      });
-    });
-  }
-
-  // modules/theme-dsfr/src/validation/array-validation.js
-  function handleArrayValidation2() {
-    var arrayQuestions = document.querySelectorAll('.question-container.input-error[class*="array-"]');
-    arrayQuestions.forEach(function(question) {
-      if (question.dataset.arrayValidationAttached) {
-        return;
-      }
-      question.dataset.arrayValidationAttached = "true";
-      var legacyMessages = question.querySelectorAll(
-        ".ls-question-mandatory, .ls-question-mandatory-initial, .ls-question-mandatory-array, .ls-question-mandatory-arraycolumn"
-      );
-      legacyMessages.forEach(function(msg) {
-        msg.style.display = "none";
-      });
-      var validContainer = question.querySelector(".question-valid-container");
-      if (validContainer) {
-        validContainer.style.display = "none";
-      }
-      var allInputs = question.querySelectorAll('table input[type="text"], table textarea, table select');
-      allInputs.forEach(function(input) {
-        input.classList.remove("fr-input--error", "error");
-        var cell = input.closest(".fr-input-group");
-        if (cell) {
-          cell.classList.remove("fr-input-group--error");
-        }
-      });
-      var errorRows = question.querySelectorAll("tr.ls-mandatory-error");
-      errorRows.forEach(function(row) {
-        row.classList.remove("ls-mandatory-error");
-        var th = row.querySelector("th.fr-text--error");
-        if (th) th.classList.remove("fr-text--error");
-      });
-      var errorCells = question.querySelectorAll("td.has-error");
-      errorCells.forEach(function(td) {
-        td.classList.remove("has-error");
-      });
-      var counterContainer = document.createElement("div");
-      counterContainer.className = "fr-messages-group fr-mt-2w";
-      counterContainer.setAttribute("aria-live", "polite");
-      counterContainer.id = "mandatory-counter-" + (question.id || Math.random().toString(36).substring(2, 11));
-      var counterMessage = document.createElement("p");
-      counterMessage.className = "fr-message fr-message--error";
-      counterMessage.setAttribute("role", "status");
-      counterContainer.appendChild(counterMessage);
-      var tableWrapper = question.querySelector(".fr-table");
-      if (tableWrapper) {
-        tableWrapper.parentNode.insertBefore(counterContainer, tableWrapper.nextSibling);
-      }
-      function updateCounter() {
-        var totalFields = allInputs.length;
-        var emptyCount = 0;
-        allInputs.forEach(function(input) {
-          var value = input.value ? input.value.trim() : "";
-          var inputGroup = input.closest(".fr-input-group");
-          if (value === "") {
-            emptyCount++;
-            input.classList.remove("fr-input--error", "fr-input--valid");
-            if (inputGroup) {
-              inputGroup.classList.remove("fr-input-group--error", "fr-input-group--valid");
-            }
-          } else {
-            var isNumberOnly = input.dataset.number === "1";
-            var isInvalidNumber = isNumberOnly && !isValidNumber(value);
-            if (isInvalidNumber) {
-              emptyCount++;
-              input.classList.add("fr-input--error");
-              input.classList.remove("fr-input--valid");
-              if (inputGroup) {
-                inputGroup.classList.add("fr-input-group--error");
-                inputGroup.classList.remove("fr-input-group--valid");
-              }
-            } else {
-              input.classList.remove("fr-input--error");
-              input.classList.add("fr-input--valid");
-              if (inputGroup) {
-                inputGroup.classList.remove("fr-input-group--error");
-                inputGroup.classList.add("fr-input-group--valid");
-              }
-            }
-          }
-        });
-        if (emptyCount === 0) {
-          counterContainer.remove();
-          question.classList.remove("input-error", "fr-input-group--error");
-          question.classList.add("input-valid");
-          if (typeof updateErrorSummary === "function") {
-            setTimeout(updateErrorSummary, 50);
-          }
-        } else {
-          question.classList.add("input-error");
-          question.classList.remove("input-valid");
-          if (emptyCount === totalFields) {
-            counterMessage.textContent = tMandatory("fields_all_required", null, totalFields);
-          } else if (emptyCount === 1) {
-            counterMessage.textContent = tMandatory("fields_remaining_singular");
-          } else {
-            counterMessage.textContent = tMandatory("fields_remaining_plural", emptyCount, totalFields);
-          }
-          if (typeof updateErrorSummary === "function") {
-            setTimeout(updateErrorSummary, 50);
-          }
-        }
-      }
-      updateCounter();
-      allInputs.forEach(function(input) {
-        if (input.dataset.arrayInputListener) return;
-        input.dataset.arrayInputListener = "true";
-        input.addEventListener("input", updateCounter);
-      });
-    });
-  }
-  function handleSimpleQuestionValidation() {
-    const simpleQuestions = document.querySelectorAll(".question-container.input-error");
-    simpleQuestions.forEach(function(question) {
-      if (question.classList.contains("numeric-multi") || question.classList.contains("multiple-short-txt") || question.dataset.simpleValidationAttached || question.classList.toString().match(/array-/)) {
-        return;
-      }
-      question.dataset.simpleValidationAttached = "true";
-      const allLsMessages = question.querySelectorAll(".ls-question-mandatory, .ls-question-mandatory-initial, .ls-question-mandatory-other");
-      allLsMessages.forEach(function(msg) {
-        msg.style.display = "none";
-      });
-      const radios = question.querySelectorAll('input[type="radio"]');
-      const checkboxes = question.querySelectorAll('input[type="checkbox"]');
-      const selects = question.querySelectorAll("select");
-      const dateInputs = question.querySelectorAll('input[type="date"], input[type="text"].date');
-      function markQuestionValid() {
-        question.classList.remove("input-error", "fr-input-group--error");
-        question.classList.add("input-valid");
-        const allErrors = question.querySelectorAll(".ls-question-mandatory, .ls-question-mandatory-initial, .ls-question-mandatory-other");
-        allErrors.forEach(function(error) {
-          error.style.display = "none";
-        });
-        const dsfrError = question.querySelector(".fr-message--error");
-        if (dsfrError) {
-          dsfrError.remove();
-        }
-        if (typeof updateErrorSummary === "function") {
-          setTimeout(updateErrorSummary, 50);
-        }
-      }
-      radios.forEach(function(radio) {
-        radio.addEventListener("change", function() {
-          if (this.checked) {
-            markQuestionValid();
-          }
-        });
-      });
-      checkboxes.forEach(function(checkbox) {
-        checkbox.addEventListener("change", function() {
-          const anyChecked = Array.from(checkboxes).some((cb) => cb.checked);
-          if (anyChecked) {
-            markQuestionValid();
-          }
-        });
-      });
-      selects.forEach(function(select) {
-        select.addEventListener("change", function() {
-          if (this.value && this.value !== "" && this.value !== "-oth-") {
-            markQuestionValid();
-          }
-        });
-      });
-      dateInputs.forEach(function(dateInput) {
-        dateInput.addEventListener("change", function() {
-          if (this.value && this.value.trim() !== "") {
-            markQuestionValid();
-          }
         });
       });
     });
@@ -2538,7 +2538,7 @@
     observeErrorChanges();
     initAriaInvalidSync();
     initNumericValidation();
-    handleArrayValidation2();
+    handleArrayValidation();
     handleNumericMultiValidation();
     handleSimpleQuestionValidation();
     transformValidationMessages();
@@ -2577,7 +2577,7 @@
     transformErrorsToDsfr();
     handleMultipleShortTextErrors();
     initNumericValidation();
-    handleArrayValidation2();
+    handleArrayValidation();
     handleNumericMultiValidation();
     handleSimpleQuestionValidation();
     transformValidationMessages();

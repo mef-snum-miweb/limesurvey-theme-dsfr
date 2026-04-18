@@ -85,6 +85,17 @@ cp -v "${SRC}/dsfr/dsfr.min.css"                              "${THEME_DIR}/css/
 cp -v "${SRC}/utility/icons/icons.min.css"                    "${THEME_DIR}/css/icons.min.css"
 cp -v "${SRC}/utility/icons/icons-system/icons-system.min.css" "${THEME_DIR}/css/icons-system.min.css"
 
+# Les CSS d'icônes DSFR référencent les SVG via des chemins relatifs qui
+# supposent l'arborescence upstream (`utility/icons/icons.min.css` →
+# `../../icons/`), et (`utility/icons/icons-system/icons-system.min.css` →
+# `../../../icons/`). Notre thème les met sous `css/`, donc on doit réécrire
+# les chemins en `../icons/` (un seul niveau de remontée) pour qu'ils
+# résolvent correctement vers `icons/` à la racine du thème.
+echo "  → Normalisation des chemins SVG relatifs..."
+sed -i.bak 's|url(\.\./\.\./icons/|url(../icons/|g' "${THEME_DIR}/css/icons.min.css"
+sed -i.bak 's|url(\.\./\.\./\.\./icons/|url(../icons/|g' "${THEME_DIR}/css/icons-system.min.css"
+rm -f "${THEME_DIR}/css/icons.min.css.bak" "${THEME_DIR}/css/icons-system.min.css.bak"
+
 echo ""
 echo "▶ Mise à jour du JS DSFR..."
 mkdir -p "${THEME_DIR}/js"
