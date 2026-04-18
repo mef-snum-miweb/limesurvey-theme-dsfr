@@ -1,6 +1,6 @@
 # Thème DSFR pour LimeSurvey
 
-[![DSFR](https://img.shields.io/badge/DSFR-v1.11-blue)](https://www.systeme-de-design.gouv.fr/)
+[![DSFR](https://img.shields.io/badge/DSFR-v1.14-blue)](https://www.systeme-de-design.gouv.fr/)
 [![LimeSurvey](https://img.shields.io/badge/LimeSurvey-6.0+-green)](https://www.limesurvey.org/)
 [![RGAA](https://img.shields.io/badge/RGAA_4.1-100%25-brightgreen)](DECLARATION_RGAA.md)
 [![Licence](https://img.shields.io/badge/Licence-Etalab_2.0-orange)](https://www.etalab.gouv.fr/licence-ouverte-open-licence/)

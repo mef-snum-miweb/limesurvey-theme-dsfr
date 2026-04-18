@@ -1,0 +1,110 @@
+name: Update DSFR
+
+# Tire une nouvelle release du DSFR officiel (GouvernementFR/dsfr) dans
+# le thème via `scripts/update-dsfr.sh`, et ouvre une Pull Request si
+# au moins un fichier change.
+#
+# Deux modes de déclenchement :
+#
+#   - `workflow_dispatch` : exécution manuelle depuis l'onglet Actions,
+#     avec input optionnel `version` (ex: "v1.14.4") ; à défaut, la
+#     dernière release publique est utilisée.
+#
+#   - `schedule` : chaque lundi à 08:00 UTC, vérification d'une nouvelle
+#     release DSFR. Si version identique à celle déjà intégrée, aucun
+#     changement n'est proposé.
+#
+# La PR est marquée `deps` + `dsfr` et doit être vérifiée manuellement :
+#   - passer la suite de tests (sur le repo `limesurvey-dsfr-suite`)
+#   - valider visuellement les composants impactés
+#   - mettre à jour DECLARATION_RGAA.md si la version DSFR y figure
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version DSFR à intégrer (ex: v1.14.4). Laisser vide pour la dernière release publique.'
+        required: false
+        type: string
+  schedule:
+    - cron: '0 8 * * 1'  # lundi 08:00 UTC
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Détermination de la version cible
+        id: target
+        run: |
+          if [[ -n "${{ inputs.version }}" ]]; then
+            VERSION="${{ inputs.version }}"
+            [[ "$VERSION" =~ ^v ]] || VERSION="v$VERSION"
+          else
+            VERSION="$(curl -sL https://api.github.com/repos/GouvernementFR/dsfr/releases/latest \
+                       | python3 -c "import json, sys; print(json.load(sys.stdin)['tag_name'])")"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "▶ Version cible : $VERSION"
+
+      - name: Version actuellement intégrée
+        id: current
+        run: |
+          CURRENT="$(head -c 200 css/dsfr.min.css | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | head -1 || echo 'unknown')"
+          echo "version=$CURRENT" >> "$GITHUB_OUTPUT"
+          echo "▶ Version actuelle dans le thème : $CURRENT"
+
+      - name: Sortie anticipée si déjà à jour
+        if: steps.target.outputs.version == steps.current.outputs.version
+        run: |
+          echo "✅ DSFR ${{ steps.target.outputs.version }} déjà intégré. Rien à faire."
+          exit 0
+
+      - name: Exécution du script de mise à jour
+        if: steps.target.outputs.version != steps.current.outputs.version
+        run: |
+          chmod +x scripts/update-dsfr.sh
+          ./scripts/update-dsfr.sh "${{ steps.target.outputs.version }}"
+
+      - name: Génération du résumé de changements
+        if: steps.target.outputs.version != steps.current.outputs.version
+        id: summary
+        run: |
+          echo "# Résumé" > /tmp/pr-body.md
+          echo "" >> /tmp/pr-body.md
+          echo "Mise à jour DSFR **${{ steps.current.outputs.version }}** → **${{ steps.target.outputs.version }}**." >> /tmp/pr-body.md
+          echo "" >> /tmp/pr-body.md
+          echo "Release upstream : <https://github.com/GouvernementFR/dsfr/releases/tag/${{ steps.target.outputs.version }}>" >> /tmp/pr-body.md
+          echo "" >> /tmp/pr-body.md
+          echo "## Fichiers modifiés" >> /tmp/pr-body.md
+          echo "" >> /tmp/pr-body.md
+          echo '```' >> /tmp/pr-body.md
+          git diff --stat | tail -20 >> /tmp/pr-body.md
+          echo '```' >> /tmp/pr-body.md
+          echo "" >> /tmp/pr-body.md
+          echo "## Checklist avant merge" >> /tmp/pr-body.md
+          echo "" >> /tmp/pr-body.md
+          echo "- [ ] Suite de tests \`./run_tests.sh --full\` OK (repo \`limesurvey-dsfr-suite\`)" >> /tmp/pr-body.md
+          echo "- [ ] Validation visuelle des composants impactés (header, footer, tableaux, formulaires)" >> /tmp/pr-body.md
+          echo "- [ ] \`DECLARATION_RGAA.md\` relu et mis à jour si la version DSFR y est citée" >> /tmp/pr-body.md
+          echo "- [ ] Changelog DSFR consulté : <https://github.com/GouvernementFR/dsfr/blob/main/CHANGELOG.md>" >> /tmp/pr-body.md
+          cat /tmp/pr-body.md
+
+      - name: Ouvrir une Pull Request
+        if: steps.target.outputs.version != steps.current.outputs.version
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore(dsfr): bump to ${{ steps.target.outputs.version }}"
+          branch: "dsfr-update/${{ steps.target.outputs.version }}"
+          delete-branch: true
+          title: "chore(dsfr): bump to ${{ steps.target.outputs.version }}"
+          body-path: /tmp/pr-body.md
+          labels: |
+            deps
+            dsfr

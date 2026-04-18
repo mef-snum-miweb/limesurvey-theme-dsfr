@@ -182,6 +182,35 @@ Règle : **tout nouveau comportement côté front doit être couvert**, au minim
 
 ---
 
+## Mettre à jour les ressources DSFR
+
+Les fichiers CSS, JS, polices et icônes du framework DSFR sont **packagés** directement dans le thème (pas de CDN). Quand une nouvelle version est publiée sur [GouvernementFR/dsfr](https://github.com/GouvernementFR/dsfr/releases), deux mécanismes permettent de tirer la mise à jour :
+
+### Script manuel
+
+```bash
+# depuis modules/theme-dsfr/
+./scripts/update-dsfr.sh            # dernière release publique
+./scripts/update-dsfr.sh v1.14.4    # version explicite
+```
+
+Le script télécharge l'archive de la release GitHub officielle, extrait uniquement les fichiers nécessaires au thème (`dsfr.min.css`, `icons.min.css`, `icons-system.min.css`, les 2 variantes du JS DSFR, les 20 polices Marianne/Spectral et les 4 catégories d'icônes utilisées : `business`, `editor`, `system`, `user`), puis met à jour le badge version dans `README.md`.
+
+**N'écrase pas** : les scripts custom (`theme.js`, `custom.js`), les CSS custom (`theme.css`, `custom.css`, `print_theme.css`, `dsfr-grid-helpers.css`), ni les templates Twig.
+
+Le script ne commit pas — il affiche la liste des étapes de validation (lancer les tests, vérifier visuellement, mettre à jour `DECLARATION_RGAA.md` si la version y est citée, puis commiter).
+
+### Workflow GitHub Actions
+
+[`.github/workflows/update-dsfr.yml`](.github/workflows/update-dsfr.yml) appelle ce même script :
+
+- **Manuellement** : onglet **Actions** > workflow "Update DSFR" > **Run workflow**, avec input optionnel `version`.
+- **Hebdomadaire** : chaque lundi 08:00 UTC, vérifie la dernière release DSFR publique et, si elle diffère de la version intégrée, ouvre une PR `dsfr-update/vX.Y.Z` avec le diff et une checklist de validation (tests, rendu visuel, déclaration RGAA).
+
+La PR est étiquetée `deps` + `dsfr`. Elle doit être revue manuellement : il peut y avoir des nouveaux composants DSFR à intégrer dans les templates Twig, des classes CSS qui changent, des icônes ajoutées/retirées, etc. Le changelog DSFR (<https://github.com/GouvernementFR/dsfr/blob/main/CHANGELOG.md>) est le compagnon obligatoire de toute mise à jour.
+
+---
+
 ## Dépendances
 
 Aucune dépendance runtime (hors DSFR lui-même et jQuery/SortableJS fournis par LimeSurvey).
