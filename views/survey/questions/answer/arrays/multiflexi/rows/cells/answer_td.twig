@@ -31,6 +31,13 @@
         'disabled' : true,
     })) }}
 
+    {# Label visible en mode linéarisé mobile (CSS .ls-label-xs-visibility).
+       aria-hidden : le SR utilise aria-labelledby du select/input qui pointe
+       déjà sur l'en-tête de colonne ET de ligne. #}
+    <label for="answer{{ myfname2 }}" class="ls-label-xs-visibility" aria-hidden="true">
+        {{ processString(dataTitle) }}
+    </label>
+
     {% if inputboxlayout == false %}
         <!-- Dropdown Layout -->
         <div class="fr-select-group">

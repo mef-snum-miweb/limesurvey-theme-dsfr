@@ -102,6 +102,17 @@
                             {{ processString(subquestion.answertext) }}
                         </th>
 
+                        {# Entête de groupe Échelle 1 — visible uniquement en
+                           mode linéarisé mobile, puisque le <thead> est masqué
+                           à cette largeur. Sans ce séparateur, l'utilisateur
+                           ne distinguait pas les options de Scale A de celles
+                           de Scale B. #}
+                        {% if leftheader %}
+                            <td class="dualscale-scale-header ls-xs-only" aria-hidden="true">
+                                {{ processString(leftheader) }}
+                            </td>
+                        {% endif %}
+
                         {# Scale 0 (first scale) #}
                         {% for j, ld in labelcode0 %}
                             <td class="answer_cell_{{ ld }} answer-item radio-item scale0-item" headers="answertext{{ subquestion.myfname }} scale0-header-{{ basename }} answer{{ basename }}-s0-{{ ld }}">
@@ -113,6 +124,10 @@
                                     aria-labelledby="answer{{ basename }}-s0-{{ ld }} answertext{{ subquestion.myfname }}"
                                     {{ labelcode0_checked[subquestion.title][ld]|raw }}
                                 />
+                                {# Label visible en mode linéarisé mobile. #}
+                                <label for="answer{{ subquestion.myfname0 }}-{{ ld }}" class="ls-label-xs-visibility" aria-hidden="true">
+                                    {{ processString(labelans0[j]) }}
+                                </label>
                             </td>
                         {% endfor %}
 
@@ -120,6 +135,14 @@
                         {% if separatorwidth %}
                             <td class="separator">
                                 {{ processString(subquestion.answertextcenter) }}
+                            </td>
+                        {% endif %}
+
+                        {# Entête de groupe Échelle 2 — visible uniquement en
+                           mode linéarisé mobile (<thead> masqué à cette largeur). #}
+                        {% if rightheader %}
+                            <td class="dualscale-scale-header ls-xs-only" aria-hidden="true">
+                                {{ processString(rightheader) }}
                             </td>
                         {% endif %}
 
@@ -134,6 +157,10 @@
                                     aria-labelledby="answer{{ basename }}-s1-{{ ld }} answertext{{ subquestion.myfname }}"
                                     {{ labelcode1_checked[subquestion.title][ld]|raw }}
                                 />
+                                {# Label visible en mode linéarisé mobile. #}
+                                <label for="answer{{ subquestion.myfname1 }}-{{ ld }}" class="ls-label-xs-visibility" aria-hidden="true">
+                                    {{ processString(labelans1[j]) }}
+                                </label>
                             </td>
                         {% endfor %}
 
