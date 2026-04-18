@@ -78,22 +78,38 @@ export function createErrorSummary() {
     summary.setAttribute('role', 'alert');
     summary.setAttribute('tabindex', '-1');
 
-    // Construire le HTML
-    let html = '<h3 class="fr-alert__title">';
-    html += errorList.length === 1 ? 'Une erreur a été détectée' : errorList.length + ' erreurs ont été détectées';
-    html += '</h3>';
-    html += '<p>Veuillez corriger les erreurs suivantes :</p>';
-    html += '<ul class="fr-mb-0">';
+    // Construction via API DOM : error.label et error.id proviennent du textContent
+    // de labels/messages contrôlés par l'admin du sondage. innerHTML les
+    // réinterpréterait comme HTML et permettrait un XSS stocké.
+    const title = document.createElement('h3');
+    title.className = 'fr-alert__title';
+    title.textContent = errorList.length === 1
+        ? 'Une erreur a été détectée'
+        : errorList.length + ' erreurs ont été détectées';
+    summary.appendChild(title);
+
+    const description = document.createElement('p');
+    description.textContent = 'Veuillez corriger les erreurs suivantes :';
+    summary.appendChild(description);
+
+    const list = document.createElement('ul');
+    list.className = 'fr-mb-0';
 
     errorList.forEach(function(error) {
-        html += '<li class="error-item" data-question-id="' + error.id + '">';
-        html += '<a href="#' + error.id + '" class="fr-link fr-icon-error-warning-line fr-link--icon-left">' + error.label + '</a>';
-        html += '</li>';
+        const item = document.createElement('li');
+        item.className = 'error-item';
+        item.setAttribute('data-question-id', error.id);
+
+        const link = document.createElement('a');
+        link.setAttribute('href', '#' + error.id);
+        link.className = 'fr-link fr-icon-error-warning-line fr-link--icon-left';
+        link.textContent = error.label;
+
+        item.appendChild(link);
+        list.appendChild(item);
     });
 
-    html += '</ul>';
-
-    summary.innerHTML = html;
+    summary.appendChild(list);
 
     // Ajouter des listeners sur les liens pour scroller proprement
     summary.querySelectorAll('a[href^="#"]').forEach(function(link) {
