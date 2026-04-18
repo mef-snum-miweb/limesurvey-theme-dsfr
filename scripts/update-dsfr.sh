@@ -13,7 +13,13 @@
 #   - CSS framework (dsfr.min.css, icons.min.css, icons-system.min.css)
 #   - JS DSFR (dsfr.module.min.js, dsfr.nomodule.min.js + .map)
 #   - Polices (Marianne + Spectral en WOFF/WOFF2)
-#   - Icônes SVG des 4 catégories utilisées (business, editor, system, user)
+#   - Icônes SVG : TOUTES les catégories présentes dans dist/icons/.
+#     Depuis DSFR 1.13+, les icônes sont réparties en ~18 catégories
+#     (arrows, buildings, business, communication, design, development,
+#     device, document, editor, finance, health, logo, map, media,
+#     others, system, user, weather). Le CSS `dsfr.min.css` référence
+#     des icônes dans plusieurs d'entre elles — si on en exclut, on
+#     obtient des 404 sur les pages qui utilisent ces composants.
 #   - Badge version dans README.md
 #
 # Fichiers PAS touchés :
@@ -94,17 +100,22 @@ cp -v "${SRC}/fonts/"*.woff  "${THEME_DIR}/fonts/" 2>/dev/null || true
 cp -v "${SRC}/fonts/"*.woff2 "${THEME_DIR}/fonts/" 2>/dev/null || true
 
 echo ""
-echo "▶ Mise à jour des icônes SVG (business, editor, system, user)..."
-for cat in business editor system user; do
-    if [[ -d "${SRC}/icons/${cat}" ]]; then
-        rm -rf "${THEME_DIR}/icons/${cat}"
-        cp -R "${SRC}/icons/${cat}" "${THEME_DIR}/icons/${cat}"
-        count="$(find "${THEME_DIR}/icons/${cat}" -name "*.svg" | wc -l | tr -d ' ')"
-        echo "  ${cat}/ : ${count} SVG"
-    else
-        echo "  ⚠️  ${cat}/ absent de la release, catégorie laissée inchangée"
-    fi
+echo "▶ Mise à jour des icônes SVG (toutes les catégories de la release)..."
+# On purge d'abord l'ancien répertoire `icons/` pour éviter de conserver
+# des SVG orphelins d'une release précédente. Puis on copie toutes les
+# catégories fournies par DSFR.
+rm -rf "${THEME_DIR}/icons"
+mkdir -p "${THEME_DIR}/icons"
+total_svg=0
+for cat_dir in "${SRC}/icons/"*/; do
+    cat="$(basename "$cat_dir")"
+    cp -R "$cat_dir" "${THEME_DIR}/icons/${cat}"
+    count="$(find "${THEME_DIR}/icons/${cat}" -name "*.svg" | wc -l | tr -d ' ')"
+    total_svg=$((total_svg + count))
+    printf "  %-16s : %4d SVG\n" "${cat}/" "${count}"
 done
+echo "  ───────────────────────"
+printf "  %-16s : %4d SVG\n" "TOTAL" "${total_svg}"
 
 # --- Mise à jour du badge de version dans README.md ------------------------
 echo ""

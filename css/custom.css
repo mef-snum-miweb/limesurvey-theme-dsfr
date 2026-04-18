@@ -2954,10 +2954,12 @@ ul.imageselect-list > li.no-anwser-item > label:hover::before {
     }
 }
 
-/* Champ "Autre" pour bootstrap_buttons - déjà stylé DSFR dans le template */
-#div{{ name }}other .fr-input,
+/* Champ "Autre" pour bootstrap_buttons — déjà stylé DSFR dans le template.
+   Règle conservée comme ancre sémantique pour retrouver ce point depuis
+   l'historique git ; ne doit porter aucune déclaration (le fr-input est
+   déjà posé par le template Twig). */
 [id$="other"] .fr-input {
-    /* Les champs "Autre" utilisent déjà fr-input */
+    /* Intentionnellement vide. */
 }
 
 /* ============================================
