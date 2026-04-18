@@ -23,7 +23,7 @@ import { handleRequiredFields } from './validation/required-fields.js';
 import { transformErrorsToDsfr, observeErrorChanges } from './validation/errors-dsfr.js';
 import { handleMultipleShortTextErrors } from './validation/mst-errors.js';
 import { initAriaInvalidSync } from './validation/aria-invalid-sync.js';
-import { createErrorSummary, initErrorSummaryObserver } from './validation/error-summary.js';
+import { createErrorSummary } from './validation/error-summary.js';
 import { initNumericValidation, handleNumericMultiValidation, observeNumericMultiSumValidation } from './validation/numeric-validation.js';
 import { handleArrayValidation, handleSimpleQuestionValidation } from './validation/array-validation.js';
 import { transformValidationMessages } from './validation/validation-messages.js';
@@ -62,7 +62,6 @@ onReady(() => {
     handleMultipleShortTextErrors();
     observeErrorChanges();
     initAriaInvalidSync();
-    initErrorSummaryObserver();
     initNumericValidation();
     handleArrayValidation();
     handleNumericMultiValidation();
