@@ -36,19 +36,22 @@
             </div>
         </div>
         <div class="fr-col-12 fr-col-md-8 fr-mb-2w">
+            {# `t` n'est pas propagé dans ce sous-template rendu par LimeSurvey hors scope de layout_global.twig.
+               On replie sur la langue active du questionnaire avec un libellé explicite (RGAA 11.1 label non vide). #}
+            {% set _lang = aSurveyInfo.alanguageChanger.datas.sSelected|default('fr') %}
+            {% set _ifOtherSpecify = (_lang == 'en') ? 'If other, please specify' : 'Si autre, précisez' %}
+            {% set _pleaseSpecifyPlaceholder = (_lang == 'en') ? 'Please specify…' : 'Veuillez préciser…' %}
             <div class="fr-input-group">
                 <label class="fr-label fr-sr-only" for="answer{{ myfname }}">
-                    {{ t.if_other_specify }}
+                    {{ _ifOtherSpecify }}
                 </label>
-                {# RGAA 8.7 — utilisation du dict t.* (traduit FR/EN) au lieu de
-                   gT() qui tombait en fallback anglais sans lang="en". #}
                 <input
                     class="fr-input {{ kpclass }}"
                     type="text"
                     name="{{ myfname }}"
                     id="answer{{ myfname }}"
                     value="{{ sValue }}"
-                    placeholder="{{ t.please_specify_placeholder }}"
+                    placeholder="{{ _pleaseSpecifyPlaceholder }}"
                 />
             </div>
         </div>

@@ -33,16 +33,20 @@
     </div>
 
     <!-- Text input for "Other" -->
+    {# `t` n'est pas propagé dans ce sous-template rendu par LimeSurvey hors scope de layout_global.twig.
+       On replie sur la langue active du questionnaire avec un libellé explicite (RGAA 11.1 label non vide). #}
+    {% set _lang = aSurveyInfo.alanguageChanger.datas.sSelected|default('fr') %}
+    {% set _ifOtherSpecify = (_lang == 'en') ? 'If other, please specify' : 'Si autre, précisez' %}
     <div class="fr-input-group fr-mt-1w">
         <label class="fr-label fr-sr-only" for="answer{{ name }}othertext">
-            {{ t.if_other_specify }}
+            {{ _ifOtherSpecify }}
         </label>
         <input
             type="text"
             class="fr-input {{ kpclass }}"
             id="answer{{ name }}othertext"
             name="{{ name }}other"
-            title="{{ t.if_other_specify }}"
+            title="{{ _ifOtherSpecify }}"
             {{ answer_other }}
             {% if numbers_only %} data-number="1" {% endif %}
         />

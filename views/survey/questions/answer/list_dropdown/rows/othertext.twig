@@ -12,9 +12,13 @@
 #}
 
 <!-- Other text field - DSFR -->
+{# `t` n'est pas propagé dans ce sous-template rendu par LimeSurvey hors scope de layout_global.twig.
+   On replie sur la langue active du questionnaire avec un libellé explicite (RGAA 11.1 label non vide). #}
+{% set _lang = aSurveyInfo.alanguageChanger.datas.sSelected|default('fr') %}
+{% set _ifOtherSpecify = (_lang == 'en') ? 'If other, please specify' : 'Si autre, précisez' %}
 <div class="fr-input-group fr-mt-2w">
     <label for="othertext{{ name }}" class="fr-label">
-        {{ t.if_other_specify }}
+        {{ _ifOtherSpecify }}
     </label>
     <input
         type="text"
