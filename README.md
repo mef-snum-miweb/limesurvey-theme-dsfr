@@ -13,15 +13,26 @@ Thème LimeSurvey conforme au [Système de Design de l'État (DSFR)](https://www
 
 ## En bref
 
-| | |
-|---|---|
-| **Accessibilité** | **100 %** RGAA 4.1 hors CAPTCHA |
-| **Design** | 100 % DSFR, zéro Bootstrap résiduel, mode clair/sombre natif |
-| **Questions** | 36 types supportés avec templates DSFR dédiés |
-| **Autonomie** | Ressources locales (polices, icônes, JS) — aucun CDN |
-| **Responsive** | Mobile-first, linéarisation des tableaux <768 px |
-| **Impression** | Layout dédié, 32 templates print par type de question |
-| **i18n** | Français et anglais, sélecteur de langue DSFR |
+<table>
+<tr>
+<td valign="top">
+
+- **Accessibilité** — **100 %** RGAA 4.1 hors CAPTCHA
+- **Design** — 100 % DSFR, zéro Bootstrap résiduel, mode clair/sombre natif
+- **Questions** — 36 types supportés avec templates DSFR dédiés
+- **Autonomie** — ressources locales (polices, icônes, JS), aucun CDN
+- **Responsive** — mobile-first, linéarisation des tableaux <768 px
+- **Impression** — layout dédié, 32 templates print par type de question
+- **i18n** — français et anglais, sélecteur de langue DSFR
+
+</td>
+<td valign="top" width="380">
+
+<a href="limesurvey-dsfr-theme.png"><img src="limesurvey-dsfr-theme.png" alt="Aperçu du thème DSFR pour LimeSurvey" width="360"></a>
+
+</td>
+</tr>
+</table>
 
 ---
 
