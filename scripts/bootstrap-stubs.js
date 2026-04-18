@@ -140,9 +140,12 @@
             $.fn.tooltip = function() { return this; };
         }
 
-        if (!$.fn.selectpicker) {
-            $.fn.selectpicker = function() { return this; };
-        }
+        // bootstrap-select : neutralisation inconditionnelle.
+        // Le core LimeSurvey peut charger la vraie lib bootstrap-select avant
+        // nos stubs via les assets AssetsManager ; on l'écrase quand même pour
+        // empêcher la construction du double dropdown (combobox DSFR à la place,
+        // voir src/dropdowns/combobox.js).
+        $.fn.selectpicker = function() { return this; };
 
         if (!$.fn.popover) {
             $.fn.popover = function() { return this; };

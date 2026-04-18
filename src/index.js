@@ -28,6 +28,7 @@ import { initNumericValidation, handleNumericMultiValidation, observeNumericMult
 import { handleArrayValidation, handleSimpleQuestionValidation } from './validation/array-validation.js';
 import { transformValidationMessages } from './validation/validation-messages.js';
 import { fixDropdownArrayInlineStyles, setupStyleObserver } from './dropdowns/dropdown-array.js';
+import { initSearchableDropdowns } from './dropdowns/combobox.js';
 import {
     initConditionalQuestionsAria,
     setupConditionalQuestionsObserver,
@@ -78,6 +79,10 @@ onReady(() => {
     fixDropdownArrayInlineStyles();
     setupStyleObserver();
 
+    // Combobox DSFR accessible : remplace bootstrap-select sur les
+    // list_dropdown avec recherche (cf. src/dropdowns/combobox.js).
+    initSearchableDropdowns();
+
     // Questions conditionnelles (a11y)
     initConditionalQuestionsAria();
     setupConditionalQuestionsObserver();
@@ -127,6 +132,7 @@ onQuestionsLoaded(() => {
     transformValidationMessages();
     fixDropdownArrayInlineStyles();
     setupStyleObserver();
+    initSearchableDropdowns();
     // fixTableAccessibility a historiquement un délai de 200ms après
     // questionsLoaded pour laisser le DOM se stabiliser.
     setTimeout(fixTableAccessibility, 200);
@@ -154,6 +160,7 @@ onPjax(() => {
     setTimeout(sanitizeRTEContent, 100);
     setTimeout(initAllRankingQuestions, 300);
     initRelevanceHandlers();
+    initSearchableDropdowns();
     // Si la page pjax répond avec des erreurs de validation côté serveur,
     // le résumé doit être (re)construit — à l'identique des branches onReady
     // et onQuestionsLoaded.

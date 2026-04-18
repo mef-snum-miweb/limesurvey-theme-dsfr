@@ -35,12 +35,12 @@
                 };
             }
 
-            // Stub pour selectpicker (Bootstrap Select)
-            if (!jQuery.fn.selectpicker) {
-                jQuery.fn.selectpicker = function() {
-                    return this;
-                };
-            }
+            // Stub pour selectpicker (Bootstrap Select) — neutralisation
+            // inconditionnelle : on remplace la vraie lib si le core LS l'a
+            // chargée avant nous, pour laisser le combobox DSFR prendre le relais.
+            jQuery.fn.selectpicker = function() {
+                return this;
+            };
 
             // Stub pour popover
             if (!jQuery.fn.popover) {

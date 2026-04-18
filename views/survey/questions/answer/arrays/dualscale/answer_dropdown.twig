@@ -18,15 +18,24 @@
  */
 #}
 
+{# Marqueurs DSFR :
+   - `dsfr-separator-empty` sur la colonne et la cellule séparateur si interddSep est vide,
+     pour que la CSS scope la règle `width:0` au cas vide uniquement.
+   - `dsfr-has-ddfix` sur la <tr> et `dsfr-has-ddfix-table` sur la <table> quand
+     ddprefix ou ddsuffix sont renseignés, pour réserver plus d'espace aux
+     cellules select-item et éviter de tronquer les libellés. #}
+{% set hasDDFix = (ddprefix|trim != '') or (ddsuffix|trim != '') %}
+{% set separatorIsEmpty = interddSep|trim == '' %}
+
 <!-- answer - DSFR -->
 <div class="ls-table-wrapper" role="group" aria-labelledby="ls-question-text-{{ basename }}">
     <div class="fr-table fr-table--bordered" data-fr-js-table="true">
-        <table class="{{ coreClass }}" aria-label="{{ t.dual_scale_matrix|default('Matrice de réponses à double échelle') }}">
+        <table class="{{ coreClass }}{% if hasDDFix %} dsfr-has-ddfix-table{% endif %}" aria-label="{{ t.dual_scale_matrix|default('Matrice de réponses à double échelle') }}">
             <!-- Column groups -->
             <colgroup>
                 <col class="answertext" style='width:{{ answerwidth }}%;' />
                 <col class="dsheader" style='width:{{ (100 - answerwidth - separatorwidth)/2 }}%;'  {% if leftheader %} role='group' aria-labelledby="left-header-{{ basename }}" {% endif %}/>
-                <col class="ddarrayseparator" style='width:{{ separatorwidth }}%'/>
+                <col class="ddarrayseparator{% if separatorIsEmpty %} dsfr-separator-empty{% endif %}" style='width:{{ separatorwidth }}%'/>
                 <col class="dsheader" style='width:{{ (100 - answerwidth - separatorwidth)/2 }}%;' {% if rightheader %} role='group' aria-labelledby="right-header-{{ basename }}" {% endif %}/>
             </colgroup>
 
@@ -45,7 +54,7 @@
             <tbody>
                 <!-- Sub questions -->
                 {% for ansrow in aSubQuestions %}
-                    <tr id="javatbd{{ ansrow.myfname }}" class="answers-list radio-list {% if ansrow.odd %}ls-odd{% else %}ls-even{% endif %}{% if ansrow.mandatoryviolation %} ls-error-mandatory {% endif %}">
+                    <tr id="javatbd{{ ansrow.myfname }}" class="answers-list radio-list {% if ansrow.odd %}ls-odd{% else %}ls-even{% endif %}{% if ansrow.mandatoryviolation %} ls-error-mandatory {% endif %}{% if hasDDFix %} dsfr-has-ddfix{% endif %}">
                         <!-- Answer text (actual question) -->
                         <th scope="row" id="answertext{{ ansrow.myfname }}" class="answertext fr-text--bold{% if ansrow.mandatoryviolation %} fr-error-text{% endif %}">
                             {{ processString(ansrow.question) }}
@@ -111,7 +120,7 @@
                         </td>
 
                         <!-- Separator -->
-                        <td class="ddarrayseparator information-item">{{ interddSep }}</td>
+                        <td class="ddarrayseparator information-item{% if separatorIsEmpty %} dsfr-separator-empty{% endif %}">{{ interddSep }}</td>
 
                         <!-- Second dropdown - select-item requis pour em_javascript.js -->
                         <td class="answer-item dropdown-item select-item{% if ansrow.mandatoryviolation and ansrow.sActualAnswer1=='' %} fr-input-group--error{% endif %}">

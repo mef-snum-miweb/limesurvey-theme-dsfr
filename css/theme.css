@@ -2026,17 +2026,24 @@ table.array-flexible-dual-scale td.dual_scale_separator {
     vertical-align: middle;
 }
 
-/* Séparateur central - masqué */
-.ls-table-wrapper table td.ddarrayseparator {
+/* Séparateur central : masqué uniquement si vide (classe `dsfr-separator-empty`
+   posée par le template Twig). Si interddSep est renseigné, on laisse le bloc
+   custom.css prendre le relais (padding + min-width pour affichage horizontal). */
+.ls-table-wrapper table td.ddarrayseparator.dsfr-separator-empty {
     width: 0 !important;
     padding: 0 !important;
     border: none !important;
     background-color: transparent !important;
 }
 
-/* Colonne séparatrice dans colgroup - masquée */
-.ls-table-wrapper table col.ddarrayseparator {
+/* Colonne séparatrice dans colgroup : masquée uniquement si vide. */
+.ls-table-wrapper table col.ddarrayseparator.dsfr-separator-empty {
     width: 0 !important;
+}
+
+/* Fond transparent systématique sur le séparateur (tous cas). */
+.ls-table-wrapper table td.ddarrayseparator {
+    background-color: transparent !important;
 }
 
 /* Fond transparent pour toutes les lignes (pas de fond sur mobile) */

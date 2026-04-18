@@ -115,11 +115,73 @@
     ".ls-question-text img",
     ".ls-question-help img"
   ];
+  var SAFE_URL_RE = /^(https?:\/\/|\/|\.\/|\.\.\/)/i;
+  var ALLOWED_STYLE_PROPS = /* @__PURE__ */ new Set([
+    "width",
+    "height",
+    "max-width",
+    "max-height",
+    "min-width",
+    "min-height",
+    "object-fit",
+    "object-position"
+  ]);
+  function sanitizeStyle(rawStyle) {
+    if (typeof rawStyle !== "string" || !rawStyle.trim()) return null;
+    const safe = rawStyle.split(";").map((decl) => decl.trim()).filter(Boolean).map((decl) => {
+      const idx = decl.indexOf(":");
+      if (idx < 0) return null;
+      const prop = decl.slice(0, idx).trim().toLowerCase();
+      const value = decl.slice(idx + 1).trim();
+      if (!ALLOWED_STYLE_PROPS.has(prop)) return null;
+      if (/[()<>]/.test(value)) return null;
+      return `${prop}: ${value}`;
+    }).filter(Boolean).join("; ");
+    return safe || null;
+  }
+  function extractRealImageSrc(rawSrc) {
+    if (typeof rawSrc !== "string") return null;
+    const trimmed = rawSrc.trim();
+    if (!trimmed) return null;
+    if (!trimmed.startsWith("<") && !trimmed.startsWith("&lt;")) return null;
+    let doc;
+    try {
+      doc = new DOMParser().parseFromString(rawSrc, "text/html");
+    } catch (e) {
+      return null;
+    }
+    const img = doc.querySelector("img");
+    if (!img) return null;
+    const src = (img.getAttribute("src") || "").trim();
+    if (!src) return null;
+    if (!SAFE_URL_RE.test(src)) return null;
+    const alt = img.getAttribute("alt");
+    const style = sanitizeStyle(img.getAttribute("style"));
+    return {
+      src,
+      alt: alt && alt.trim() ? alt : null,
+      style
+    };
+  }
   function enableImageLazyLoading() {
     const images = document.querySelectorAll(IMAGE_SELECTORS.join(", "));
     images.forEach(function(img) {
       if (!img.hasAttribute("loading")) {
         img.setAttribute("loading", "lazy");
+      }
+      const rawSrc = img.getAttribute("src");
+      if (rawSrc) {
+        const extracted = extractRealImageSrc(rawSrc);
+        if (extracted) {
+          img.setAttribute("src", extracted.src);
+          if (extracted.alt && (!img.hasAttribute("alt") || img.getAttribute("alt").trim() === "" || img.getAttribute("alt") === "Image de réponse")) {
+            img.setAttribute("alt", extracted.alt);
+          }
+          if (extracted.style) {
+            const existing = img.getAttribute("style") || "";
+            img.setAttribute("style", existing ? `${existing}; ${extracted.style}` : extracted.style);
+          }
+        }
       }
       if (!img.hasAttribute("alt") || img.getAttribute("alt").trim() === "") {
         const altText = img.hasAttribute("title") && img.getAttribute("title").trim() !== "" ? img.getAttribute("title") : "Image de réponse";
@@ -1688,6 +1750,327 @@
     });
   }
 
+  // modules/theme-dsfr/src/dropdowns/combobox.js
+  var ACTIVE_SELECTOR = "select.list-question-select, select.dsfr-input[data-width]";
+  var UPGRADED_FLAG = "data-dsfr-combobox";
+  var comboboxCounter = 0;
+  var globalClickHandler = null;
+  var registeredInstances = /* @__PURE__ */ new Set();
+  function initSearchableDropdowns(root = document) {
+    ensureGlobalClickHandler();
+    const selects = root.querySelectorAll(ACTIVE_SELECTOR);
+    selects.forEach((select) => {
+      if (select.getAttribute(UPGRADED_FLAG) === "1") {
+        return;
+      }
+      try {
+        upgradeToCombobox(select);
+      } catch (err) {
+        console.warn("[dsfr-combobox] upgrade failed, falling back to native select", err);
+      }
+    });
+  }
+  function upgradeToCombobox(select) {
+    if (!(select instanceof HTMLSelectElement)) return;
+    if (select.multiple) return;
+    if (select.getAttribute(UPGRADED_FLAG) === "1") return;
+    unwrapBootstrapSelect(select);
+    comboboxCounter += 1;
+    const uid = `dsfr-cb-${comboboxCounter}`;
+    const listboxId = `${uid}-listbox`;
+    const inputId = `${uid}-input`;
+    const options = Array.from(select.options).map((opt, index) => ({
+      value: opt.value,
+      label: opt.textContent || "",
+      selected: opt.selected,
+      disabled: opt.disabled,
+      index
+    }));
+    const selectedOption = options.find((o) => o.selected) || options[0] || null;
+    const placeholder = options.length > 0 && options[0].value === "" ? options[0].label : "";
+    const wrapper = document.createElement("div");
+    wrapper.className = "dsfr-combobox fr-select-group";
+    wrapper.setAttribute("data-dsfr-combobox-wrapper", "1");
+    const input = document.createElement("input");
+    input.type = "text";
+    input.setAttribute("role", "combobox");
+    input.className = "fr-select dsfr-combobox-input";
+    input.id = inputId;
+    input.setAttribute("aria-autocomplete", "list");
+    input.setAttribute("aria-expanded", "false");
+    input.setAttribute("aria-controls", listboxId);
+    input.setAttribute("autocomplete", "off");
+    if (placeholder) {
+      input.setAttribute("placeholder", placeholder);
+    }
+    const ariaLabelledBy = select.getAttribute("aria-labelledby");
+    if (ariaLabelledBy) input.setAttribute("aria-labelledby", ariaLabelledBy);
+    const ariaDescribedBy = select.getAttribute("aria-describedby");
+    if (ariaDescribedBy) input.setAttribute("aria-describedby", ariaDescribedBy);
+    if (selectedOption && selectedOption.value !== "") {
+      input.value = selectedOption.label;
+    }
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "dsfr-combobox-toggle fr-icon-arrow-down-s-line";
+    toggle.setAttribute("aria-label", "Ouvrir la liste");
+    toggle.setAttribute("tabindex", "-1");
+    const listbox = document.createElement("ul");
+    listbox.setAttribute("role", "listbox");
+    listbox.id = listboxId;
+    listbox.className = "dsfr-combobox-listbox";
+    listbox.hidden = true;
+    options.forEach((opt, index) => {
+      const li = document.createElement("li");
+      li.setAttribute("role", "option");
+      li.id = `${uid}-opt-${index}`;
+      li.className = "dsfr-combobox-option";
+      li.dataset.value = opt.value;
+      li.dataset.label = opt.label;
+      li.textContent = opt.label;
+      if (opt.disabled) {
+        li.setAttribute("aria-disabled", "true");
+      }
+      if (opt.selected && opt.value !== "") {
+        li.setAttribute("aria-selected", "true");
+      } else {
+        li.setAttribute("aria-selected", "false");
+      }
+      listbox.appendChild(li);
+    });
+    const status = document.createElement("div");
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
+    status.className = "fr-sr-only dsfr-combobox-status";
+    wrapper.appendChild(input);
+    wrapper.appendChild(toggle);
+    wrapper.appendChild(listbox);
+    wrapper.appendChild(status);
+    select.setAttribute(UPGRADED_FLAG, "1");
+    select.setAttribute("aria-hidden", "true");
+    select.setAttribute("tabindex", "-1");
+    select.style.position = "absolute";
+    select.style.width = "1px";
+    select.style.height = "1px";
+    select.style.padding = "0";
+    select.style.margin = "-1px";
+    select.style.overflow = "hidden";
+    select.style.clip = "rect(0, 0, 0, 0)";
+    select.style.whiteSpace = "nowrap";
+    select.style.border = "0";
+    if (select.parentNode) {
+      select.parentNode.insertBefore(wrapper, select);
+    }
+    const instance = {
+      uid,
+      select,
+      wrapper,
+      input,
+      toggle,
+      listbox,
+      status,
+      options,
+      activeIndex: -1,
+      open: false
+    };
+    registeredInstances.add(instance);
+    input.addEventListener("input", () => onInput(instance));
+    input.addEventListener("keydown", (e) => onKeyDown(instance, e));
+    input.addEventListener("focus", () => {
+    });
+    input.addEventListener("click", () => openListbox(instance));
+    toggle.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (instance.open) {
+        closeListbox(instance);
+      } else {
+        openListbox(instance);
+        input.focus();
+      }
+    });
+    listbox.addEventListener("mousedown", (e) => {
+      const li = e.target.closest('li[role="option"]');
+      if (!li) return;
+      e.preventDefault();
+      const index = instance.options.findIndex((o) => o.value === li.dataset.value);
+      if (index >= 0) {
+        selectOption(instance, index);
+      }
+    });
+    const initialIndex = options.findIndex((o) => o.selected);
+    if (initialIndex >= 0 && options[initialIndex].value !== "") {
+      setActiveOption(instance, initialIndex, { scroll: false });
+    }
+  }
+  function unwrapBootstrapSelect(select) {
+    const bsWrapper = select.closest(".bootstrap-select");
+    if (!bsWrapper || !bsWrapper.parentNode) return;
+    bsWrapper.parentNode.insertBefore(select, bsWrapper);
+    bsWrapper.parentNode.removeChild(bsWrapper);
+    select.classList.remove("form-control", "bs-select-hidden");
+  }
+  function onInput(instance) {
+    const query = instance.input.value;
+    filterOptions(instance, query);
+    openListbox(instance);
+  }
+  function filterOptions(instance, query) {
+    const normalized = normalize(query);
+    let visibleCount = 0;
+    Array.from(instance.listbox.children).forEach((li, index) => {
+      const label = instance.options[index].label;
+      const match = normalize(label).includes(normalized);
+      li.hidden = !match;
+      if (match) visibleCount += 1;
+    });
+    announceStatus2(instance, visibleCount);
+    if (instance.activeIndex >= 0) {
+      const active = instance.listbox.children[instance.activeIndex];
+      if (active && active.hidden) {
+        const firstVisible = Array.from(instance.listbox.children).findIndex((li) => !li.hidden);
+        setActiveOption(instance, firstVisible);
+      }
+    }
+  }
+  function normalize(str) {
+    return (str || "").toLowerCase().normalize("NFD").replace(new RegExp("\\p{Diacritic}", "gu"), "");
+  }
+  function announceStatus2(instance, count) {
+    if (count === 0) {
+      instance.status.textContent = "Aucun résultat";
+    } else if (count === 1) {
+      instance.status.textContent = "1 résultat disponible";
+    } else {
+      instance.status.textContent = `${count} résultats disponibles`;
+    }
+  }
+  function openListbox(instance) {
+    if (instance.open) return;
+    instance.open = true;
+    instance.listbox.hidden = false;
+    instance.input.setAttribute("aria-expanded", "true");
+    instance.toggle.setAttribute("aria-label", "Fermer la liste");
+    if (instance.activeIndex < 0) {
+      const firstVisible = Array.from(instance.listbox.children).findIndex((li) => !li.hidden);
+      if (firstVisible >= 0) {
+        setActiveOption(instance, firstVisible);
+      }
+    }
+  }
+  function closeListbox(instance) {
+    if (!instance.open) return;
+    instance.open = false;
+    instance.listbox.hidden = true;
+    instance.input.setAttribute("aria-expanded", "false");
+    instance.input.removeAttribute("aria-activedescendant");
+    instance.toggle.setAttribute("aria-label", "Ouvrir la liste");
+    Array.from(instance.listbox.children).forEach((li) => {
+      li.hidden = false;
+    });
+  }
+  function setActiveOption(instance, index, { scroll = true } = {}) {
+    const previous = instance.listbox.children[instance.activeIndex];
+    if (previous) {
+      previous.classList.remove("is-active");
+    }
+    instance.activeIndex = index;
+    const current = instance.listbox.children[index];
+    if (!current) {
+      instance.input.removeAttribute("aria-activedescendant");
+      return;
+    }
+    current.classList.add("is-active");
+    instance.input.setAttribute("aria-activedescendant", current.id);
+    if (scroll) {
+      if (typeof current.scrollIntoView === "function") {
+        current.scrollIntoView({ block: "nearest" });
+      }
+    }
+  }
+  function moveActive(instance, delta) {
+    const visibleIndexes = Array.from(instance.listbox.children).map((li, i) => li.hidden ? -1 : i).filter((i) => i >= 0);
+    if (visibleIndexes.length === 0) return;
+    const currentPos = visibleIndexes.indexOf(instance.activeIndex);
+    let nextPos = currentPos + delta;
+    if (nextPos < 0) nextPos = visibleIndexes.length - 1;
+    if (nextPos >= visibleIndexes.length) nextPos = 0;
+    setActiveOption(instance, visibleIndexes[nextPos]);
+  }
+  function selectOption(instance, index) {
+    const opt = instance.options[index];
+    if (!opt || opt.disabled) return;
+    instance.input.value = opt.value === "" ? "" : opt.label;
+    instance.select.value = opt.value;
+    instance.select.dispatchEvent(new Event("change", { bubbles: true }));
+    Array.from(instance.listbox.children).forEach((li, i) => {
+      li.setAttribute("aria-selected", i === index && opt.value !== "" ? "true" : "false");
+    });
+    closeListbox(instance);
+    instance.input.focus();
+  }
+  function onKeyDown(instance, event) {
+    switch (event.key) {
+      case "ArrowDown":
+        event.preventDefault();
+        if (!instance.open) openListbox(instance);
+        else moveActive(instance, 1);
+        break;
+      case "ArrowUp":
+        event.preventDefault();
+        if (!instance.open) openListbox(instance);
+        else moveActive(instance, -1);
+        break;
+      case "Enter":
+        if (instance.open && instance.activeIndex >= 0) {
+          event.preventDefault();
+          selectOption(instance, instance.activeIndex);
+        }
+        break;
+      case "Escape":
+        if (instance.open) {
+          event.preventDefault();
+          closeListbox(instance);
+        } else if (instance.input.value !== "") {
+          event.preventDefault();
+          instance.input.value = "";
+          filterOptions(instance, "");
+        }
+        break;
+      case "Home":
+        if (instance.open) {
+          event.preventDefault();
+          const firstVisible = Array.from(instance.listbox.children).findIndex((li) => !li.hidden);
+          if (firstVisible >= 0) setActiveOption(instance, firstVisible);
+        }
+        break;
+      case "End":
+        if (instance.open) {
+          event.preventDefault();
+          const visible = Array.from(instance.listbox.children).map((li, i) => li.hidden ? -1 : i).filter((i) => i >= 0);
+          if (visible.length > 0) setActiveOption(instance, visible[visible.length - 1]);
+        }
+        break;
+      case "Tab":
+        closeListbox(instance);
+        break;
+      default:
+        break;
+    }
+  }
+  function ensureGlobalClickHandler() {
+    if (globalClickHandler) return;
+    globalClickHandler = (event) => {
+      registeredInstances.forEach((instance) => {
+        if (!instance.open) return;
+        if (!instance.wrapper.contains(event.target)) {
+          closeListbox(instance);
+        }
+      });
+    };
+    document.addEventListener("click", globalClickHandler, { capture: true });
+  }
+
   // modules/theme-dsfr/src/a11y/conditional-aria.js
   function extractQuestionCodes(expression) {
     if (!expression) return [];
@@ -2547,6 +2930,7 @@
     setTimeout(createErrorSummary, 100);
     fixDropdownArrayInlineStyles();
     setupStyleObserver();
+    initSearchableDropdowns();
     initConditionalQuestionsAria();
     setupConditionalQuestionsObserver();
     initConditionalVisibilityNotifier();
@@ -2583,6 +2967,7 @@
     transformValidationMessages();
     fixDropdownArrayInlineStyles();
     setupStyleObserver();
+    initSearchableDropdowns();
     setTimeout(fixTableAccessibility, 200);
     setTimeout(observeNumericMultiSumValidation, 200);
     setTimeout(createErrorSummary, 100);
@@ -2598,6 +2983,7 @@
     setTimeout(sanitizeRTEContent, 100);
     setTimeout(initAllRankingQuestions, 300);
     initRelevanceHandlers();
+    initSearchableDropdowns();
     setTimeout(createErrorSummary, 200);
   });
   var dropdownResizeTimer;

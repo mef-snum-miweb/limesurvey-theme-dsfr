@@ -3072,12 +3072,110 @@ table.questions-list td.dropdown-item {
     max-width: 100% !important;
 }
 
-/* Séparateur dual-scale - garder visible mais discret */
+/* Séparateur dual-scale : scoping via les classes `dsfr-separator-empty` /
+   `dsfr-has-ddfix` / `dsfr-has-ddfix-table` posées par le template Twig.
+   Voir views/survey/questions/answer/arrays/dualscale/answer_dropdown.twig. */
 .array-flexible-dual-scale td.ddarrayseparator,
 [class*="array-"] td.ddarrayseparator {
-    min-width: 1rem !important;
     background-color: transparent !important;
 }
+
+/* Séparateur vide : totalement masqué (comportement historique). */
+.array-flexible-dual-scale col.ddarrayseparator.dsfr-separator-empty,
+.array-flexible-dual-scale td.ddarrayseparator.dsfr-separator-empty,
+[class*="array-"] col.ddarrayseparator.dsfr-separator-empty,
+[class*="array-"] td.ddarrayseparator.dsfr-separator-empty {
+    width: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
+/* Cas avec ddprefix/ddsuffix : on passe la table en table-layout:auto pour
+   que les cellules select-item puissent s'étirer sans tronquer "préfixe"
+   et "suffixe", et on donne au séparateur un padding latéral généreux.
+   Spécificité élevée (html body .fr-table ...) pour battre la règle
+   `[class*="array-"] .fr-table table { table-layout: fixed !important }`
+   déclarée plus haut dans ce fichier. */
+html body table.dsfr-has-ddfix-table,
+html body [class*="array-"] .fr-table table.dsfr-has-ddfix-table,
+html body [class*="array-"] table.dsfr-has-ddfix-table.ls-answers {
+    table-layout: auto !important;
+}
+
+/* Séparateur non-vide : largeur confortable pour "séparateur" etc. et
+   padding latéral généreux pour l'aérer. Override des styles inline du
+   colgroup (width:8%) via specificity HTML body. */
+html body table.dsfr-has-ddfix-table col.ddarrayseparator:not(.dsfr-separator-empty) {
+    width: auto;
+}
+
+tr.dsfr-has-ddfix td.ddarrayseparator:not(.dsfr-separator-empty) {
+    min-width: 5rem;
+    padding: 0.5rem 1rem;
+    text-align: center;
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow: visible;
+    color: var(--text-mention-grey);
+}
+
+/* Cellules select-item : ne pas rogner le contenu, laisser le flex
+   s'étaler. `min-width: max-content` pousse la cellule pour contenir
+   le flex ; `overflow: visible` empêche le rognage si les styles
+   par défaut du tableau posaient overflow hidden. */
+html body tr.dsfr-has-ddfix td.select-item,
+html body tr.dsfr-has-ddfix td.dropdown-item {
+    overflow: visible !important;
+    min-width: -webkit-max-content;
+    min-width: -moz-max-content;
+    min-width: max-content;
+    width: auto !important;
+    max-width: none !important;
+}
+
+/* Flex container interne : nowrap, gap, ne pas shrinker sous la taille
+   du contenu combiné. */
+html body tr.dsfr-has-ddfix td.select-item .ls-input-group,
+html body tr.dsfr-has-ddfix td.dropdown-item .ls-input-group {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: -webkit-max-content;
+    min-width: -moz-max-content;
+    min-width: max-content;
+    width: 100%;
+}
+
+/* Préfixes et suffixes : intouchables, jamais shrink, jamais rogner. */
+html body tr.dsfr-has-ddfix .ls-input-group-extra,
+html body tr.dsfr-has-ddfix .ddprefix,
+html body tr.dsfr-has-ddfix .ddsuffix {
+    flex: 0 0 auto !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    word-break: keep-all;
+    min-width: -webkit-min-content;
+    min-width: -moz-min-content;
+    min-width: min-content;
+}
+
+/* Select central : override le `width: 100% !important` hérité pour
+   qu'il ne monopolise plus la cellule ; `min-width: 10rem` garantit
+   un confort de sélection. */
+html body tr.dsfr-has-ddfix td.select-item select.fr-select,
+html body tr.dsfr-has-ddfix td.dropdown-item select.fr-select,
+html body tr.dsfr-has-ddfix td.select-item .ls-input-group > select,
+html body tr.dsfr-has-ddfix td.dropdown-item .ls-input-group > select {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 10rem;
+}
+
 
 /* Dropdown menu Bootstrap - style DSFR */
 .dropdown-menu {
@@ -3374,4 +3472,82 @@ dialog.file-upload-modal::backdrop {
 /* Ensure DSFR dialog doesn't conflict with native dialog */
 dialog.fr-modal[open] {
     display: block;
+}
+
+/* ============================================
+   COMBOBOX DSFR accessible — src/dropdowns/combobox.js
+   Remplacement runtime de bootstrap-select pour les list_dropdown
+   avec recherche. Pattern WAI-ARIA 1.2 Combobox / Listbox.
+   ============================================ */
+
+.dsfr-combobox {
+    position: relative;
+}
+
+.dsfr-combobox .dsfr-combobox-input {
+    width: 100%;
+    padding-right: 2.5rem;
+}
+
+.dsfr-combobox-toggle {
+    position: absolute;
+    right: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: 0;
+    color: var(--text-default-grey);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0.25rem;
+}
+
+.dsfr-combobox-toggle:focus {
+    outline: 2px solid var(--focus-blue-france, #0a76f6);
+    outline-offset: 2px;
+}
+
+.dsfr-combobox-listbox {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    max-height: 20rem;
+    overflow-y: auto;
+    background: var(--background-default-grey, #fff);
+    border: 1px solid var(--border-default-grey, #ddd);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    margin: 0.25rem 0 0;
+    list-style: none;
+}
+
+.dsfr-combobox-listbox[hidden] {
+    display: none !important;
+}
+
+.dsfr-combobox-option {
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    color: var(--text-default-grey);
+    font-family: Marianne, arial, sans-serif;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.dsfr-combobox-option[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.dsfr-combobox-option.is-active,
+.dsfr-combobox-option:hover {
+    background-color: var(--background-contrast-blue-france, #e3e3fd);
+    color: var(--text-action-high-blue-france, #000091);
+}
+
+.dsfr-combobox-option[aria-selected="true"] {
+    font-weight: 700;
 }
