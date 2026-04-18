@@ -507,166 +507,148 @@
   }
 
   // modules/theme-dsfr/src/validation/error-summary.js
-  function createErrorSummary() {
-    const oldSummary = document.getElementById("dsfr-error-summary");
-    if (oldSummary) {
-      oldSummary.remove();
+  var SUMMARY_ID = "dsfr-error-summary";
+  var STATUS_ID = "dsfr-error-status";
+  var ERROR_QUESTION_SELECTOR = ".question-container.input-error";
+  function ensureStatusRegion() {
+    let status = document.getElementById(STATUS_ID);
+    if (status) return status;
+    status = document.createElement("div");
+    status.id = STATUS_ID;
+    status.className = "fr-sr-only";
+    status.setAttribute("role", "status");
+    status.setAttribute("aria-live", "polite");
+    status.setAttribute("aria-atomic", "true");
+    const summary = document.getElementById(SUMMARY_ID);
+    if (summary && summary.parentNode) {
+      summary.parentNode.insertBefore(status, summary.nextSibling);
+    } else {
+      document.body.appendChild(status);
     }
-    const errorQuestions = document.querySelectorAll(".question-container.input-error, .question-container.fr-input-group--error");
-    if (errorQuestions.length === 0) {
+    return status;
+  }
+  function announceStatus(message) {
+    const status = ensureStatusRegion();
+    status.textContent = "";
+    setTimeout(() => {
+      status.textContent = message;
+    }, 30);
+  }
+  function describeErrorQuestion(question) {
+    const id = question.id;
+    const textEl = question.querySelector(".ls-label-question, .question-text");
+    const text = textEl ? textEl.textContent.trim() : "Question sans titre";
+    const msgEl = question.querySelector(".fr-message--error");
+    const msg = msgEl ? msgEl.textContent.trim() : "";
+    let label = text;
+    if (msg) label += " : " + msg;
+    if (label.length > 150) label = label.substring(0, 147) + "...";
+    return { id, label };
+  }
+  function buildErrorItem(error) {
+    const item = document.createElement("li");
+    item.className = "error-item";
+    item.setAttribute("data-question-id", error.id);
+    const link = document.createElement("a");
+    link.setAttribute("href", "#" + error.id);
+    link.className = "fr-link fr-icon-error-warning-line fr-link--icon-left";
+    link.textContent = error.label;
+    link.addEventListener("click", function(e) {
+      e.preventDefault();
+      const target = document.getElementById(error.id);
+      if (!target) return;
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      setTimeout(() => {
+        const firstInput = target.querySelector(
+          '.fr-input:not([type="hidden"]), input:not([type="hidden"]), textarea, select'
+        );
+        if (firstInput) firstInput.focus();
+      }, 300);
+    });
+    item.appendChild(link);
+    return item;
+  }
+  function updateHeader(summary, remaining) {
+    const title = summary.querySelector(".fr-alert__title");
+    const description = summary.querySelector(".dsfr-error-summary-desc");
+    if (remaining === 0) {
+      summary.className = "fr-alert fr-alert--success fr-mb-4w";
+      if (title) title.textContent = "Toutes les erreurs ont été corrigées";
+      if (description) description.textContent = "Vous pouvez maintenant soumettre le formulaire.";
       return;
     }
-    const errorList = [];
-    errorQuestions.forEach(function(question) {
-      const questionId = question.id;
-      const questionTextElement = question.querySelector(".ls-label-question, .question-text");
-      let questionText = questionTextElement ? questionTextElement.textContent.trim() : "Question sans titre";
-      const questionNumberElement = question.querySelector(".question-number");
-      let questionNumber = questionNumberElement ? questionNumberElement.textContent.trim() : "";
-      const errorMessageElement = question.querySelector(".fr-message--error");
-      let errorMessage = errorMessageElement ? errorMessageElement.textContent.trim() : "";
-      let label = questionText;
-      if (errorMessage) {
-        label += " : " + errorMessage;
-      }
-      if (label.length > 150) {
-        label = label.substring(0, 147) + "...";
-      }
-      errorList.push({
-        id: questionId,
-        label
-      });
-    });
+    summary.className = "fr-alert fr-alert--error fr-mb-4w";
+    if (title) {
+      title.textContent = remaining === 1 ? "Une erreur à corriger" : remaining + " erreurs à corriger";
+    }
+    if (description) description.textContent = "Veuillez corriger les erreurs suivantes :";
+  }
+  function createErrorSummary() {
+    const existing = document.getElementById(SUMMARY_ID);
+    if (existing) existing.remove();
+    const errorQuestions = document.querySelectorAll(ERROR_QUESTION_SELECTOR);
+    if (errorQuestions.length === 0) return;
     const summary = document.createElement("div");
-    summary.id = "dsfr-error-summary";
+    summary.id = SUMMARY_ID;
     summary.className = "fr-alert fr-alert--error fr-mb-4w";
     summary.setAttribute("role", "alert");
     summary.setAttribute("tabindex", "-1");
     const title = document.createElement("h3");
     title.className = "fr-alert__title";
-    title.textContent = errorList.length === 1 ? "Une erreur a été détectée" : errorList.length + " erreurs ont été détectées";
     summary.appendChild(title);
     const description = document.createElement("p");
-    description.textContent = "Veuillez corriger les erreurs suivantes :";
+    description.className = "dsfr-error-summary-desc";
     summary.appendChild(description);
     const list = document.createElement("ul");
     list.className = "fr-mb-0";
-    errorList.forEach(function(error) {
-      const item = document.createElement("li");
-      item.className = "error-item";
-      item.setAttribute("data-question-id", error.id);
-      const link = document.createElement("a");
-      link.setAttribute("href", "#" + error.id);
-      link.className = "fr-link fr-icon-error-warning-line fr-link--icon-left";
-      link.textContent = error.label;
-      item.appendChild(link);
-      list.appendChild(item);
-    });
+    errorQuestions.forEach((q) => list.appendChild(buildErrorItem(describeErrorQuestion(q))));
     summary.appendChild(list);
-    summary.querySelectorAll('a[href^="#"]').forEach(function(link) {
-      link.addEventListener("click", function(e) {
-        e.preventDefault();
-        const targetId = this.getAttribute("href").substring(1);
-        const targetElement = document.getElementById(targetId);
-        if (targetElement) {
-          targetElement.scrollIntoView({ behavior: "smooth", block: "center" });
-          setTimeout(function() {
-            const firstInput = targetElement.querySelector(".fr-input, input, textarea, select");
-            if (firstInput) {
-              firstInput.focus();
-            }
-          }, 300);
-        }
-      });
-    });
-    const questionContainer = document.querySelector(".questions-container, .survey-question-container, #question-container, .question-container");
+    updateHeader(summary, errorQuestions.length);
     const firstQuestion = document.querySelector(".question-container");
-    if (questionContainer && questionContainer.parentNode) {
-      questionContainer.parentNode.insertBefore(summary, questionContainer);
-    } else if (firstQuestion && firstQuestion.parentNode) {
+    if (firstQuestion && firstQuestion.parentNode) {
       firstQuestion.parentNode.insertBefore(summary, firstQuestion);
     } else {
       const form = document.querySelector('form#limesurvey, form[name="limesurvey"]');
-      if (form) {
-        form.insertBefore(summary, form.firstChild);
-      }
+      if (form) form.insertBefore(summary, form.firstChild);
     }
-    setTimeout(function() {
+    ensureStatusRegion();
+    setTimeout(() => {
       summary.scrollIntoView({ behavior: "smooth", block: "start" });
       summary.focus();
     }, 100);
   }
   function updateErrorSummary() {
-    const summary = document.getElementById("dsfr-error-summary");
-    if (!summary) {
-      return;
-    }
-    const errorItems = summary.querySelectorAll(".error-item");
-    let totalErrors = errorItems.length;
-    let correctedCount = 0;
-    errorItems.forEach(function(item) {
-      const questionId = item.getAttribute("data-question-id");
-      const question = document.getElementById(questionId);
+    const summary = document.getElementById(SUMMARY_ID);
+    if (!summary) return;
+    const items = Array.from(summary.querySelectorAll(".error-item"));
+    let removed = 0;
+    const correctedLabels = [];
+    items.forEach((item) => {
+      const id = item.getAttribute("data-question-id");
+      if (!id) return;
+      const question = document.getElementById(id);
       if (!question) return;
-      const isError = question.classList.contains("input-error");
-      const isValid = question.classList.contains("input-valid");
-      const inputs = question.querySelectorAll('.fr-input, input[type="text"], input[type="number"], textarea, select');
-      let allInputsValid = inputs.length > 0;
-      inputs.forEach(function(input) {
-        if (input.classList.contains("fr-input--error") || !input.value || input.value.trim() === "") {
-          allInputsValid = false;
-        }
-      });
-      if (isValid && !isError || allInputsValid) {
-        if (!item.classList.contains("corrected")) {
-          item.classList.add("corrected");
-          const link = item.querySelector("a");
-          if (link) {
-            link.classList.remove("fr-icon-error-warning-line");
-            link.classList.add("fr-icon-checkbox-circle-line");
-          }
-        }
-        correctedCount++;
-      }
+      const stillInError = question.matches(ERROR_QUESTION_SELECTOR);
+      if (stillInError) return;
+      const link = item.querySelector("a");
+      const label = link ? link.textContent.trim() : "";
+      if (label) correctedLabels.push(label.split(" : ")[0]);
+      item.remove();
+      removed++;
     });
-    const title = summary.querySelector(".fr-alert__title");
-    const description = summary.querySelector("p");
-    if (correctedCount === totalErrors) {
-      summary.className = "fr-alert fr-alert--success fr-mb-4w";
-      if (title) {
-        title.textContent = "Toutes les erreurs ont été corrigées !";
+    const remaining = summary.querySelectorAll(".error-item").length;
+    updateHeader(summary, remaining);
+    if (removed > 0) {
+      let msg;
+      if (remaining === 0) {
+        msg = "Toutes les erreurs ont été corrigées. Vous pouvez soumettre le formulaire.";
+      } else if (removed === 1) {
+        msg = correctedLabels[0] + " corrigée. " + (remaining === 1 ? "Il reste 1 erreur." : "Il reste " + remaining + " erreurs.");
+      } else {
+        msg = removed + " erreurs corrigées. " + (remaining === 1 ? "Il reste 1 erreur." : "Il reste " + remaining + " erreurs.");
       }
-      if (description) {
-        description.textContent = "Vous pouvez maintenant soumettre le formulaire.";
-      }
-    } else if (correctedCount > 0) {
-      summary.className = "fr-alert fr-alert--warning fr-mb-4w";
-      if (title) {
-        const remaining = totalErrors - correctedCount;
-        title.textContent = remaining + " erreur" + (remaining > 1 ? "s" : "") + " restante" + (remaining > 1 ? "s" : "");
-      }
-      if (description) {
-        description.textContent = "Continuez à corriger les erreurs suivantes :";
-      }
+      announceStatus(msg);
     }
-  }
-  function initErrorSummaryObserver() {
-    if (!document.body) return;
-    const observer = new MutationObserver(function(mutations) {
-      mutations.forEach(function(mutation) {
-        if (mutation.type === "attributes" && mutation.attributeName === "class") {
-          const target = mutation.target;
-          if (target.classList && target.classList.contains("question-container") && target.classList.contains("input-error")) {
-            setTimeout(createErrorSummary, 100);
-          }
-        }
-      });
-    });
-    observer.observe(document.body, {
-      attributes: true,
-      attributeFilter: ["class"],
-      subtree: true
-    });
   }
 
   // modules/theme-dsfr/src/validation/mst-errors.js
@@ -2424,8 +2406,10 @@
     triggerEmRelevanceGroup();
     triggerEmRelevanceSubQuestion();
   }
+  var NS = ".dsfrRelevance";
   function triggerEmRelevanceQuestion() {
-    $("[id^='question']").on("relevance:on", function(event) {
+    $("[id^='question']").off("relevance:on" + NS + " relevance:off" + NS);
+    $("[id^='question']").on("relevance:on" + NS, function(event) {
       if (event.target != this) return;
       $(this).removeClass("ls-irrelevant ls-hidden");
       $(this).find("input, textarea, select").each(function() {
@@ -2433,18 +2417,19 @@
         $(this).removeAttr("tabindex");
       });
     });
-    $("[id^='question']").on("relevance:off", function(event) {
+    $("[id^='question']").on("relevance:off" + NS, function(event) {
       if (event.target != this) return;
       $(this).addClass("ls-irrelevant ls-hidden");
       $(this).find("input, textarea, select").each(function() {
         $(this).attr("tabindex", "-1");
       });
     });
-    $(".allinone [id^='group-']:not(.ls-irrelevant) [id^='question']").on("relevance:on", function(event) {
+    $(".allinone [id^='group-']:not(.ls-irrelevant) [id^='question']").off("relevance:on" + NS + " relevance:off" + NS);
+    $(".allinone [id^='group-']:not(.ls-irrelevant) [id^='question']").on("relevance:on" + NS, function(event) {
       if (event.target != this) return;
       $(this).closest("[id^='group-']").removeClass("ls-hidden");
     });
-    $(".allinone [id^='group-']:not(.ls-irrelevant) [id^='question']").on("relevance:off", function(event) {
+    $(".allinone [id^='group-']:not(.ls-irrelevant) [id^='question']").on("relevance:off" + NS, function(event) {
       if (event.target != this) return;
       if ($(this).closest("[id^='group-']").find("[id^='question']").length == $(this).closest("[id^='group-']").find("[id^='question'].ls-hidden").length) {
         $(this).closest("[id^='group-']").addClass("ls-hidden");
@@ -2452,17 +2437,19 @@
     });
   }
   function triggerEmRelevanceGroup() {
-    $("[id^='group-']").on("relevance:on", function(event) {
+    $("[id^='group-']").off("relevance:on" + NS + " relevance:off" + NS);
+    $("[id^='group-']").on("relevance:on" + NS, function(event) {
       if (event.target != this) return;
       $(this).removeClass("ls-irrelevant ls-hidden");
     });
-    $("[id^='group-']").on("relevance:off", function(event) {
+    $("[id^='group-']").on("relevance:off" + NS, function(event) {
       if (event.target != this) return;
       $(this).addClass("ls-irrelevant ls-hidden");
     });
   }
   function triggerEmRelevanceSubQuestion() {
-    $("[id^='question']").on("relevance:on", "[id^='javatbd']", function(event, data) {
+    $("[id^='question']").off("relevance:on" + NS + " relevance:off" + NS, "[id^='javatbd']");
+    $("[id^='question']").on("relevance:on" + NS, "[id^='javatbd']", function(event, data) {
       if (event.target != this) return;
       data = $.extend({ style: "hidden" }, data);
       $(this).removeClass("ls-irrelevant ls-" + data.style);
@@ -2482,7 +2469,7 @@
         updateRepeatHeading($(this).closest(".ls-answers"));
       }
     });
-    $("[id^='question']").on("relevance:off", "[id^='javatbd']", function(event, data) {
+    $("[id^='question']").on("relevance:off" + NS, "[id^='javatbd']", function(event, data) {
       if (event.target != this) return;
       data = $.extend({ style: "hidden" }, data);
       $(this).addClass("ls-irrelevant ls-" + data.style);
@@ -2550,7 +2537,6 @@
     handleMultipleShortTextErrors();
     observeErrorChanges();
     initAriaInvalidSync();
-    initErrorSummaryObserver();
     initNumericValidation();
     handleArrayValidation2();
     handleNumericMultiValidation();
@@ -2612,6 +2598,7 @@
     setTimeout(sanitizeRTEContent, 100);
     setTimeout(initAllRankingQuestions, 300);
     initRelevanceHandlers();
+    setTimeout(createErrorSummary, 200);
   });
   var dropdownResizeTimer;
   window.addEventListener("resize", () => {
