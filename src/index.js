@@ -143,8 +143,9 @@ onQuestionsLoaded(() => {
     // Ranking — réexécuté avec un délai pour laisser SortableJS se peupler
     setTimeout(initAllRankingQuestions, 300);
 
-    // Relevance — ré-attacher les handlers jQuery (idempotent par design
-    // grâce au jQuery .on qui ignore les doublons de handler pur)
+    // Relevance — les handlers s'appuient sur un namespace jQuery `.dsfrRelevance`
+    // et font `$(sel).off('.dsfrRelevance').on(...)` avant chaque ré-attachement,
+    // sans quoi chaque onQuestionsLoaded/onPjax empilerait une copie de plus.
     initRelevanceHandlers();
 });
 
@@ -153,6 +154,10 @@ onPjax(() => {
     setTimeout(sanitizeRTEContent, 100);
     setTimeout(initAllRankingQuestions, 300);
     initRelevanceHandlers();
+    // Si la page pjax répond avec des erreurs de validation côté serveur,
+    // le résumé doit être (re)construit — à l'identique des branches onReady
+    // et onQuestionsLoaded.
+    setTimeout(createErrorSummary, 200);
 });
 
 // --- Redimensionnement : dropdown-array selon largeur de fenêtre ---

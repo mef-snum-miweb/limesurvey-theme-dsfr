@@ -27,8 +27,17 @@ export function triggerEmRelevance() {
     triggerEmRelevanceSubQuestion();
 }
 
+/**
+ * Namespace jQuery utilisé pour tous les handlers relevance du thème.
+ * Permet un `.off('.dsfr')` global avant chaque re-attachement pour
+ * éviter d'empiler N copies d'un même handler à chaque navigation AJAX
+ * (onQuestionsLoaded / onPjax rappellent initRelevanceHandlers).
+ */
+const NS = '.dsfrRelevance';
+
 export function triggerEmRelevanceQuestion() {
-    $("[id^='question']").on('relevance:on', function (event) {
+    $("[id^='question']").off('relevance:on' + NS + ' relevance:off' + NS);
+    $("[id^='question']").on('relevance:on' + NS, function (event) {
         if (event.target != this) return;
         $(this).removeClass('ls-irrelevant ls-hidden');
         $(this).find('input, textarea, select').each(function () {
@@ -36,7 +45,7 @@ export function triggerEmRelevanceQuestion() {
             $(this).removeAttr('tabindex');
         });
     });
-    $("[id^='question']").on('relevance:off', function (event) {
+    $("[id^='question']").on('relevance:off' + NS, function (event) {
         if (event.target != this) return;
         $(this).addClass('ls-irrelevant ls-hidden');
         $(this).find('input, textarea, select').each(function () {
@@ -44,11 +53,12 @@ export function triggerEmRelevanceQuestion() {
         });
     });
     // Mode All-in-one : maintenir la visibilité du groupe aussi
-    $(".allinone [id^='group-']:not(.ls-irrelevant) [id^='question']").on('relevance:on', function (event) {
+    $(".allinone [id^='group-']:not(.ls-irrelevant) [id^='question']").off('relevance:on' + NS + ' relevance:off' + NS);
+    $(".allinone [id^='group-']:not(.ls-irrelevant) [id^='question']").on('relevance:on' + NS, function (event) {
         if (event.target != this) return;
         $(this).closest("[id^='group-']").removeClass('ls-hidden');
     });
-    $(".allinone [id^='group-']:not(.ls-irrelevant) [id^='question']").on('relevance:off', function (event) {
+    $(".allinone [id^='group-']:not(.ls-irrelevant) [id^='question']").on('relevance:off' + NS, function (event) {
         if (event.target != this) return;
         if ($(this).closest("[id^='group-']").find("[id^='question']").length == $(this).closest("[id^='group-']").find("[id^='question'].ls-hidden").length) {
             $(this).closest("[id^='group-']").addClass('ls-hidden');
@@ -57,18 +67,20 @@ export function triggerEmRelevanceQuestion() {
 }
 
 export function triggerEmRelevanceGroup() {
-    $("[id^='group-']").on('relevance:on', function (event) {
+    $("[id^='group-']").off('relevance:on' + NS + ' relevance:off' + NS);
+    $("[id^='group-']").on('relevance:on' + NS, function (event) {
         if (event.target != this) return;
         $(this).removeClass('ls-irrelevant ls-hidden');
     });
-    $("[id^='group-']").on('relevance:off', function (event) {
+    $("[id^='group-']").on('relevance:off' + NS, function (event) {
         if (event.target != this) return;
         $(this).addClass('ls-irrelevant ls-hidden');
     });
 }
 
 export function triggerEmRelevanceSubQuestion() {
-    $("[id^='question']").on('relevance:on', "[id^='javatbd']", function (event, data) {
+    $("[id^='question']").off('relevance:on' + NS + ' relevance:off' + NS, "[id^='javatbd']");
+    $("[id^='question']").on('relevance:on' + NS, "[id^='javatbd']", function (event, data) {
         if (event.target != this) return;
         data = $.extend({ style: 'hidden' }, data);
         $(this).removeClass('ls-irrelevant ls-' + data.style);
@@ -88,7 +100,7 @@ export function triggerEmRelevanceSubQuestion() {
             updateRepeatHeading($(this).closest('.ls-answers'));
         }
     });
-    $("[id^='question']").on('relevance:off', "[id^='javatbd']", function (event, data) {
+    $("[id^='question']").on('relevance:off' + NS, "[id^='javatbd']", function (event, data) {
         if (event.target != this) return;
         data = $.extend({ style: 'hidden' }, data);
         $(this).addClass('ls-irrelevant ls-' + data.style);
