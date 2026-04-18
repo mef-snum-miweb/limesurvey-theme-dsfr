@@ -45,21 +45,19 @@
             <!-- Available choices (left column) -->
             <div class="fr-col-12 fr-col-md-6 ranking-available-items">
                 <h4 id="ranking-choice-title-{{qId}}" class="sortable-subtitle sortable-rank-subtitle fr-h6 fr-mb-2w">{{choice_title}}</h4>
+                {# RGAA 7.1 / WCAG nested-interactive : on renonce au pattern
+                   listbox/option — la sémantique ARIA d'option rend le <li>
+                   interactif et axe-core le signale comme imbriquant le
+                   bouton .ranking-btn-add. Les boutons portent toute
+                   l'accessibilité clavier et les annonces SR via aria-live. #}
                 <ul id="sortable-choice-{{qId}}"
                     class="sortable-choice sortable-list list-group"
-                    role="listbox"
-                    aria-labelledby="ranking-choice-title-{{qId}}"
-                    aria-roledescription="{{ t.available_choices|default('Choix disponibles') }}">
+                    aria-labelledby="ranking-choice-title-{{qId}}">
                     {% for ansrow in answers %}
                         <li id="javatbd{{rankingName}}{{ansrow.code}}"
                             class="ls-choice list-group-item answer-item sortable-item grabable sortable-enable fr-mb-2w"
                             data-value="{{ansrow.code}}"
-                            data-label="{{ processString(ansrow.answer) }}"
-                            tabindex="0"
-                            role="option"
-                            aria-selected="false"
-                            aria-roledescription="{{ t.movable_element|default('Élément déplaçable') }}"
-                            aria-label="{{ processString(ansrow.answer) | striptags }} - {{ t.press_enter_to_rank|default('Appuyez sur Entrée pour ajouter au classement') }}">
+                            data-label="{{ processString(ansrow.answer) }}">
                             <span class="ranking-item-text">{{ processString(ansrow.answer) }}</span>
                             <span class="grabable selector__dragHandle float-end" aria-hidden="true">
                                 <svg width="9" height="14" viewBox="0 0 9 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -76,13 +74,12 @@
             <div class="fr-col-12 fr-col-md-6 ranking-sorted-items">
                 <h4 id="ranking-rank-title-{{qId}}" class="sortable-subtitle sortable-rank-subtitle fr-h6 fr-mb-2w">{{rank_title}}</h4>
                 {# RGAA 9.3 — liste ordonnée (classement), donc <ol>.
-                   role="listbox" est conservé pour l'interactivité drag-and-drop
-                   (la sémantique ARIA override la sémantique HTML native). #}
+                   Pas de role="listbox" pour éviter le nested-interactive
+                   (cf. note plus haut). Les boutons Monter/Descendre/Retirer
+                   portent l'interaction clavier. #}
                 <ol id="sortable-rank-{{qId}}"
                     class="sortable-rank sortable-list list-group"
-                    role="listbox"
-                    aria-labelledby="ranking-rank-title-{{qId}}"
-                    aria-roledescription="{{ t.ranking_instructions|default('Utilisez les boutons ou Alt+Flèches pour réordonner') }}">
+                    aria-labelledby="ranking-rank-title-{{qId}}">
                     <li class="d-none ls-remove"></li>
                 </ol>
             </div>

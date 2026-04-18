@@ -542,18 +542,27 @@
     summary.className = "fr-alert fr-alert--error fr-mb-4w";
     summary.setAttribute("role", "alert");
     summary.setAttribute("tabindex", "-1");
-    let html = '<h3 class="fr-alert__title">';
-    html += errorList.length === 1 ? "Une erreur a été détectée" : errorList.length + " erreurs ont été détectées";
-    html += "</h3>";
-    html += "<p>Veuillez corriger les erreurs suivantes :</p>";
-    html += '<ul class="fr-mb-0">';
+    const title = document.createElement("h3");
+    title.className = "fr-alert__title";
+    title.textContent = errorList.length === 1 ? "Une erreur a été détectée" : errorList.length + " erreurs ont été détectées";
+    summary.appendChild(title);
+    const description = document.createElement("p");
+    description.textContent = "Veuillez corriger les erreurs suivantes :";
+    summary.appendChild(description);
+    const list = document.createElement("ul");
+    list.className = "fr-mb-0";
     errorList.forEach(function(error) {
-      html += '<li class="error-item" data-question-id="' + error.id + '">';
-      html += '<a href="#' + error.id + '" class="fr-link fr-icon-error-warning-line fr-link--icon-left">' + error.label + "</a>";
-      html += "</li>";
+      const item = document.createElement("li");
+      item.className = "error-item";
+      item.setAttribute("data-question-id", error.id);
+      const link = document.createElement("a");
+      link.setAttribute("href", "#" + error.id);
+      link.className = "fr-link fr-icon-error-warning-line fr-link--icon-left";
+      link.textContent = error.label;
+      item.appendChild(link);
+      list.appendChild(item);
     });
-    html += "</ul>";
-    summary.innerHTML = html;
+    summary.appendChild(list);
     summary.querySelectorAll('a[href^="#"]').forEach(function(link) {
       link.addEventListener("click", function(e) {
         e.preventDefault();
@@ -2238,7 +2247,7 @@
       }
       badge.textContent = "#" + rank;
       var label = getItemLabel(item);
-      item.setAttribute("aria-label", label + " - Rang " + rank + " sur " + total + ". Entrée pour retirer, Alt+Flèches pour réordonner");
+      item.setAttribute("aria-label", label + " - Rang " + rank + " sur " + total);
     });
     var choiceList = document.getElementById("sortable-choice-" + qId);
     if (choiceList) {
@@ -2247,13 +2256,9 @@
       });
       choiceList.querySelectorAll("li:not(.ls-remove):not(.d-none)").forEach(function(item) {
         var label = getItemLabel(item);
-        item.setAttribute("aria-label", label + " - Appuyez sur Entrée pour ajouter au classement");
-        item.setAttribute("aria-selected", "false");
+        item.setAttribute("aria-label", label);
       });
     }
-    items.forEach(function(item) {
-      item.setAttribute("aria-selected", "true");
-    });
   }
   function addItemToRank(item, qId) {
     var maxAnswers = parseInt(document.querySelector('[data-ranking-qid="' + qId + '"]').dataset.maxAnswers) || 0;

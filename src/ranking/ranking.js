@@ -1,7 +1,7 @@
 /**
  * AccessibleRanking — enrichit les questions de classement (type R) avec :
  *
- * - Navigation clavier (Enter/Space pour saisir, Alt+Flèches pour réordonner)
+ * - Navigation clavier via les boutons .ranking-btn-* (tab + Enter)
  * - Boutons de contrôle visibles (Monter / Descendre / Retirer / Ajouter)
  * - Annonces aria-live pour les lecteurs d'écran (`#ranking-live-<qId>`)
  * - Numérotation dynamique des rangs (badge `<span class="ranking-rank-number">`)
@@ -271,7 +271,7 @@ export function updateRankNumbers(qId) {
 
         // Mettre à jour l'aria-label de l'item
         var label = getItemLabel(item);
-        item.setAttribute('aria-label', label + ' - Rang ' + rank + ' sur ' + total + '. Entrée pour retirer, Alt+Flèches pour réordonner');
+        item.setAttribute('aria-label', label + ' - Rang ' + rank + ' sur ' + total);
     });
 
     // Retirer les badges des items dans la liste des choix
@@ -283,15 +283,13 @@ export function updateRankNumbers(qId) {
         // Remettre l'aria-label initial pour les items dans la choice list
         choiceList.querySelectorAll('li:not(.ls-remove):not(.d-none)').forEach(function(item) {
             var label = getItemLabel(item);
-            item.setAttribute('aria-label', label + ' - Appuyez sur Entrée pour ajouter au classement');
-            item.setAttribute('aria-selected', 'false');
+            item.setAttribute('aria-label', label);
         });
     }
-
-    // Marquer aria-selected sur les items classés
-    items.forEach(function(item) {
-        item.setAttribute('aria-selected', 'true');
-    });
+    // Note : plus de role="option"/aria-selected — le pattern listbox a été
+    // retiré pour éviter le nested-interactive (les <li> interactifs
+    // contenaient les boutons .ranking-btn-*). L'état "item classé" est
+    // annoncé via l'aria-label et la live region.
 }
 
 // ---- Actions de déplacement ----
