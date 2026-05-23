@@ -60,6 +60,23 @@ Les **36 types** du noyau LimeSurvey ont un template Twig DSFR dédié dans [`vi
 
 ---
 
+## Rédaction des questions : HTML autorisé par champ
+
+Le HTML saisi dans le back-office (éditeur CKEditor) est traité différemment selon le champ de saisie :
+
+| Champ | Wrapper rendu | Balises autorisées |
+|---|---|---|
+| **Question** (intitulé) | `<h3 class="question-text fr-h5">` | uniquement inline : `<strong> <em> <u> <br> <span> <a> <abbr> <sub> <sup>` |
+| **Aide** (description sous la question) | `<div class="fr-hint-text">` | **tout HTML**, classes DSFR comprises (`fr-card`, `fr-callout`, `fr-highlight`, listes, images, etc.) |
+
+**Pourquoi** : l'intitulé de question est rendu dans un `<h3>` pour respecter l'arborescence des titres (RGAA 9.1). Un `<h3>` ne peut pas contenir d'éléments bloc (`<div>`, `<p>`, `<h3>` interne…) sans casser la validité HTML et la navigation par titres pour les lecteurs d'écran. Le thème strippe donc tout ce qui n'est pas inline dans ce champ.
+
+**À retenir pour les concepteurs** : tout contenu illustratif riche — cartes, callouts, mises en avant, listes complexes, images de contexte — **va dans le champ "Aide"**, pas dans le champ "Question". L'intitulé reste un titre court.
+
+Templates concernés : [`question_text_content.twig`](views/subviews/survey/question_subviews/question_text_content.twig) (titre, `striptags` whitelist inline) et [`survey_question_help.twig`](views/subviews/survey/question_subviews/survey_question_help.twig) (aide, rendu en `|raw` sans filtre).
+
+---
+
 ## Accessibilité & responsive
 
 | | |
