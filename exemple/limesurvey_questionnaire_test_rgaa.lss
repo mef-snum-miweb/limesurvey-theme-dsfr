@@ -27787,6 +27787,7 @@ Le seguenti risposte sono state date dal partecipante:<br />
      <antibot_enabled>on</antibot_enabled>
      <marianne_text>inherit</marianne_text>
      <header_title>inherit</header_title>
+     <baseline_text>inherit</baseline_text>
      <footer_text>inherit</footer_text>
      <intellectual_property>inherit</intellectual_property>
      <accessibility_content>inherit</accessibility_content>
@@ -27826,6 +27827,7 @@ Le seguenti risposte sono state date dal partecipante:<br />
 Égalité
 Fraternité</marianne_text>
      <header_title>Enquêtes et questionnaires</header_title>
+     <baseline_text></baseline_text>
      <footer_text>Service de questionnaires en ligne</footer_text>
      <intellectual_property>Sauf mention explicite de propriété intellectuelle détenue par des tiers, les contenus de ce site sont proposés sous licence etalab-2.0</intellectual_property>
      <antibot_enabled>off</antibot_enabled>
@@ -27852,6 +27854,7 @@ Fraternité</marianne_text>
 Égalité
 Fraternité</marianne_text>
      <header_title>Enquêtes et questionnaires</header_title>
+     <baseline_text></baseline_text>
      <footer_text>Service de questionnaires en ligne</footer_text>
      <intellectual_property>Sauf mention explicite de propriété intellectuelle détenue par des tiers, les contenus de ce site sont proposés sous licence etalab-2.0</intellectual_property>
      <antibot_enabled>off</antibot_enabled>
@@ -27879,6 +27882,7 @@ Fraternité</marianne_text>
 Égalité
 Fraternité</marianne_text>
      <header_title>Enquêtes et questionnaires</header_title>
+     <baseline_text></baseline_text>
      <footer_text>Service de questionnaires en ligne</footer_text>
      <intellectual_property>Sauf mention explicite de propriété intellectuelle détenue par des tiers, les contenus de ce site sont proposés sous licence etalab-2.0</intellectual_property>
      <antibot_timer>2</antibot_timer>
