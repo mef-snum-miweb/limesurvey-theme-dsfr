@@ -338,7 +338,7 @@
                     <description type="data" twig="on"><![CDATA[<p>{{ gT('Ceci est une enquête utilisant le thème DSFR.') }}</p>]]></description>
                     <welcome type="data" twig="on"><![CDATA[<p>{{ gT('Bienvenue dans cette enquête') }}</p>]]></welcome>
                     <therearexquestions type="data" twig="on"><![CDATA[{{ gT('Il y a 2 questions dans cette enquête') }}]]></therearexquestions>
-                    <surveyls_url type="data" twig="on">"https://www.gouvernement.fr/"</surveyls_url>
+                    <surveyls_url type="data" twig="on">"https://www.info.gouv.fr/"</surveyls_url>
                     <surveyls_urldescription type="data" twig="on"><![CDATA[{{ gT("Site du gouvernement") }}]]></surveyls_urldescription>
                 </survey>
 
