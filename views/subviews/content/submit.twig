@@ -56,6 +56,53 @@
                 {% endif %}
                 {% endblock %}
 
+                {# Liens de fin de questionnaire (impression PDF, statistiques publiques,
+                   URL de fin). Habillés en boutons DSFR. Activés par les paramètres
+                   « Imprimer les réponses » (printanswers), « Statistiques publiques »
+                   (publicstatistics) et le champ « URL de fin » du sondage côté
+                   LimeSurvey. #}
+                {% set _hasFinalLinks = aSurveyInfo.aCompleted.aPrintAnswers.show
+                                        or aSurveyInfo.aCompleted.aPublicStatistics.show
+                                        or aSurveyInfo.aCompleted.sSurveylsUrl %}
+                {% if _hasFinalLinks %}
+                    <ul class="fr-btns-group fr-btns-group--inline-md fr-btns-group--icon-left fr-mb-4w">
+                        {% block printanswer %}
+                        {% if aSurveyInfo.aCompleted.aPrintAnswers.show %}
+                            <li>
+                                <a href="{{ aSurveyInfo.aCompleted.aPrintAnswers.sUrl }}"
+                                   title="{{ aSurveyInfo.aCompleted.aPrintAnswers.sTitle }}"
+                                   class="fr-btn fr-btn--secondary fr-icon-printer-line">
+                                    {{ gT("Print your answers.") }}
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% endblock %}
+
+                        {% block publicstatistics %}
+                        {% if aSurveyInfo.aCompleted.aPublicStatistics.show %}
+                            <li>
+                                <a href="{{ aSurveyInfo.aCompleted.aPublicStatistics.sUrl }}"
+                                   title="{{ aSurveyInfo.aCompleted.aPublicStatistics.sTitle }}"
+                                   class="fr-btn fr-btn--secondary fr-icon-line-chart-line">
+                                    {{ gT("View the statistics for this survey.") }}
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% endblock %}
+
+                        {% block endurl %}
+                        {% if aSurveyInfo.aCompleted.sSurveylsUrl %}
+                            <li>
+                                <a href="{{ str_replace('\"', '%22', aSurveyInfo.aCompleted.sSurveylsUrl) }}"
+                                   class="fr-btn fr-icon-external-link-line">
+                                    {{ aSurveyInfo.aCompleted.sSurveylsUrlDescription ?: aSurveyInfo.aCompleted.sSurveylsUrl }}
+                                </a>
+                            </li>
+                        {% endif %}
+                        {% endblock %}
+                    </ul>
+                {% endif %}
+
             {# Before LS3 Master, this should be replace by a Twig block logic #}
             {{ aSurveyInfo.aCompleted.sPluginHTML }}
         </div>

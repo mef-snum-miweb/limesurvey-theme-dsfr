@@ -252,11 +252,28 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
     box-shadow: var(--overlap-shadow);
 }
 
-/* Questions conditionnelles - EM ajoute ces classes */
-/* Issue #15: Affichage dynamique */
-.ls-hidden,
-.ls-irrelevant {
+/* Questions/groupes conditionnels - EM (ExpressionScript) ajoute ces classes
+   sur les .question-container ou .group-container quand la pertinence calcule
+   `false`. On les masque visuellement et on les rend non focusables.
+
+   IMPORTANT : on cible UNIQUEMENT le conteneur racine de la question/du groupe
+   (sélecteur self avec `.`, pas descendant). LimeSurvey core ajoute aussi
+   `ls-irrelevant ls-disabled` sur les sub-questions internes d'une question M
+   (Multiple choice) quand une option avec `exclude_all_others` est cochée
+   (ex. « Aucun »). Dans ce cas on veut désactiver l'item, PAS le masquer —
+   sinon les autres réponses disparaissent à l'écran, surtout après une
+   soumission échouée qui re-render la page avec ces classes maintenues.
+   Issue #15 (affichage dynamique des questions conditionnelles). */
+.question-container.ls-hidden,
+.question-container.ls-irrelevant,
+.group-container.ls-hidden,
+.group-container.ls-irrelevant {
     display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
 }
 
 /* Animation pour les questions conditionnelles qui apparaissent */
@@ -274,17 +291,15 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
     opacity: 0;
 }
 
-/* Assurer que les questions cachées ne prennent pas d'espace */
-.group-container .ls-irrelevant,
-.group-container .ls-hidden,
-[id^="question"] .ls-irrelevant,
-[id^="question"] .ls-hidden {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
+/* Sub-question items désactivés par une option exclusive (ex. « Aucun ») :
+   ils gardent leur place dans le DOM et restent visibles, mais on signale
+   visuellement qu'ils sont inactifs. LimeSurvey désactive déjà l'input via
+   l'attribut `disabled` — on s'occupe juste du rendu. */
+.fr-checkbox-group.ls-disabled,
+.fr-checkbox-group.ls-irrelevant,
+.fr-radio-group.ls-disabled,
+.fr-radio-group.ls-irrelevant {
+    opacity: 0.5;
 }
 
 /* ============================================
