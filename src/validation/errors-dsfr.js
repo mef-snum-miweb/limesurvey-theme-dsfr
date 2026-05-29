@@ -23,11 +23,18 @@
 import { handleMultipleShortTextErrors } from './mst-errors.js';
 import { handleArrayValidation } from './array-validation.js';
 import { updateErrorSummary } from './error-summary.js';
+import { isQuestionHidden } from '../core/dom-utils.js';
 
 export function transformErrorsToDsfr() {
 
-    // Trouver toutes les questions en erreur
-    const errorQuestions = document.querySelectorAll('.question-container.input-error');
+    // Trouver toutes les questions en erreur, en EXCLUANT celles masquées par
+    // relevance (conditionnelles non affichées). Le core LimeSurvey pose parfois
+    // `input-error` sur des questions mandatory non pertinentes ; poser un
+    // message d'erreur + aria-invalid dessus les ferait apparaître pré-remplies
+    // en erreur dès que la relevance les révèle (cf. error-summary.js).
+    const errorQuestions = Array.from(
+        document.querySelectorAll('.question-container.input-error'),
+    ).filter(function (q) { return !isQuestionHidden(q); });
 
     // Passe systématique : poser aria-invalid sur TOUS les champs en erreur,
     // indépendamment du handler spécialisé qui gère le message d'erreur.

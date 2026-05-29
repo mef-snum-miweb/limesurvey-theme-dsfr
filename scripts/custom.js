@@ -514,6 +514,10 @@
     fields_remaining_plural: "Veuillez compléter les %remaining% champs restants sur %total%.",
     fields_remaining_singular: "Veuillez compléter le dernier champ.",
     fields_all_required: "Veuillez compléter tous les champs (%total% champs requis).",
+    // Variante « lignes » pour les tableaux à choix (radios) : une réponse par ligne.
+    rows_remaining_plural: "Veuillez répondre aux %remaining% lignes restantes sur %total%.",
+    rows_remaining_singular: "Veuillez répondre à la dernière ligne.",
+    rows_all_required: "Veuillez répondre à toutes les lignes (%total% lignes).",
     field_valid: "Saisie valide",
     numeric_only: "Ce champ n'accepte que des valeurs numériques."
   };
@@ -521,6 +525,9 @@
     fields_remaining_plural: "Please complete the remaining %remaining% of %total% fields.",
     fields_remaining_singular: "Please complete the last field.",
     fields_all_required: "Please complete all fields (%total% fields required).",
+    rows_remaining_plural: "Please answer the remaining %remaining% of %total% rows.",
+    rows_remaining_singular: "Please answer the last row.",
+    rows_all_required: "Please answer all rows (%total% rows).",
     field_valid: "Valid input",
     numeric_only: "This field only accepts numeric values."
   };
@@ -568,10 +575,21 @@
     return str;
   }
 
+  // modules/theme-dsfr/src/core/dom-utils.js
+  function isValidNumber(value) {
+    return /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
+  }
+  function isQuestionHidden(el) {
+    return el.style.display === "none" || el.classList.contains("ls-irrelevant") || el.classList.contains("ls-hidden") || el.classList.contains("d-none");
+  }
+
   // modules/theme-dsfr/src/validation/error-summary.js
   var SUMMARY_ID = "dsfr-error-summary";
   var STATUS_ID = "dsfr-error-status";
   var ERROR_QUESTION_SELECTOR = ".question-container.input-error";
+  function isListableError(question) {
+    return question.matches(ERROR_QUESTION_SELECTOR) && !isQuestionHidden(question);
+  }
   function ensureStatusRegion() {
     let status = document.getElementById(STATUS_ID);
     if (status) return status;
@@ -648,7 +666,9 @@
   function createErrorSummary() {
     const existing = document.getElementById(SUMMARY_ID);
     if (existing) existing.remove();
-    const errorQuestions = document.querySelectorAll(ERROR_QUESTION_SELECTOR);
+    const errorQuestions = Array.from(
+      document.querySelectorAll(ERROR_QUESTION_SELECTOR)
+    ).filter(isListableError);
     if (errorQuestions.length === 0) return;
     const summary = document.createElement("div");
     summary.id = SUMMARY_ID;
@@ -690,7 +710,7 @@
       if (!id) return;
       const question = document.getElementById(id);
       if (!question) return;
-      const stillInError = question.matches(ERROR_QUESTION_SELECTOR);
+      const stillInError = isListableError(question);
       if (stillInError) return;
       const link = item.querySelector("a");
       const label = link ? link.textContent.trim() : "";
@@ -846,14 +866,6 @@
     });
   }
 
-  // modules/theme-dsfr/src/core/dom-utils.js
-  function isValidNumber(value) {
-    return /^-?\d+([.,]\d*)?$/.test(value) || /^-?\d*[.,]\d+$/.test(value);
-  }
-  function isQuestionHidden(el) {
-    return el.style.display === "none" || el.classList.contains("ls-irrelevant") || el.classList.contains("ls-hidden") || el.classList.contains("d-none");
-  }
-
   // modules/theme-dsfr/src/validation/array-validation.js
   function handleArrayValidation() {
     var arrayQuestions = document.querySelectorAll('.question-container.input-error[class*="array-"]');
@@ -873,6 +885,14 @@
         validContainer.style.display = "none";
       }
       var allInputs = question.querySelectorAll('table input[type="text"], table textarea, table select');
+      if (allInputs.length === 0) {
+        var tableRadios = Array.from(question.querySelectorAll('table input[type="radio"]'));
+        var tableCheckboxes = Array.from(question.querySelectorAll('table input[type="checkbox"]'));
+        if (tableRadios.length > 0 || tableCheckboxes.length > 0) {
+          handleChoiceArray(question, tableRadios.concat(tableCheckboxes));
+          return;
+        }
+      }
       allInputs.forEach(function(input) {
         input.classList.remove("fr-input--error", "error");
         var cell = input.closest(".fr-input-group");
@@ -965,6 +985,72 @@
       });
     });
   }
+  function handleChoiceArray(question, controls) {
+    question.querySelectorAll("tr.ls-mandatory-error").forEach(function(row) {
+      row.classList.remove("ls-mandatory-error");
+      var th = row.querySelector("th.fr-text--error");
+      if (th) th.classList.remove("fr-text--error");
+    });
+    question.querySelectorAll("td.has-error").forEach(function(td) {
+      td.classList.remove("has-error");
+    });
+    var groupsByName = {};
+    controls.forEach(function(ctrl) {
+      var name = ctrl.name || ctrl.getAttribute("name") || "";
+      if (!name) return;
+      (groupsByName[name] = groupsByName[name] || []).push(ctrl);
+    });
+    var groups = Object.keys(groupsByName).map(function(k) {
+      return groupsByName[k];
+    });
+    if (groups.length === 0) return;
+    var counterContainer = document.createElement("div");
+    counterContainer.className = "fr-messages-group fr-mt-2w";
+    counterContainer.setAttribute("aria-live", "polite");
+    counterContainer.id = "mandatory-counter-" + (question.id || Math.random().toString(36).substring(2, 11));
+    var counterMessage = document.createElement("p");
+    counterMessage.className = "fr-message fr-message--error";
+    counterMessage.setAttribute("role", "status");
+    counterContainer.appendChild(counterMessage);
+    var tableWrapper = question.querySelector(".fr-table");
+    if (tableWrapper) {
+      tableWrapper.parentNode.insertBefore(counterContainer, tableWrapper.nextSibling);
+    }
+    function updateCounter() {
+      var totalRows = groups.length;
+      var emptyRows = groups.filter(function(g) {
+        return !g.some(function(c) {
+          return c.checked;
+        });
+      }).length;
+      if (emptyRows === 0) {
+        counterContainer.remove();
+        question.classList.remove("input-error", "fr-input-group--error");
+        question.classList.add("input-valid");
+        setTimeout(updateErrorSummary, 50);
+        return;
+      }
+      if (!counterContainer.isConnected && tableWrapper) {
+        tableWrapper.parentNode.insertBefore(counterContainer, tableWrapper.nextSibling);
+      }
+      question.classList.add("input-error");
+      question.classList.remove("input-valid");
+      if (emptyRows === totalRows) {
+        counterMessage.textContent = tMandatory("rows_all_required", null, totalRows);
+      } else if (emptyRows === 1) {
+        counterMessage.textContent = tMandatory("rows_remaining_singular");
+      } else {
+        counterMessage.textContent = tMandatory("rows_remaining_plural", emptyRows, totalRows);
+      }
+      setTimeout(updateErrorSummary, 50);
+    }
+    updateCounter();
+    controls.forEach(function(ctrl) {
+      if (ctrl.dataset.arrayChoiceListener) return;
+      ctrl.dataset.arrayChoiceListener = "true";
+      ctrl.addEventListener("change", updateCounter);
+    });
+  }
   function handleSimpleQuestionValidation() {
     const simpleQuestions = document.querySelectorAll(".question-container.input-error");
     simpleQuestions.forEach(function(question) {
@@ -1029,7 +1115,11 @@
 
   // modules/theme-dsfr/src/validation/errors-dsfr.js
   function transformErrorsToDsfr() {
-    const errorQuestions = document.querySelectorAll(".question-container.input-error");
+    const errorQuestions = Array.from(
+      document.querySelectorAll(".question-container.input-error")
+    ).filter(function(q) {
+      return !isQuestionHidden(q);
+    });
     errorQuestions.forEach(function(question) {
       question.querySelectorAll('input:not([type="hidden"]), textarea, select').forEach(function(field) {
         field.setAttribute("aria-invalid", "true");
@@ -2269,6 +2359,18 @@
       }
       return "Une question";
     }
+    function clearRevealedErrorState(questionEl) {
+      questionEl.classList.remove("input-error");
+      questionEl.querySelectorAll(".fr-input-group--error").forEach(function(g) {
+        g.classList.remove("fr-input-group--error");
+      });
+      questionEl.querySelectorAll(".fr-message--error").forEach(function(m) {
+        m.remove();
+      });
+      questionEl.querySelectorAll('[aria-invalid="true"]').forEach(function(f) {
+        f.removeAttribute("aria-invalid");
+      });
+    }
     var announceTimer = null;
     var pendingAnnouncements = [];
     function scheduleAnnouncement(message) {
@@ -2293,6 +2395,7 @@
             el.dataset.conditionalWasHidden = "true";
           } else if (!isHidden && wasHidden) {
             el.dataset.conditionalWasHidden = "false";
+            clearRevealedErrorState(el);
             var label = getQuestionLabel(el);
             scheduleAnnouncement("Nouvelle question affichée : " + label);
           }

@@ -41,8 +41,24 @@ export function handleArrayValidation() {
             validContainer.style.display = 'none';
         }
 
-        // Trouver tous les inputs dans le tableau
+        // Trouver tous les inputs texte/numérique/liste dans le tableau.
         var allInputs = question.querySelectorAll('table input[type="text"], table textarea, table select');
+
+        // Tableaux à choix (types F, A, B, C, E, H, dual scale…) : les cellules
+        // sont des radios (ou des cases), pas des champs texte. La logique de
+        // « compteur de champs vides » ne s'y applique pas — on délègue à un
+        // chemin dédié qui compte les LIGNES non répondues. Sans ce branchement,
+        // `allInputs` est vide → emptyCount=0 → la question était considérée à
+        // tort comme « tout rempli », `input-error` retiré, et elle disparaissait
+        // du récapitulatif d'erreurs (régression 527199 : Q17DGCCRF, Q17INSEE…).
+        if (allInputs.length === 0) {
+            var tableRadios = Array.from(question.querySelectorAll('table input[type="radio"]'));
+            var tableCheckboxes = Array.from(question.querySelectorAll('table input[type="checkbox"]'));
+            if (tableRadios.length > 0 || tableCheckboxes.length > 0) {
+                handleChoiceArray(question, tableRadios.concat(tableCheckboxes));
+                return;
+            }
+        }
 
         // Retirer les classes d'erreur individuelles injectées par le template
         allInputs.forEach(function(input) {
@@ -163,6 +179,95 @@ export function handleArrayValidation() {
 
             input.addEventListener('input', updateCounter);
         });
+    });
+}
+
+/**
+ * Validation DSFR des tableaux À CHOIX (radios / cases) : types F (array),
+ * A/B (5 et 10 points), C (oui/non/incertain), E (augmente/égal/diminue),
+ * H (par colonne), dual scale. À la différence des tableaux texte/numérique,
+ * la complétude se mesure par LIGNE : un groupe de contrôles partageant le
+ * même attribut `name` = une ligne (ou une échelle de ligne en dual scale),
+ * répondue dès qu'un de ses contrôles est coché.
+ *
+ * Sans ce chemin dédié, `handleArrayValidation` ne trouvait aucun champ
+ * texte → concluait « tout rempli », retirait `input-error` et la question
+ * disparaissait du récapitulatif tout en passant en « valide » (bug 527199).
+ *
+ * @param {HTMLElement} question  Le .question-container (déjà `input-error`).
+ * @param {HTMLInputElement[]} controls  Radios et/ou cases du tableau.
+ */
+function handleChoiceArray(question, controls) {
+    // Remplacer l'habillage d'erreur natif (lignes/cellules) par le compteur DSFR.
+    question.querySelectorAll('tr.ls-mandatory-error').forEach(function(row) {
+        row.classList.remove('ls-mandatory-error');
+        var th = row.querySelector('th.fr-text--error');
+        if (th) th.classList.remove('fr-text--error');
+    });
+    question.querySelectorAll('td.has-error').forEach(function(td) {
+        td.classList.remove('has-error');
+    });
+
+    // Regrouper par `name` : un groupe = une ligne. Répondue ssi un coché.
+    var groupsByName = {};
+    controls.forEach(function(ctrl) {
+        var name = ctrl.name || ctrl.getAttribute('name') || '';
+        if (!name) return;
+        (groupsByName[name] = groupsByName[name] || []).push(ctrl);
+    });
+    var groups = Object.keys(groupsByName).map(function(k) { return groupsByName[k]; });
+    if (groups.length === 0) return;
+
+    // Compteur global (même habillage que les tableaux texte).
+    var counterContainer = document.createElement('div');
+    counterContainer.className = 'fr-messages-group fr-mt-2w';
+    counterContainer.setAttribute('aria-live', 'polite');
+    counterContainer.id = 'mandatory-counter-' + (question.id || Math.random().toString(36).substring(2, 11));
+    var counterMessage = document.createElement('p');
+    counterMessage.className = 'fr-message fr-message--error';
+    counterMessage.setAttribute('role', 'status');
+    counterContainer.appendChild(counterMessage);
+    var tableWrapper = question.querySelector('.fr-table');
+    if (tableWrapper) {
+        tableWrapper.parentNode.insertBefore(counterContainer, tableWrapper.nextSibling);
+    }
+
+    function updateCounter() {
+        var totalRows = groups.length;
+        var emptyRows = groups.filter(function(g) {
+            return !g.some(function(c) { return c.checked; });
+        }).length;
+
+        if (emptyRows === 0) {
+            counterContainer.remove();
+            question.classList.remove('input-error', 'fr-input-group--error');
+            question.classList.add('input-valid');
+            setTimeout(updateErrorSummary, 50);
+            return;
+        }
+
+        // Ré-insérer le compteur s'il avait été retiré (cas case décochée).
+        if (!counterContainer.isConnected && tableWrapper) {
+            tableWrapper.parentNode.insertBefore(counterContainer, tableWrapper.nextSibling);
+        }
+        question.classList.add('input-error');
+        question.classList.remove('input-valid');
+        if (emptyRows === totalRows) {
+            counterMessage.textContent = tMandatory('rows_all_required', null, totalRows);
+        } else if (emptyRows === 1) {
+            counterMessage.textContent = tMandatory('rows_remaining_singular');
+        } else {
+            counterMessage.textContent = tMandatory('rows_remaining_plural', emptyRows, totalRows);
+        }
+        setTimeout(updateErrorSummary, 50);
+    }
+
+    updateCounter();
+
+    controls.forEach(function(ctrl) {
+        if (ctrl.dataset.arrayChoiceListener) return;
+        ctrl.dataset.arrayChoiceListener = 'true';
+        ctrl.addEventListener('change', updateCounter);
     });
 }
 

@@ -13,6 +13,10 @@ export const MANDATORY_I18N_FR = {
     fields_remaining_plural: 'Veuillez compléter les %remaining% champs restants sur %total%.',
     fields_remaining_singular: 'Veuillez compléter le dernier champ.',
     fields_all_required: 'Veuillez compléter tous les champs (%total% champs requis).',
+    // Variante « lignes » pour les tableaux à choix (radios) : une réponse par ligne.
+    rows_remaining_plural: 'Veuillez répondre aux %remaining% lignes restantes sur %total%.',
+    rows_remaining_singular: 'Veuillez répondre à la dernière ligne.',
+    rows_all_required: 'Veuillez répondre à toutes les lignes (%total% lignes).',
     field_valid: 'Saisie valide',
     numeric_only: "Ce champ n'accepte que des valeurs numériques.",
 };
@@ -21,6 +25,9 @@ export const MANDATORY_I18N_EN = {
     fields_remaining_plural: 'Please complete the remaining %remaining% of %total% fields.',
     fields_remaining_singular: 'Please complete the last field.',
     fields_all_required: 'Please complete all fields (%total% fields required).',
+    rows_remaining_plural: 'Please answer the remaining %remaining% of %total% rows.',
+    rows_remaining_singular: 'Please answer the last row.',
+    rows_all_required: 'Please answer all rows (%total% rows).',
     field_valid: 'Valid input',
     numeric_only: 'This field only accepts numeric values.',
 };

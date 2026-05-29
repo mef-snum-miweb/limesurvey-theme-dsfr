@@ -305,6 +305,32 @@ export function initConditionalVisibilityNotifier() {
         return 'Une question';
     }
 
+    // Nettoie l'état d'erreur périmé d'une question qui vient d'être révélée.
+    //
+    // Le core LimeSurvey pose `input-error` sur les questions mandatory même
+    // quand elles sont non pertinentes (masquées par relevance) au moment d'un
+    // submit en échec. Quand l'utilisateur déclenche ensuite leur affichage, on
+    // ne doit pas lui présenter une question qu'il découvre déjà marquée en
+    // erreur (input-error + aria-invalid). On réinitialise ; l'erreur ré-
+    // apparaîtra normalement au prochain submit si la question reste vide.
+    //
+    // Robuste vis-à-vis de `observeErrorChanges` (errors-dsfr) : celui-ci se
+    // contente de programmer `transformErrorsToDsfr` à +100 ms, qui re-sélectionne
+    // `.question-container.input-error` à l'exécution — la classe étant retirée
+    // ici de façon synchrone, la question révélée n'est plus reprise.
+    function clearRevealedErrorState(questionEl) {
+        questionEl.classList.remove('input-error');
+        questionEl.querySelectorAll('.fr-input-group--error').forEach(function (g) {
+            g.classList.remove('fr-input-group--error');
+        });
+        questionEl.querySelectorAll('.fr-message--error').forEach(function (m) {
+            m.remove();
+        });
+        questionEl.querySelectorAll('[aria-invalid="true"]').forEach(function (f) {
+            f.removeAttribute('aria-invalid');
+        });
+    }
+
     // Timer pour regrouper les annonces (éviter le spam)
     var announceTimer = null;
     var pendingAnnouncements = [];
@@ -338,6 +364,9 @@ export function initConditionalVisibilityNotifier() {
                 } else if (!isHidden && wasHidden) {
                     // Question vient d'apparaître
                     el.dataset.conditionalWasHidden = 'false';
+                    // Purge l'état d'erreur périmé hérité du submit où la
+                    // question était encore masquée (cf. clearRevealedErrorState).
+                    clearRevealedErrorState(el);
                     var label = getQuestionLabel(el);
                     scheduleAnnouncement('Nouvelle question affichée : ' + label);
                 }

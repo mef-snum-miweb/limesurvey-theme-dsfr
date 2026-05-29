@@ -41,6 +41,8 @@
  *     au clavier doit pouvoir rester sur son champ pendant qu'il corrige.
  */
 
+import { isQuestionHidden } from '../core/dom-utils.js';
+
 const SUMMARY_ID = 'dsfr-error-summary';
 const STATUS_ID = 'dsfr-error-status';
 
@@ -56,6 +58,25 @@ const STATUS_ID = 'dsfr-error-status';
  * toujours en erreur dans le résumé.
  */
 const ERROR_QUESTION_SELECTOR = '.question-container.input-error';
+
+/**
+ * Une question en erreur n'est listable QUE si elle est effectivement affichée.
+ *
+ * Le core LimeSurvey pose parfois `input-error` sur des questions mandatory
+ * **non pertinentes** (conditionnelles masquées par relevance — classes
+ * `ls-irrelevant`/`ls-hidden` + `display:none` posées côté serveur dès le
+ * rendu). Cas observé sur le sondage 527199 (Galileo BNA) : un groupe où seule
+ * la 1re question est visible affichait « 5 erreurs à corriger » listant 4
+ * questions de suivi invisibles, conditionnées à la réponse de la 1re.
+ *
+ * On ne peut pas demander à l'utilisateur de corriger une question qu'il ne
+ * voit pas → on les exclut du résumé. Le filtre est fiable au moment de la
+ * construction : les classes de masquage sont présentes dans le HTML serveur,
+ * pas ajoutées tardivement par le JS de relevance.
+ */
+function isListableError(question) {
+    return question.matches(ERROR_QUESTION_SELECTOR) && !isQuestionHidden(question);
+}
 
 /* ──────────────── Helpers ──────────────── */
 
@@ -168,7 +189,9 @@ export function createErrorSummary() {
     const existing = document.getElementById(SUMMARY_ID);
     if (existing) existing.remove();
 
-    const errorQuestions = document.querySelectorAll(ERROR_QUESTION_SELECTOR);
+    const errorQuestions = Array.from(
+        document.querySelectorAll(ERROR_QUESTION_SELECTOR),
+    ).filter(isListableError);
     if (errorQuestions.length === 0) return;
 
     const summary = document.createElement('div');
@@ -245,7 +268,9 @@ export function updateErrorSummary() {
         // heuristique "tous les champs sont remplis" car chaque handler
         // de validation (mst-errors, numeric, array) sait mieux que nous
         // si la question est valide (notamment pour les sous-questions).
-        const stillInError = question.matches(ERROR_QUESTION_SELECTOR);
+        // Une question devenue non pertinente (masquée par relevance) sort
+        // également du résumé : `isListableError` couvre les deux cas.
+        const stillInError = isListableError(question);
         if (stillInError) return;
 
         const link = item.querySelector('a');
