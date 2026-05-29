@@ -16,8 +16,16 @@
  */
 #}
 <!-- answer_row -->
-<div class="fr-fieldset__element checkbox-item answer-item" id='javatbd{{ myfname }}'>
-    <div class="fr-checkbox-group {{ relevanceClass }}">
+{# `relevanceClass` (ls-irrelevant + ls-disabled/ls-hidden, posée par
+   `QuestionBaseRenderer::getCurrentRelevecanceClass()` quand une option
+   exclusive est cochée) DOIT rester sur le wrapper `[id^="javatbd"]` —
+   c'est le sélecteur que `survey.js` cible pour retirer dynamiquement la
+   classe via `relevance:on`. Si on la pose sur le `.fr-checkbox-group`
+   interne, le JS ne la voit pas, la classe persiste, le CSS LS core
+   `.js .ls-irrelevant { pointer-events: none }` bloque le clic et
+   l'utilisateur ne peut plus décocher l'option exclusive. #}
+<div class="fr-fieldset__element checkbox-item answer-item {{ relevanceClass }}" id='javatbd{{ myfname }}'>
+    <div class="fr-checkbox-group">
         <input
             type="checkbox"
             name="{{ myfname }}"

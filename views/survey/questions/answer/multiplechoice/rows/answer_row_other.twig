@@ -17,8 +17,11 @@
 #}
 
 <!-- answer_row_other -->
-<div class="fr-fieldset__element checkbox-item answer-item" id='javatbd{{ myfname }}'>
-    <div class="fr-grid-row fr-grid-row--gutters {{ relevanceClass }}">
+{# `relevanceClass` sur le wrapper `[id^="javatbd"]` — cf. answer_row.twig
+   pour la justification (sinon le JS LS core ne peut pas retirer la classe
+   dynamiquement et l'utilisateur reste verrouillé). #}
+<div class="fr-fieldset__element checkbox-item answer-item {{ relevanceClass }}" id='javatbd{{ myfname }}'>
+    <div class="fr-grid-row fr-grid-row--gutters">
         <div class="fr-col-12 fr-col-md-4 fr-mb-2w">
             <!-- Checkbox + label -->
             <div class="fr-checkbox-group">
