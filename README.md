@@ -38,28 +38,81 @@ Thème LimeSurvey conforme au [Système de Design de l'État (DSFR)](https://www
 
 ## Installation
 
-Le thème s'installe directement dans une instance LimeSurvey à partir de l'archive de [release](../../releases/latest) :
+> **Méthode recommandée : dépôt des fichiers sur le serveur (filesystem).**
+> L'import `.zip` via le back-office **n'est pas fiable pour ce thème** : LimeSurvey
+> filtre les extensions autorisées à l'upload web (liste blanche `allowedthemeuploads` /
+> `allowedthemeimageformats`) et **exclut volontairement le `.svg`** (risque XSS). Or le
+> thème embarque ~48 SVG essentiels (`files/logos/*.svg`, `files/icons/inline/*.svg` pour
+> la [conformité CSP](#conformité-csp)) : un import web les retire silencieusement et le
+> thème s'affiche cassé (logos manquants, icônes absentes). Le référencement dans
+> `config.xml` ne contourne pas le filtre (c'est une règle serveur).
 
-1. Télécharger l'archive `.zip` de la dernière release
-2. Depuis l'administration LimeSurvey : **Configuration > Thèmes > Importer**
-3. Activer le thème **DSFR** sur les sondages souhaités
+### Installation filesystem (recommandée)
 
-Alternative : copier manuellement le contenu du dépôt dans `upload/themes/survey/dsfr/` de l'instance LimeSurvey, puis l'activer depuis **Configuration > Thèmes**.
+1. Copier le contenu du dépôt (ou de l'archive de [release](../../releases/latest)) dans `upload/themes/survey/dsfr/` de l'instance LimeSurvey.
+2. S'assurer que les fichiers appartiennent à l'utilisateur du serveur web (ex. `chown -R www-data:www-data upload/themes/survey/dsfr`).
+3. Depuis l'administration : **Configuration > Thèmes** → le thème **DSFR** apparaît, l'activer sur les sondages souhaités.
 
-### Mise à jour depuis une version ≤ 1.2.x
+### Import `.zip` via le back-office (déconseillé)
 
-La release **v1.3.0** supprime le fichier legacy `css/dsfr-no-datauri.min.css` (remplacé par `css/dsfr.min.css` fourni par DSFR ≥ 1.13). LimeSurvey stocke la liste des CSS du thème en base (`lime_template_configuration.files_css`) et peut continuer à référencer l'ancien fichier après mise à jour — résultat : 404 sur le CSS principal, boutons sans style, thème cassé.
+Possible uniquement si l'instance autorise l'upload de SVG côté serveur. Pour cela, ajouter `svg` aux listes blanches dans `application/config/config.php` :
 
-Après avoir importé ou remplacé la nouvelle version, il faut **réinitialiser la configuration du thème** :
+```php
+'allowedthemeuploads'      => 'css,js,map,json,eot,otf,ttf,woff,woff2,svg,txt,md,xml,twig,lss,lsa,lsq,lsg',
+'allowedthemeimageformats' => 'gif,ico,jpg,jpeg,png,svg',
+```
 
-1. **Configuration > Thèmes > DSFR > Étendre** puis bouton *Réinitialiser ce thème*
-2. (ou en SQL) `UPDATE lime_template_configuration SET files_css = REPLACE(files_css, 'dsfr-no-datauri.min.css', 'dsfr.min.css') WHERE template_name = 'dsfr';` puis purger `tmp/assets/`
-
-Aucune action nécessaire pour une installation neuve.
+> ⚠️ **Sécurité** : un SVG peut embarquer du JavaScript. N'autoriser le `.svg` à l'upload que sur une instance dont vous maîtrisez les contributeurs de thèmes. L'installation filesystem reste préférable : les fichiers sont déposés par l'administrateur système, hors du flux d'upload web.
 
 ### Pour tester ou contribuer
 
 Le repo [`bmatge/limesurvey-dsfr-suite`](https://github.com/bmatge/limesurvey-dsfr-suite) fournit un environnement Docker prêt à l'emploi (LimeSurvey 6 + MySQL + questionnaire de test RGAA + suite de tests) qui monte ce thème en direct. Il sert au développement et à la validation a11y ; il n'est **pas** requis pour utiliser le thème en production.
+
+---
+
+## Mise à jour
+
+> **Mettre à jour = remplacer les fichiers sur disque. Ne jamais désinstaller / réinstaller
+> ni utiliser « Réinitialiser ce thème » sur la configuration globale.**
+
+LimeSurvey met en cache la configuration du thème **en base** (`lime_template_configuration` :
+`files_css`, `files_js`, `options`) et **ne resynchronise pas** automatiquement depuis `config.xml`
+au remplacement des fichiers. Deux conséquences :
+
+- **La désinstallation est destructrice.** `uninstall()` exécute `deleteAll('template_name = :name')`
+  et efface **toutes** les lignes du thème : la ligne globale **et toutes les surcharges par sondage**.
+  Sont concernés : le bouton *Désinstaller*, mais aussi le bouton **« Réinitialiser ce thème »**
+  global (= `uninstall()` + ré-import du manifeste). Désinstaller pour « forcer » une mise à jour
+  fait donc reconfigurer tous les sondages. **À proscrire.**
+- **Un simple remplacement de fichiers ne touche aucune ligne en base** : les configurations
+  globale et par sondage sont conservées. C'est la procédure normale de mise à jour.
+
+### Procédure de mise à jour non destructive
+
+1. Remplacer les fichiers du thème sur disque (filesystem) par la nouvelle version.
+2. Purger les caches LimeSurvey : vider `tmp/assets/` (assets Yii publiés) et `tmp/runtime/` (Twig compilé).
+3. Recharger un sondage utilisant le thème pour vérifier le rendu.
+
+Les **nouvelles options** ajoutées au `config.xml` (ex. `baseline_text` en v1.3.x) apparaissent
+automatiquement par héritage, sans aucune action en base.
+
+### Resynchronisation SQL ciblée (seulement si la liste des CSS/JS change)
+
+Quand une version **renomme ou supprime un fichier CSS/JS** référencé, la ligne en base continue de
+pointer vers l'ancien nom → 404 et thème cassé. Corriger **uniquement la ligne globale** (les lignes
+par sondage qui héritent suivent), sans rien désinstaller :
+
+```sql
+-- Exemple v1.3.0 : dsfr-no-datauri.min.css → dsfr.min.css
+UPDATE lime_template_configuration
+SET files_css = REPLACE(files_css, 'dsfr-no-datauri.min.css', 'dsfr.min.css')
+WHERE template_name = 'dsfr' AND sid IS NULL;
+```
+
+Puis purger `tmp/assets/`. Aucune action n'est nécessaire pour une installation neuve.
+
+> **Bonne pratique projet** : garder des **noms de fichiers CSS/JS stables** entre versions, pour
+> qu'une mise à jour reste un simple remplacement de fichiers sans resynchronisation SQL.
 
 ---
 
