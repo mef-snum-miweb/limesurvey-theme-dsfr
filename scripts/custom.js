@@ -2,7 +2,7 @@
 (() => {
   // modules/theme-dsfr/src/banner.js
   console.log(
-    "%c\n             Développé avec ❤️ par la                   \n                                                        \n       ███╗   ███╗██╗██╗    ██╗███████╗██████╗           \n       ████╗ ████║██║██║    ██║██╔════╝██╔══██╗          \n       ██╔████╔██║██║██║ █╗ ██║█████╗  ██████╔╝          \n       ██║╚██╔╝██║██║██║███╗██║██╔══╝  ██╔══██╗          \n       ██║ ╚═╝ ██║██║╚███╔███╔╝███████╗██████╔╝          \n       ╚═╝     ╚═╝╚═╝ ╚══╝╚══╝ ╚══════╝╚═════╝           \n                                                        \n           Mission Ingénierie du Web                   \n    Ministère de l'Économie et des Finances         \n    https://github.com/bmatge/limesurvey-theme-dsfr  \n    Thème DSFR pour LimeSurvey - 2025 - Etalab 2.0    \n",
+    "%c\n             Développé avec ❤️ par la                   \n                                                        \n       ███╗   ███╗██╗██╗    ██╗███████╗██████╗           \n       ████╗ ████║██║██║    ██║██╔════╝██╔══██╗          \n       ██╔████╔██║██║██║ █╗ ██║█████╗  ██████╔╝          \n       ██║╚██╔╝██║██║██║███╗██║██╔══╝  ██╔══██╗          \n       ██║ ╚═╝ ██║██║╚███╔███╔╝███████╗██████╔╝          \n       ╚═╝     ╚═╝╚═╝ ╚══╝╚══╝ ╚══════╝╚═════╝           \n                                                        \n           Mission Ingénierie du Web                   \n    Ministère de l'Économie et des Finances         \n    https://github.com/mef-snum-miweb/limesurvey-theme-dsfr  \n    Thème DSFR pour LimeSurvey - 2025 - Etalab 2.0    \n",
     "color: #000091; font-weight: bold;"
   );
 
