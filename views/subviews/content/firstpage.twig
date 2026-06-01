@@ -16,25 +16,16 @@
 #}
 
 {# render the layout_global content block #}
+{# Note : la logique anti-bot est désormais centralisée dans layout_global.twig
+   afin de protéger l'entrée du questionnaire indépendamment de l'option
+   "écran de bienvenue" (sinon `firstpage.twig` n'est rendu que quand le
+   welcome est activé, et l'antibot ne s'affichait jamais sans welcome). #}
 
 {# Include the alert for no JavaScript #}
 {{ include('./subviews/messages/no_js_alert.twig') }}
 
 {# Include the language changer selector - MASQUÉ : déjà présent dans le header #}
 {# {{ include('./subviews/navigation/language_changer_first_page.twig') }} #}
-
-{# Vérifier si la protection anti-bot est activée #}
-{% set antibotEnabled = aSurveyInfo.options.antibot_enabled|default('off') == 'on' %}
-
-{% if antibotEnabled %}
-    {# Conteneur pour la page anti-bot (affiché par défaut si anti-bot activé) #}
-    <div id="antibot-page-wrapper">
-        {{ include('./subviews/antibot/antibot_challenge.twig') }}
-    </div>
-
-    {# Conteneur pour la page de bienvenue (caché par défaut si anti-bot activé) #}
-    <div id="welcome-page-wrapper" style="display: none;">
-{% endif %}
 
 {# Include the form opening tag #}
 {{ include('./subviews/header/start_form.twig') }} <!-- main form -->
@@ -50,66 +41,6 @@
     {# Presents the navigator #}
     {{ include('./subviews/navigation/navigator.twig') }}
 </form> <!-- main form -->
-
-{% if antibotEnabled %}
-    </div> {# Fermeture du welcome-page-wrapper #}
-
-    {# Script pour gérer l'affichage conditionnel basé sur sessionStorage #}
-    <script>
-    (function() {
-        'use strict';
-        var surveyId = '{{ aSurveyInfo.sid }}';
-        var storageKey = 'antibot_validated_' + surveyId;
-
-        // Vérifier si déjà validé (via sessionStorage)
-        try {
-            var validated = sessionStorage.getItem(storageKey);
-            if (validated) {
-                // Déjà validé - afficher directement la page de bienvenue
-                var antibotWrapper = document.getElementById('antibot-page-wrapper');
-                var welcomeWrapper = document.getElementById('welcome-page-wrapper');
-                if (antibotWrapper) antibotWrapper.style.display = 'none';
-                if (welcomeWrapper) welcomeWrapper.style.display = 'block';
-            }
-        } catch(e) {
-            // sessionStorage non disponible - laisser la page anti-bot visible
-        }
-
-        // Fonction pour basculer vers la page de bienvenue (appelée depuis antibot_challenge.twig)
-        window.showWelcomePage = function() {
-            var antibotWrapper = document.getElementById('antibot-page-wrapper');
-            var welcomeWrapper = document.getElementById('welcome-page-wrapper');
-
-            if (antibotWrapper) {
-                antibotWrapper.style.opacity = '0';
-                antibotWrapper.style.transition = 'opacity 0.3s ease';
-            }
-
-            setTimeout(function() {
-                if (antibotWrapper) antibotWrapper.style.display = 'none';
-                if (welcomeWrapper) {
-                    welcomeWrapper.style.display = 'block';
-                    welcomeWrapper.style.opacity = '0';
-                    welcomeWrapper.style.transition = 'opacity 0.3s ease';
-                    setTimeout(function() {
-                        welcomeWrapper.style.opacity = '1';
-                    }, 50);
-                }
-
-                // Scroll vers le haut
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-
-                // Focus sur le titre pour l'accessibilité
-                var mainTitle = welcomeWrapper.querySelector('h1');
-                if (mainTitle) {
-                    mainTitle.setAttribute('tabindex', '-1');
-                    mainTitle.focus();
-                }
-            }, 300);
-        };
-    })();
-    </script>
-{% endif %}
 
 {{ registerScript("BasicFirstPageThemeScripts", "
     if(window.basicThemeScripts === undefined){

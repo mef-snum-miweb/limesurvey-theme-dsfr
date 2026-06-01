@@ -318,6 +318,22 @@
                 {# Placé ici pour être le premier titre de la page, avant la barre de progression (H2) #}
                 <h1 class="fr-sr-only">{{ gT(aSurveyInfo.name) }}</h1>
 
+                {# Anti-bot gate : protège l'entrée du questionnaire indépendamment
+                   du paramètre "écran de bienvenue". Rendu sur les pages d'entrée
+                   uniquement (firstpage = welcome, main = première question quand
+                   pas de welcome). La validation est mémorisée en sessionStorage
+                   côté client, donc les pages suivantes masquent immédiatement
+                   le gate sans flash perceptible. #}
+                {% set _antibotEnabled = aSurveyInfo.options.antibot_enabled|default('off') == 'on' %}
+                {% set _antibotShouldRender = _antibotEnabled and (aSurveyInfo.include_content in ['firstpage', 'main']) %}
+
+                {% if _antibotShouldRender %}
+                <div id="antibot-page-wrapper">
+                    {{ include('./subviews/antibot/antibot_challenge.twig') }}
+                </div>
+                <div id="survey-content-wrapper" style="display: none;">
+                {% endif %}
+
                 {# Top Container: in this template, it contains only  #}
                 {% block progress %}
                     {{ include('./subviews/header/progress_bar.twig') }}
@@ -332,6 +348,54 @@
                     {% set sViewContent =  './subviews/content/' ~ aSurveyInfo.include_content ~ '.twig' %}
                     {% include './subviews/content/outerframe.twig' with {'include_content': sViewContent } %}
                 {% endblock %}
+
+                {% if _antibotShouldRender %}
+                </div> {# /survey-content-wrapper #}
+                <script>
+                (function() {
+                    'use strict';
+                    var surveyId = '{{ aSurveyInfo.sid }}';
+                    var storageKey = 'antibot_validated_' + surveyId;
+
+                    try {
+                        if (sessionStorage.getItem(storageKey)) {
+                            var antibotWrapper = document.getElementById('antibot-page-wrapper');
+                            var contentWrapper = document.getElementById('survey-content-wrapper');
+                            if (antibotWrapper) antibotWrapper.style.display = 'none';
+                            if (contentWrapper) contentWrapper.style.display = 'block';
+                        }
+                    } catch(e) {}
+
+                    window.showSurveyContent = function() {
+                        var antibotWrapper = document.getElementById('antibot-page-wrapper');
+                        var contentWrapper = document.getElementById('survey-content-wrapper');
+                        if (antibotWrapper) {
+                            antibotWrapper.style.opacity = '0';
+                            antibotWrapper.style.transition = 'opacity 0.3s ease';
+                        }
+                        setTimeout(function() {
+                            if (antibotWrapper) antibotWrapper.style.display = 'none';
+                            if (contentWrapper) {
+                                contentWrapper.style.display = 'block';
+                                contentWrapper.style.opacity = '0';
+                                contentWrapper.style.transition = 'opacity 0.3s ease';
+                                setTimeout(function() { contentWrapper.style.opacity = '1'; }, 50);
+                            }
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                            var mainTitle = contentWrapper && contentWrapper.querySelector('h1');
+                            if (mainTitle) {
+                                mainTitle.setAttribute('tabindex', '-1');
+                                mainTitle.focus();
+                            }
+                        }, 300);
+                    };
+
+                    // Compat ascendante : antibot_challenge.twig pouvait
+                    // appeler window.showWelcomePage avant la généralisation.
+                    window.showWelcomePage = window.showSurveyContent;
+                })();
+                </script>
+                {% endif %}
 
                 {# Bootstrap alert modal #}
                 {{ include('./subviews/messages/bootstrap_alert_modal.twig') }}

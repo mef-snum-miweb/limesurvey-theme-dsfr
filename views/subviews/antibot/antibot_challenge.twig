@@ -268,8 +268,12 @@
             // sessionStorage non disponible, continuer quand même
         }
 
-        // Basculer vers la page de bienvenue
-        if (typeof window.showWelcomePage === 'function') {
+        // Révéler le contenu du questionnaire (welcome page ou main selon
+        // que l'écran de bienvenue est activé ou non). La fonction est définie
+        // dans layout_global.twig, avec un alias showWelcomePage pour compat.
+        if (typeof window.showSurveyContent === 'function') {
+            window.showSurveyContent();
+        } else if (typeof window.showWelcomePage === 'function') {
             window.showWelcomePage();
         }
 
@@ -311,8 +315,17 @@
         });
     }
 
-    // Focus sur le champ de réponse
-    answerInput.focus();
+    // Focus sur le champ de réponse, sauf si l'utilisateur a déjà validé
+    // l'antibot dans cette session (page d'entrée re-rendue après validation,
+    // p. ex. retour arrière ou nav entre groupes) — sinon on volerait le focus
+    // sur une page où le contenu du questionnaire est en réalité visible.
+    try {
+        if (!sessionStorage.getItem('antibot_validated_' + '{{ aSurveyInfo.sid }}')) {
+            answerInput.focus();
+        }
+    } catch(e) {
+        answerInput.focus();
+    }
 
 })();
 </script>
