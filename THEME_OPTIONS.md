@@ -43,6 +43,7 @@ Taille recommandée : 6rem (96 px) de hauteur dans le header.
 | `show_footer_links` | on / off | on | Afficher les liens de pied de page (accessibilité, mentions, etc.) |
 | `marianne_text` | textarea 2 lignes | `République<br>Française` | Texte sous la Marianne |
 | `header_title` | textarea 2 lignes | — | Titre du service dans l'en-tête |
+| `baseline_text` | textarea 2 lignes | — | Baseline (tagline DSFR sous le titre du service, dans l'en-tête) |
 | `footer_text` | textarea 3 lignes | — | Texte libre dans le footer |
 | `intellectual_property` | textarea 3 lignes | — | Mention de propriété intellectuelle (copyright, licence) |
 

@@ -1,0 +1,18 @@
+{#
+    Page d'options du thème DSFR.
+
+    Ce thème utilise la page d'options « core » de LimeSurvey
+    (<optionspage>core</optionspage> dans config.xml) : le rendu est généré
+    automatiquement à partir du bloc <options> du config.xml, via
+    application/views/themeOptions/options_core.php.
+
+    La SEULE raison d'être de ce fichier est de rendre le bouton « Options »
+    global cliquable : TemplateConfiguration::getHasOptionPage() exige la
+    présence physique d'un fichier options/options.twig (un thème autonome,
+    sans <extends>, n'en hérite d'aucun parent). Sans ce fichier, le bouton
+    reste grisé et seules les options par sondage sont accessibles.
+
+    Pour fournir un rendu d'options 100 % personnalisé, remplacer
+    <optionspage>core</optionspage> par <optionspage>custom</optionspage>
+    dans config.xml puis écrire le HTML ici.
+#}
