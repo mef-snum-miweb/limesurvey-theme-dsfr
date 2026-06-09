@@ -1,12 +1,15 @@
 {#
 /**
- * Gender question, radio item Html
+ * Gender question, radio item Html — DSFR
+ * Même pattern que yesno/radio : fieldset + legend + un fr-radio-group
+ * par item (le ul role=radiogroup sans fieldset n'est pas le composant
+ * radio DSFR).
  *
  * @var $name
- * @var $checkconditionFunction
  * @var $fChecked
  * @var $mChecked
  * @var $naChecked
+ * @var $noAnswer
  * @var $value
  */
 #}
@@ -14,52 +17,54 @@
 <!--Gender question, radio display -->
 
 <!-- answer -->
-<ul class="ls-answers answers-list gender-button radio-list fr-fieldset__content" role="radiogroup" aria-labelledby="ls-question-text-{{ basename }}" >
-    <!-- Female -->
-    <li id='javatbd{{ name }}F' class="answer-item radio-item">
-        <input
-            type="radio"
-            name="{{ name }}"
-            id="answer{{ name }}F"
-            value="F"
-            {{ fChecked }}
-        />
-        <label for="answer{{ name }}F" class="fr-label radio-label">
-            {{ gT('Female') }}
-        </label>
-    </li>
-
-    <!-- Male -->
-    <li id='javatbd{{ name }}M' class="answer-item radio-item">
-        <input
-            type="radio"
-            name="{{ name }}"
-            id="answer{{ name }}M"
-            value="M"
-            {{ mChecked }}
-        />
-
-        <label for="answer{{ name }}M" class="fr-label radio-label">
-            {{ gT('Male') }}
-        </label>
-    </li>
-
-    <!-- No answer -->
-    {% if noAnswer %}
-        <li id='javatbd{{ name }}' class="answer-item radio-item noanswer-item">
+<fieldset class="fr-fieldset ls-answers gender-button" aria-labelledby="ls-question-text-{{ basename }}">
+    <legend class="fr-fieldset__legend fr-sr-only">{{ t.choose_option|default('Veuillez choisir l\'une des options suivantes') }}</legend>
+    <div class="fr-fieldset__content">
+        <!-- Female -->
+        <div class="fr-radio-group answer-item radio-item" id="javatbd{{ name }}F">
             <input
                 type="radio"
                 name="{{ name }}"
-                id="answer{{ name }}"
-                value=""
-                {{ naChecked }}
+                id="answer{{ name }}F"
+                value="F"
+                {{ fChecked }}
             />
-            <label for="answer{{ name }}" class="fr-label radio-label">
-                {{ gT('No answer') }}
+            <label class="fr-label" for="answer{{ name }}F">
+                {{ gT('Female') }}
             </label>
-        </li>
-    {% endif %}
-</ul>
+        </div>
+
+        <!-- Male -->
+        <div class="fr-radio-group answer-item radio-item" id="javatbd{{ name }}M">
+            <input
+                type="radio"
+                name="{{ name }}"
+                id="answer{{ name }}M"
+                value="M"
+                {{ mChecked }}
+            />
+            <label class="fr-label" for="answer{{ name }}M">
+                {{ gT('Male') }}
+            </label>
+        </div>
+
+        <!-- No answer -->
+        {% if noAnswer %}
+            <div class="fr-radio-group answer-item radio-item noanswer-item" id="javatbd{{ name }}">
+                <input
+                    type="radio"
+                    name="{{ name }}"
+                    id="answer{{ name }}"
+                    value=""
+                    {{ naChecked }}
+                />
+                <label class="fr-label" for="answer{{ name }}">
+                    {{ gT('No answer') }}
+                </label>
+            </div>
+        {% endif %}
+    </div>
+</fieldset>
 {{ C.Html.hiddenField('java' ~ name, value, ({'id' : 'java' ~ name,'disabled' : 'true'})) }}
 
 <!-- end of answer -->

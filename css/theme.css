@@ -2251,7 +2251,7 @@ li.selector--inputondemand-list-item label.control-label {
 /* === Utility classes DSFR custom === */
 
 /* Text alignment utility - right */
-.fr-text--right {
+.lsd-text-right {
     text-align: right !important;
 }
 

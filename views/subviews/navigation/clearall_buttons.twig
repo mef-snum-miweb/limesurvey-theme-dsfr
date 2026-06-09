@@ -5,10 +5,9 @@
 #}
 
 <div class="{{ aSurveyInfo.class.clearallwrapper }}">
-    <div class="{{ aSurveyInfo.class.clearallwrapper }}">
-        <label class="fr-label fw-bold {{ aSurveyInfo.class.clearalllabel }}">
-            <input {{ aSurveyInfo.attr.clearallconfirm }} class="me-2 {{ aSurveyInfo.class.clearallconfirm }}"><span class="fr-label">{{gT("Please confirm you want to clear your response?")}}</span>
-        </label>
-        <button {{ aSurveyInfo.attr.clearallbutton }} class="{{ aSurveyInfo.class.clearallbutton }} fr-btn fr-btn--tertiary-no-outline" title="{{ gT("This action need to be confirmed.") }}">{{gT("Exit and clear survey")}}</button>
+    <div class="fr-checkbox-group fr-mb-1w">
+        <input {{ aSurveyInfo.attr.clearallconfirm }} id="confirm-clearall" class="{{ aSurveyInfo.class.clearallconfirm }}">
+        <label class="fr-label {{ aSurveyInfo.class.clearalllabel }}" for="confirm-clearall">{{ gT("Please confirm you want to clear your response?") }}</label>
     </div>
+    <button {{ aSurveyInfo.attr.clearallbutton }} class="{{ aSurveyInfo.class.clearallbutton }} fr-btn fr-btn--tertiary-no-outline" title="{{ gT("This action need to be confirmed.") }}">{{ gT("Exit and clear survey") }}</button>
 </div>

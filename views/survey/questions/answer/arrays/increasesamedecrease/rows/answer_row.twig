@@ -32,7 +32,7 @@
     {# Labels visibles en mode linéarisé mobile ; aria-hidden car le SR lit
        via aria-labelledby de l'input (column header + row header). #}
     <!-- Increase -->
-    <td class="answer_cell_I answer-item radio-item fr-text--center" headers="answertext{{ myfname }} answer{{ basename }}-I">
+    <td class="answer_cell_I answer-item radio-item lsd-text-center" headers="answertext{{ myfname }} answer{{ basename }}-I">
         <input
             type="radio"
             name="{{ myfname }}"
@@ -46,7 +46,7 @@
     </td>
 
     <!-- Same -->
-    <td class="answer_cell_S answer-item radio-item fr-text--center" headers="answertext{{ myfname }} answer{{ basename }}-S">
+    <td class="answer_cell_S answer-item radio-item lsd-text-center" headers="answertext{{ myfname }} answer{{ basename }}-S">
         <input
             type="radio"
             name="{{ myfname }}"
@@ -60,7 +60,7 @@
     </td>
 
     <!-- Decrease -->
-    <td class="answer_cell_D answer-item radio-item fr-text--center" headers="answertext{{ myfname }} answer{{ basename }}-D">
+    <td class="answer_cell_D answer-item radio-item lsd-text-center" headers="answertext{{ myfname }} answer{{ basename }}-D">
         <input
             type="radio"
             name="{{ myfname }}"
@@ -75,7 +75,7 @@
 
     <!-- No Answer -->
     {% if no_answer %}
-        <td class="answer_cell_ answer-item noanswer-item radio-item fr-text--center" headers="answertext{{ myfname }} answer{{ basename }}-">
+        <td class="answer_cell_ answer-item noanswer-item radio-item lsd-text-center" headers="answertext{{ myfname }} answer{{ basename }}-">
             <input
                 type="radio"
                 name="{{ myfname }}"

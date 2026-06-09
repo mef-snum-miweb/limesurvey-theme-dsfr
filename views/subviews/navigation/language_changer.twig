@@ -20,16 +20,15 @@
         'attribute' : 'value',
     #}
     {% set htmlOptions = {
-            'class'          : 'fr-input',
+            'class'          : 'fr-select',
             'data-targeturl' : aLCD.targetUrl,
         }
     %}
     <!-- Language Changer -->
-    <div class=" {{ aSurveyInfo.class.formgroup }} form-change-lang fr-grid-row row-cols-lg-auto g-1" {{ aSurveyInfo.attr.formgroup }} >
-        <label class="{{ aSurveyInfo.class.controllabel }} fr-label fr-col-auto fw-bold" {{ aSurveyInfo.attr.controllabel }} for="lang">
-            <span class="fr-label" {{ aSurveyInfo.attr.languagechanger }}>{{ gT("Language:") }}</span>
-        </label>
-        <div class="fr-col-auto">
+    <div class="{{ aSurveyInfo.class.formgroup }} form-change-lang fr-grid-row fr-grid-row--bottom" {{ aSurveyInfo.attr.formgroup }}>
+        <div class="fr-col-12 fr-col-md-auto">
+            <div class="fr-select-group">
+                <label class="fr-label {{ aSurveyInfo.class.controllabel }}" {{ aSurveyInfo.attr.controllabel }} for="lang">{{ gT("Language:") }}</label>
                 {{
                     C.Html.dropDownList(
                         'lang',
@@ -38,22 +37,23 @@
                         htmlOptions
                     )
                 }}
+            </div>
         </div>
-        <div class="fr-col-auto">
-        <!-- for no js functionality (need form) -->
-        {% set buttonhtmlOptions = {
-                'type'          : 'submit',
-                'value'         : 'changelang',
-                'name'          : 'move',
-                'class'         : 'fr-btn ls-language-changer-item ',
-            }
-        %}
-        {{
-            C.Html.htmlButton(
-                gT("Change the language"),
-                buttonhtmlOptions
-            )
-        }}
+        <div class="fr-col-12 fr-col-md-auto">
+            <!-- for no js functionality (need form) -->
+            {% set buttonhtmlOptions = {
+                    'type'          : 'submit',
+                    'value'         : 'changelang',
+                    'name'          : 'move',
+                    'class'         : 'fr-btn ls-language-changer-item',
+                }
+            %}
+            {{
+                C.Html.htmlButton(
+                    gT("Change the language"),
+                    buttonhtmlOptions
+                )
+            }}
         </div>
     </div>
 

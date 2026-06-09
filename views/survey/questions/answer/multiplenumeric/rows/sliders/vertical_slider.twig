@@ -7,7 +7,7 @@
 {% set sliderUiPosition = sliderAnswerValue != ''
     ? sliderAnswerValue|replace({',': '.'})
     : (slider_position != '' ? slider_position : (slider_min + slider_max) / 2) %}
-<div class="fr-range-group fr-range-group--vertical" id="range-group-{{ myfname }}">
+<div class="fr-range-group lsd-range-group--vertical" id="range-group-{{ myfname }}">
     <div class="fr-grid-row fr-grid-row--gutters">
         {% if sliderleft is not empty %}
             <div class="fr-col-12 fr-text--sm fr-mb-1w">
@@ -16,7 +16,7 @@
         {% endif %}
 
         <div class="fr-col-12">
-            <div class="fr-range fr-range--vertical">
+            <div class="fr-range lsd-range--vertical">
                 <!-- Affichage de la valeur courante (– si pas encore de réponse) -->
                 <span class="fr-range__output" id="output-{{ myfname }}">{{ sliderAnswerValue != '' ? sliderAnswerValue : '–' }}</span>
 

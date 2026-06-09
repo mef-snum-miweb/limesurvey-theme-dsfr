@@ -52,7 +52,7 @@
                 {% set registerKey = "register_" ~ key %}
                 <label for="{{ registerKey }}" class='{{ aSurveyInfo.class.registerformextraslabel }} fr-label '> {{ aExtraAttribute.caption }} {% if aExtraAttribute.mandatory == 'Y' %}{{ include('./subviews/registration/required.twig') }}{% endif %}</label>
                 <div {{ aSurveyInfo.attr.registerformcolrowcdiv }} >
-                    {{ C.Html.textField(registerKey, aSurveyInfo.aAttribute[key],({'id' : registerKey,'class' : 'fr-input input-sm'})) }}
+                    {{ C.Html.textField(registerKey, aSurveyInfo.aAttribute[key],({'id' : registerKey,'class' : 'fr-input'})) }}
                 </div>
             </div>
         {% endfor %}
@@ -65,10 +65,10 @@
                     <div class="{{ aSurveyInfo.class.registerformcaptchadivb }} fr-col-2" {{ aSurveyInfo.attr.registerformcaptchadivb }}>
                             {{ renderCaptcha().renderOut() }}
                     </div>
-                    <div class="{{ aSurveyInfo.class.registerformcaptchadivc }} fr-col-1 align-self-center" {{ aSurveyInfo.attr.registerformcaptchadivc }}>
-                        <a href="#" class="fr-btn fr-btn--sm fr-btn--tertiary" id="reloadCaptcha" title="{{ gT("Reload captcha") }}" data-fr-toggle="captcha"><i class="fa fa-refresh"></i></a>
+                    <div class="{{ aSurveyInfo.class.registerformcaptchadivc }} fr-col-1" {{ aSurveyInfo.attr.registerformcaptchadivc }}>
+                        <a href="#" class="fr-btn fr-btn--sm fr-btn--tertiary" id="reloadCaptcha" title="{{ gT("Reload captcha") }}" data-captcha-reload="true"><span class="fr-icon-refresh-line" aria-hidden="true"></span><span class="fr-sr-only">{{ gT("Reload captcha") }}</span></a>
                     </div>
-                    <div class="fr-col-9 align-self-center">
+                    <div class="fr-col-9">
                         <input class='fr-input {{ aSurveyInfo.class.registerformcaptchainput }}' {{ aSurveyInfo.attr.registerformcaptchainput }}>
                     </div>
                 </div>
@@ -82,7 +82,7 @@
 
         {# Submit register button #}
         <div class='{{ aSurveyInfo.class.registersave }} fr-mb-3w' {{ aSurveyInfo.attr.registersave }} >
-            <div class='{{ aSurveyInfo.class.registersavediv }} float-end' {{ aSurveyInfo.attr.registersavediv }} >
+            <div class='{{ aSurveyInfo.class.registersavediv }}' {{ aSurveyInfo.attr.registersavediv }} >
                 {% set continue = gT("Continue",'unescaped') %}
                 <button {{ aSurveyInfo.attr.registersavedivbutton }}  class='{{ aSurveyInfo.class.registersavedivbutton }} fr-btn fr-btn--secondary' >
                     {{ continue }}

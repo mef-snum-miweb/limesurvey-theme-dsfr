@@ -30,11 +30,11 @@ body > article {
 }
 
 /* Utilitaires d'alignement de texte DSFR-compatible */
-.fr-text-left {
+.lsd-text-left {
     text-align: left;
 }
 
-.fr-text-right {
+.lsd-text-right {
     text-align: right;
 }
 
@@ -62,7 +62,7 @@ body > article {
 
 /* Navigation responsive */
 @media (max-width: 768px) {
-    .fr-text-right {
+    .lsd-text-right {
         text-align: center;
         margin-top: 1rem;
     }
@@ -3805,4 +3805,44 @@ dialog.fr-modal[open] {
 /* Tableaux (échelles doubles, multi-flexi) : on s'appuie sur .fr-table. */
 .printanswers-q__answer .fr-table {
     margin: 0;
+}
+
+/* ============================================
+   REVUE 2026-06 (#25) — remplacements d'icônes-fontes
+   ============================================ */
+
+/* Astérisque de champ obligatoire (texte, plus de fa-asterisk).
+   Classe partagée avec l'injection JS de required-fields.js. */
+.required-asterisk {
+    color: var(--text-default-error);
+    font-weight: 700;
+}
+
+/* Icônes DSFR des radios riches yesno/gender (remplacent les ri-*
+   qui portaient des styles inline font-size/couleur en dur). */
+.lsd-rich-radio-icon {
+    color: var(--text-mention-grey);
+}
+
+.lsd-rich-radio-icon::before {
+    --icon-size: 2rem;
+}
+
+/* Utilitaires projet (ex-classes fr-* inventées, renommées lsd- :
+   le préfixe fr- est réservé au DSFR). */
+.lsd-text-center {
+    text-align: center;
+}
+
+.lsd-text-muted {
+    color: var(--text-mention-grey);
+}
+
+.lsd-mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.lsd-text-error {
+    color: var(--text-default-error);
 }
