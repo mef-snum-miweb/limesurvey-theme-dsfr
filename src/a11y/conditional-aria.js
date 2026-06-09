@@ -53,8 +53,9 @@ export function findQuestionByCode(questionCode) {
     let question = document.querySelector(`[data-qcode="${questionCode}"]`);
 
     if (!question) {
-        // Chercher dans les IDs des questions (format: question + code)
-        question = document.querySelector(`[id*="${questionCode}"]`);
+        // ids canoniques (frontière exacte — [id*=] matchait Q12 pour Q1)
+        question = document.getElementById('question' + questionCode)
+            || document.getElementById('javatbd' + questionCode);
     }
 
     return question;

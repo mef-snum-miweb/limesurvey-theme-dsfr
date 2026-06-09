@@ -325,7 +325,9 @@ function attachErrorRemovalListeners(question, inputGroup, messagesGroup) {
             }
 
             setTimeout(updateErrorSummary, 50);
-        }, { once: true });
+        }); // pas de { once: true } : une question qui retombe en erreur
+            // après une première correction doit pouvoir se re-nettoyer
+            // (le handler est idempotent).
     });
 }
 

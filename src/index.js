@@ -68,6 +68,15 @@ function safeInit(fn) {
 registerRelevanceGlobals(window);
 window.DSFRSanitizeRTEContent = sanitizeRTEContent;
 
+
+// Délais d'ordonnancement (ms) — laissent le DOM/EM se stabiliser avant
+// les passes qui lisent leur état. Valeurs historiques, conservées telles
+// quelles ; chaque init reste idempotente si elle tourne deux fois.
+const DELAY_EM_MESSAGES = 100;   // messages EM peuplés après le rendu
+const DELAY_DOM_STABLE = 200;    // observers posés après stabilisation DOM
+const DELAY_RANKING = 300;       // SortableJS peuplé (listes ranking)
+const DELAY_AFTER_SUBMIT = 500;  // round-trip validation serveur
+
 // --- Initialisation au chargement de la page ---
 onReady(() => {
     safeInit(sanitizeRTEContent);
@@ -91,9 +100,9 @@ onReady(() => {
     // Laisser un petit délai aux messages d'Expression Manager pour se peupler
     setTimeout(() => safeInit(transformValidationMessages), 100);
     // L'observer de somme des numeric-multi a besoin que le DOM soit stable
-    setTimeout(() => safeInit(observeNumericMultiSumValidation), 200);
+    setTimeout(() => safeInit(observeNumericMultiSumValidation), DELAY_DOM_STABLE);
     // Créer le récapitulatif si des erreurs sont déjà présentes au chargement
-    setTimeout(() => safeInit(createErrorSummary), 100);
+    setTimeout(() => safeInit(createErrorSummary), DELAY_EM_MESSAGES);
 
     // Tableaux dropdown-array : nettoyage mobile + observer
     safeInit(fixDropdownArrayInlineStyles);
@@ -127,7 +136,7 @@ onReady(() => {
 
     // Relevance jQuery — légère attente pour laisser jQuery se charger
     // sur les pages où il arrive après DOMContentLoaded.
-    setTimeout(() => safeInit(initRelevanceHandlers), 100);
+    setTimeout(() => safeInit(initRelevanceHandlers), DELAY_EM_MESSAGES);
 
     // Re-déclencher la transformation + le récapitulatif après soumission
     // LimeSurvey (cas de validation côté serveur qui ne passe pas par pjax).
@@ -137,7 +146,7 @@ onReady(() => {
             setTimeout(() => {
                 safeInit(transformErrorsToDsfr);
                 safeInit(createErrorSummary);
-            }, 500);
+            }, DELAY_AFTER_SUBMIT);
         });
     });
 });
@@ -161,9 +170,9 @@ onQuestionsLoaded(() => {
     safeInit(initSearchableDropdowns);
     // fixTableAccessibility a historiquement un délai de 200ms après
     // questionsLoaded pour laisser le DOM se stabiliser.
-    setTimeout(() => safeInit(fixTableAccessibility), 200);
-    setTimeout(() => safeInit(observeNumericMultiSumValidation), 200);
-    setTimeout(() => safeInit(createErrorSummary), 100);
+    setTimeout(() => safeInit(fixTableAccessibility), DELAY_DOM_STABLE);
+    setTimeout(() => safeInit(observeNumericMultiSumValidation), DELAY_DOM_STABLE);
+    setTimeout(() => safeInit(createErrorSummary), DELAY_EM_MESSAGES);
 
     // Inputs et captcha — re-init après chargement AJAX
     safeInit(initMultipleShortText);
@@ -175,7 +184,7 @@ onQuestionsLoaded(() => {
     safeInit(initCaptchaValidation);
 
     // Ranking — réexécuté avec un délai pour laisser SortableJS se peupler
-    setTimeout(() => safeInit(initAllRankingQuestions), 300);
+    setTimeout(() => safeInit(initAllRankingQuestions), DELAY_RANKING);
 
     // Relevance — les handlers s'appuient sur un namespace jQuery `.dsfrRelevance`
     // et font `$(sel).off('.dsfrRelevance').on(...)` avant chaque ré-attachement,
@@ -185,8 +194,8 @@ onQuestionsLoaded(() => {
 
 // --- Re-initialisation sur navigation pjax ---
 onPjax(() => {
-    setTimeout(() => safeInit(sanitizeRTEContent), 100);
-    setTimeout(() => safeInit(initAllRankingQuestions), 300);
+    setTimeout(() => safeInit(sanitizeRTEContent), DELAY_EM_MESSAGES);
+    setTimeout(() => safeInit(initAllRankingQuestions), DELAY_RANKING);
     safeInit(initRelevanceHandlers);
     safeInit(initSearchableDropdowns);
     safeInit(initStepperProgress);
@@ -195,7 +204,7 @@ onPjax(() => {
     // Si la page pjax répond avec des erreurs de validation côté serveur,
     // le résumé doit être (re)construit — à l'identique des branches onReady
     // et onQuestionsLoaded.
-    setTimeout(() => safeInit(createErrorSummary), 200);
+    setTimeout(() => safeInit(createErrorSummary), DELAY_DOM_STABLE);
 });
 
 // --- Redimensionnement : dropdown-array selon largeur de fenêtre ---

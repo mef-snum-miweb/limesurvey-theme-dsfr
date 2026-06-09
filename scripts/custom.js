@@ -7,6 +7,24 @@
   );
 
   // modules/theme-dsfr/src/core/runtime.js
+  var JQUERY_RETRY_INTERVAL_MS = 100;
+  var JQUERY_RETRY_MAX = 100;
+  function whenJQueryReady(cb) {
+    if (typeof window.$ !== "undefined") {
+      cb(window.$);
+      return;
+    }
+    let attempts = 0;
+    const timer = setInterval(() => {
+      attempts++;
+      if (typeof window.$ !== "undefined") {
+        clearInterval(timer);
+        cb(window.$);
+      } else if (attempts >= JQUERY_RETRY_MAX) {
+        clearInterval(timer);
+      }
+    }, JQUERY_RETRY_INTERVAL_MS);
+  }
   function onReady(cb) {
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", cb);
@@ -16,11 +34,14 @@
   }
   function onQuestionsLoaded(cb) {
     document.addEventListener("limesurvey:questionsLoaded", cb);
+    whenJQueryReady(($2) => {
+      $2(document).on("pjax:complete.dsfrQuestionsLoaded", cb);
+    });
   }
   function onPjax(cb) {
-    if (typeof window.$ !== "undefined") {
-      window.$(document).on("pjax:complete", cb);
-    }
+    whenJQueryReady(($2) => {
+      $2(document).on("pjax:complete.dsfrPjax", cb);
+    });
   }
 
   // modules/theme-dsfr/src/rte/sanitize-constants.js
@@ -1353,7 +1374,7 @@
           validMessage.textContent = "Merci d'avoir répondu";
         }
         setTimeout(updateErrorSummary, 50);
-      }, { once: true });
+      });
     });
   }
   function observeErrorChanges() {
@@ -1660,10 +1681,10 @@
               var sumRangeMsg = qId ? document.getElementById("vmsg_" + qId + "_sum_range-dsfr") : null;
               if (sumRangeMsg) {
                 hasSumConstraint2 = true;
-                var rangeMatch = sumRangeMsg.textContent.match(/(\d+)\s+.+\s+(\d+)/);
-                if (rangeMatch) {
-                  var minSum = parseFloat(rangeMatch[1]);
-                  var maxSum = parseFloat(rangeMatch[2]);
+                var rangeNumbers = sumRangeMsg.textContent.match(/-?\d+(?:[.,]\d+)?/g);
+                if (rangeNumbers && rangeNumbers.length >= 2) {
+                  var minSum = parseFloat(rangeNumbers[0].replace(",", "."));
+                  var maxSum = parseFloat(rangeNumbers[rangeNumbers.length - 1].replace(",", "."));
                   var currentSum = 0;
                   allInputs.forEach(function(inp) {
                     var val = inp.value ? inp.value.trim().replace(",", ".") : "";
@@ -1746,10 +1767,10 @@
       if (!sumRangeMsg) return;
       if (totalEl.dataset.dsfrSumObserver) return;
       totalEl.dataset.dsfrSumObserver = "true";
-      var rangeMatch = sumRangeMsg.textContent.match(/(\d+)\s+.+\s+(\d+)/);
-      if (!rangeMatch) return;
-      var minSum = parseFloat(rangeMatch[1]);
-      var maxSum = parseFloat(rangeMatch[2]);
+      var rangeNumbers = sumRangeMsg.textContent.match(/-?\d+(?:[.,]\d+)?/g);
+      if (!rangeNumbers || rangeNumbers.length < 2) return;
+      var minSum = parseFloat(rangeNumbers[0].replace(",", "."));
+      var maxSum = parseFloat(rangeNumbers[rangeNumbers.length - 1].replace(",", "."));
       var totalRow = totalEl.closest(".ls-group-total");
       function checkSumAndUpdate() {
         var allInputs2 = question.querySelectorAll('input.numeric[data-number="1"]');
@@ -1832,11 +1853,7 @@
       } else if (message.classList.contains("ls-em-success") || message.classList.contains("ls-em-tip")) {
         messageType = "info";
       }
-      const dsfrMessage = document.createElement("p");
-      dsfrMessage.className = `fr-message fr-message--${messageType}`;
-      dsfrMessage.textContent = message.textContent.trim();
-      dsfrMessage.id = message.id ? `${message.id}-dsfr` : "";
-      message.replaceWith(dsfrMessage);
+      message.classList.add("fr-message", "fr-message--" + messageType);
     });
   }
 
@@ -2255,7 +2272,7 @@
   function findQuestionByCode(questionCode) {
     let question = document.querySelector(`[data-qcode="${questionCode}"]`);
     if (!question) {
-      question = document.querySelector(`[id*="${questionCode}"]`);
+      question = document.getElementById("question" + questionCode) || document.getElementById("javatbd" + questionCode);
     }
     return question;
   }
@@ -3292,6 +3309,10 @@
   }
   registerRelevanceGlobals(window);
   window.DSFRSanitizeRTEContent = sanitizeRTEContent;
+  var DELAY_EM_MESSAGES = 100;
+  var DELAY_DOM_STABLE = 200;
+  var DELAY_RANKING = 300;
+  var DELAY_AFTER_SUBMIT = 500;
   onReady(() => {
     safeInit(sanitizeRTEContent);
     safeInit(enableImageLazyLoading);
@@ -3310,8 +3331,8 @@
     safeInit(handleSimpleQuestionValidation);
     safeInit(transformValidationMessages);
     setTimeout(() => safeInit(transformValidationMessages), 100);
-    setTimeout(() => safeInit(observeNumericMultiSumValidation), 200);
-    setTimeout(() => safeInit(createErrorSummary), 100);
+    setTimeout(() => safeInit(observeNumericMultiSumValidation), DELAY_DOM_STABLE);
+    setTimeout(() => safeInit(createErrorSummary), DELAY_EM_MESSAGES);
     safeInit(fixDropdownArrayInlineStyles);
     safeInit(setupStyleObserver);
     safeInit(initSearchableDropdowns);
@@ -3328,14 +3349,14 @@
     safeInit(initCaptchaReload);
     safeInit(initCaptchaValidation);
     safeInit(initAllRankingQuestions);
-    setTimeout(() => safeInit(initRelevanceHandlers), 100);
+    setTimeout(() => safeInit(initRelevanceHandlers), DELAY_EM_MESSAGES);
     const forms = document.querySelectorAll('form#limesurvey, form[name="limesurvey"]');
     forms.forEach((form) => {
       form.addEventListener("submit", () => {
         setTimeout(() => {
           safeInit(transformErrorsToDsfr);
           safeInit(createErrorSummary);
-        }, 500);
+        }, DELAY_AFTER_SUBMIT);
       });
     });
   });
@@ -3355,9 +3376,9 @@
     safeInit(fixDropdownArrayInlineStyles);
     safeInit(setupStyleObserver);
     safeInit(initSearchableDropdowns);
-    setTimeout(() => safeInit(fixTableAccessibility), 200);
-    setTimeout(() => safeInit(observeNumericMultiSumValidation), 200);
-    setTimeout(() => safeInit(createErrorSummary), 100);
+    setTimeout(() => safeInit(fixTableAccessibility), DELAY_DOM_STABLE);
+    setTimeout(() => safeInit(observeNumericMultiSumValidation), DELAY_DOM_STABLE);
+    setTimeout(() => safeInit(createErrorSummary), DELAY_EM_MESSAGES);
     safeInit(initMultipleShortText);
     safeInit(initBootstrapButtonsRadio);
     safeInit(initRadioOtherField);
@@ -3365,18 +3386,18 @@
     safeInit(initNativeDateInputs);
     safeInit(initCaptchaReload);
     safeInit(initCaptchaValidation);
-    setTimeout(() => safeInit(initAllRankingQuestions), 300);
+    setTimeout(() => safeInit(initAllRankingQuestions), DELAY_RANKING);
     safeInit(initRelevanceHandlers);
   });
   onPjax(() => {
-    setTimeout(() => safeInit(sanitizeRTEContent), 100);
-    setTimeout(() => safeInit(initAllRankingQuestions), 300);
+    setTimeout(() => safeInit(sanitizeRTEContent), DELAY_EM_MESSAGES);
+    setTimeout(() => safeInit(initAllRankingQuestions), DELAY_RANKING);
     safeInit(initRelevanceHandlers);
     safeInit(initSearchableDropdowns);
     safeInit(initStepperProgress);
     safeInit(initNativeSliders);
     safeInit(initNativeDateInputs);
-    setTimeout(() => safeInit(createErrorSummary), 200);
+    setTimeout(() => safeInit(createErrorSummary), DELAY_DOM_STABLE);
   });
   var dropdownResizeTimer;
   window.addEventListener("resize", () => {

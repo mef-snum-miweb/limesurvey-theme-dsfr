@@ -323,10 +323,12 @@ export function handleNumericMultiValidation() {
                         if (sumRangeMsg) {
                             hasSumConstraint = true;
                             // Parser les limites depuis le texte "entre X et Y"
-                            var rangeMatch = sumRangeMsg.textContent.match(/(\d+)\s+.+\s+(\d+)/);
-                            if (rangeMatch) {
-                                var minSum = parseFloat(rangeMatch[1]);
-                                var maxSum = parseFloat(rangeMatch[2]);
+                            // Premier et dernier nombre du message localisé
+                            // (décimaux « 2,5 » et négatifs acceptés).
+                            var rangeNumbers = sumRangeMsg.textContent.match(/-?\d+(?:[.,]\d+)?/g);
+                            if (rangeNumbers && rangeNumbers.length >= 2) {
+                                var minSum = parseFloat(rangeNumbers[0].replace(',', '.'));
+                                var maxSum = parseFloat(rangeNumbers[rangeNumbers.length - 1].replace(',', '.'));
 
                                 // Calculer la somme des champs remplis
                                 var currentSum = 0;
@@ -438,10 +440,10 @@ export function observeNumericMultiSumValidation() {
         totalEl.dataset.dsfrSumObserver = 'true';
 
         // Parser les limites depuis le texte du message (ex: "entre 3 et 10")
-        var rangeMatch = sumRangeMsg.textContent.match(/(\d+)\s+.+\s+(\d+)/);
-        if (!rangeMatch) return;
-        var minSum = parseFloat(rangeMatch[1]);
-        var maxSum = parseFloat(rangeMatch[2]);
+        var rangeNumbers = sumRangeMsg.textContent.match(/-?\d+(?:[.,]\d+)?/g);
+        if (!rangeNumbers || rangeNumbers.length < 2) return;
+        var minSum = parseFloat(rangeNumbers[0].replace(',', '.'));
+        var maxSum = parseFloat(rangeNumbers[rangeNumbers.length - 1].replace(',', '.'));
 
         var totalRow = totalEl.closest('.ls-group-total');
 
