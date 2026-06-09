@@ -5,6 +5,33 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/). L'historique antérieur à
 `1.4.0` est consultable via les tags Git (`git tag`) et les *releases* GitHub.
 
+## [1.5.0] — 2026-06-10
+
+Release de l'**épic P0** de la [revue complète du 2026-06-09](docs/REVUE-2026-06-09.md)
+(#35) : corrections critiques à fort impact.
+
+### Corrigé
+
+- **CSS** : les 10 variables DSFR fantômes (`--error-425`, `--warning-425`,
+  `--blue-france`…) sont remplacées par des tokens 1.14 réels — les messages
+  d'erreur et d'avertissement EM retrouvent leur couleur (RGAA). _Closes #6._
+- **CSS** : `.ls-js-hidden` redéfinie (elle était fournie par
+  `template-core.css`, retiré dans `config.xml`) — l'alerte RGPD
+  `#datasecurity_error` n'est plus visible en permanence. _Closes #7._
+- **Twig** : `fr-col-offset-2--lg` (classe inexistante) → `fr-col-offset-lg-2` ;
+  les formulaires inscription / code d'accès / sauvegarde / chargement sont à
+  nouveau centrés. _Closes #8._
+- **JS** : suppression du handler legacy de `theme.js` qui retirait
+  `fr-input-group--error` dès la première frappe même sur saisie invalide,
+  en contradiction avec la validation de `src/`. Retrait des 8 `console.log`
+  de debug du bundle. _Closes #9._
+- **JS** : `:has()` éliminé de `required-fields.js` (SyntaxError sur
+  Firefox ESR 115 / Safari < 15.4 qui interrompait toute l'initialisation) ;
+  chaque init de `index.js` est isolée par `safeInit()` (try/catch). _Closes #10._
+- **Twig** : `justsaved.twig` réécrit en alerte DSFR fermable
+  (`fr-alert--success/error/info`) au lieu de Bootstrap (`alert fade in`)
+  et d'API inventées (`data-fr-dismiss`). _Closes #11._
+
 ## [1.4.0] — 2026-06-01
 
 Version centrée sur la **configurabilité** du thème et la **fiabilité des mises
