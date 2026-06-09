@@ -5,6 +5,28 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/). L'historique antérieur à
 `1.4.0` est consultable via les tags Git (`git tag`) et les *releases* GitHub.
 
+## [1.9.0] — 2026-06-10
+
+Release de l'**épic P2 — dette CSS** (#39).
+
+### Modifié
+
+- **~420 lignes de CSS mort supprimées** (vérifiées sans usage) : modales
+  Bootstrap, ranking legacy, .survey-footer*, .skip-link, .progress*,
+  .question-yesno, checkbox-array… ; `dsfr-grid-helpers.css` vidé (classes
+  natives DSFR dupliquées, gutters en conflit avec le système natif).
+  Règle de propriété theme.css/custom.css documentée. _Closes #30._
+- **Dark mode réparé localement** : hex en dur tokenisés (radios de
+  matrices, en-têtes dual-scale, selects, hovers blancs). _Closes #31._
+- **Breakpoints cohérents** : plus de chevauchement à 768px exactement ni
+  de trou 576↔577 ; `html{font-size:100%}` respecte le réglage de police
+  du navigateur (RGAA). _Closes #31._
+
+### Notes
+
+- La migration `@layer` + dépose des 777 `!important` restants est
+  planifiée dans #41 (exige des snapshots visuels par type de question).
+
 ## [1.8.0] — 2026-06-10
 
 Release de l'**épic P2 — dette JavaScript** (#38).
