@@ -5,6 +5,33 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/). L'historique antérieur à
 `1.4.0` est consultable via les tags Git (`git tag`) et les *releases* GitHub.
 
+## [1.8.0] — 2026-06-10
+
+Release de l'**épic P2 — dette JavaScript** (#38).
+
+### Modifié
+
+- **theme.js dégraissé** (1446 → 870 lignes) : suppression du handler qui
+  avalait toute erreur « bootstrap », des stubs dupliqués, des fonctions
+  enhance* legacy, de la double validation captcha et des ~320 lignes de
+  validation morte. Chargement du JS DSFR robuste (mode debug, installation
+  en sous-répertoire) ; combobox découplé de theme.js. _Closes #27._
+- **i18n centralisée** : dictionnaire UI fr/en + `tUI()` pour toutes les
+  chaînes de validation et annonces lecteur d'écran ; légendes des questions
+  via `gT()` (traduites dans toutes les langues LS) ; warnings via `gT()` ;
+  fichier mort `translations.twig` supprimé. _Closes #28._
+
+### Corrigé
+
+- **Cycle de vie** : `limesurvey:questionsLoaded` n'est émis par aucun code
+  du core 6.16 — la ré-initialisation complète tourne désormais réellement
+  (déclenchée sur pjax) ; `onPjax` attend jQuery au lieu d'abandonner ;
+  messages EM transformés **sur place** (mises à jour dynamiques et
+  aria-describedby préservés) ; correction du `{ once: true }` qui empêchait
+  une question retombée en erreur de se re-nettoyer ; bornes de somme
+  tolérantes aux décimaux/négatifs ; sélecteur de question conditionnelle
+  exact (Q1 ne matche plus Q12). _Closes #29._
+
 ## [1.7.0] — 2026-06-10
 
 Release de l'**épic P2 — conformité DSFR des composants** (#37).
