@@ -53,7 +53,7 @@ body > article {
 }
 
 .text-warning {
-    color: var(--warning-425) !important;
+    color: var(--warning-425-625) !important;
 }
 
 .text-muted {
@@ -408,14 +408,14 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
 
 /* Erreur (rouge DSFR) */
 .ls-em-error {
-    color: var(--error-425) !important;
+    color: var(--error-425-625) !important;
 }
 
 /* Warning (orange DSFR warning-main-525) */
 .em_num_answers,
 .em_validation_q,
 .em_commented_checkbox {
-    color: var(--warning-425) !important;
+    color: var(--warning-425-625) !important;
 }
 
 /* ============================================
@@ -482,12 +482,12 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
 
 .alert-warning {
     background-color: var(--background-contrast-warning);
-    border-left-color: var(--warning-425);
+    border-left-color: var(--warning-425-625);
 }
 
 .alert .h4,
 .alert strong {
-    color: var(--error-425) !important;
+    color: var(--error-425-625) !important;
 }
 
 /* Cartes d'erreur Bootstrap → DSFR */
@@ -1353,7 +1353,7 @@ table th > input[type="radio"]:hover,
 td.answer-item input[type="radio"]:hover,
 td.radio-item input[type="radio"]:hover,
 .dsfr-radio-table:hover {
-    border-color: var(--border-action-high-blue-france-hover) !important;
+    border-color: var(--border-action-high-blue-france) !important;
     background-color: var(--background-alt-grey) !important;
 }
 
@@ -2402,7 +2402,7 @@ table.fr-table--bordered {
     height: auto;
     display: block;
     margin: 0.5rem 0;
-    border-radius: var(--border-radius, 0.25rem); /* Border radius DSFR */
+    border-radius: 0.25rem; /* Border radius DSFR */
     box-shadow: var(--overlap-shadow, 0 8px 16px rgba(0,0,0,0.1)); /* Ombre légère DSFR */
 }
 
@@ -3639,7 +3639,7 @@ dialog.fr-modal[open] {
 }
 
 .dsfr-combobox-toggle:focus {
-    outline: 2px solid var(--focus-blue-france, #0a76f6);
+    outline: 2px solid #0a76f6;
     outline-offset: 2px;
 }
 

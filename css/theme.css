@@ -272,7 +272,7 @@ body > article {
    ============================================ */
 
 #outerframeContainer {
-    background-color: var(--grey-light);
+    background-color: var(--background-alt-grey);
     min-height: 100vh;
     padding-top: 6rem; /* Espace pour le header fixed */
 }
@@ -301,7 +301,7 @@ body > article {
 }
 
 .progress-bar {
-    background-color: var(--blue-france) !important;
+    background-color: var(--blue-france-sun-113-625) !important;
     height: 100%;
     transition: width 0.3s ease;
 }
@@ -642,7 +642,7 @@ select:disabled,
 
 /* Message succès (vert) */
 .fr-message--valid {
-    color: var(--success-425);
+    color: var(--success-425-625);
 }
 
 .fr-message--valid::before {
@@ -939,22 +939,22 @@ input[type="submit"]:hover {
 /* Info */
 .alert-info {
     background-color: var(--background-contrast-info);
-    border-left-color: var(--info-425);
-    color: var(--info-425);
+    border-left-color: var(--info-425-625);
+    color: var(--info-425-625);
 }
 
 /* Success */
 .alert-success {
     background-color: var(--background-contrast-success);
-    border-left-color: var(--success-425);
-    color: var(--success-425);
+    border-left-color: var(--success-425-625);
+    color: var(--success-425-625);
 }
 
 /* Warning */
 .alert-warning {
     background-color: var(--background-contrast-warning);
-    border-left-color: var(--warning-425);
-    color: var(--warning-425);
+    border-left-color: var(--warning-425-625);
+    color: var(--warning-425-625);
 }
 
 /* Error/Danger */
@@ -1278,7 +1278,7 @@ footer.fr-footer,
 
 /* Focus visible pour tous les éléments interactifs */
 *:focus-visible {
-    outline: 2px solid var(--blue-france);
+    outline: 2px solid #0a76f6;
     outline-offset: 2px;
 }
 
@@ -1287,7 +1287,7 @@ footer.fr-footer,
     position: absolute;
     top: -40px;
     left: 0;
-    background: var(--blue-france);
+    background: var(--background-action-high-blue-france);
     color: white;
     padding: 8px;
     text-decoration: none;
