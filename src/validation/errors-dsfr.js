@@ -20,6 +20,7 @@
  *   apparaît (validation LS côté client déclenche cette classe).
  */
 
+import { tUI } from '../core/i18n.js';
 import { handleMultipleShortTextErrors } from './mst-errors.js';
 import { handleArrayValidation } from './array-validation.js';
 import { updateErrorSummary } from './error-summary.js';
@@ -186,7 +187,7 @@ function attachErrorRemovalListeners(question, inputGroup, messagesGroup) {
                 const newErrorMessage = document.createElement('p');
                 newErrorMessage.className = 'fr-message fr-message--error';
                 newErrorMessage.id = messagesGroup.id + '-error';
-                newErrorMessage.textContent = 'Ce champ est obligatoire';
+                newErrorMessage.textContent = tUI('field_mandatory');
                 newErrorMessage.setAttribute('role', 'alert');
                 messagesGroup.appendChild(newErrorMessage);
             }
@@ -224,7 +225,7 @@ function attachErrorRemovalListeners(question, inputGroup, messagesGroup) {
                     errorMsg.setAttribute('role', 'alert');
                     messagesGroup.appendChild(errorMsg);
                 }
-                errorMsg.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
+                errorMsg.textContent = tUI('numeric_chars_only');
 
                 setTimeout(updateErrorSummary, 50);
                 return;
@@ -264,7 +265,7 @@ function attachErrorRemovalListeners(question, inputGroup, messagesGroup) {
                 validMessage.id = messagesGroup.id + '-valid';
                 messagesGroup.appendChild(validMessage);
             }
-            validMessage.textContent = 'Merci d\'avoir répondu';
+            validMessage.textContent = tUI('thanks_answered');
         }
 
         // Mettre à jour le récapitulatif d'erreurs
@@ -321,7 +322,7 @@ function attachErrorRemovalListeners(question, inputGroup, messagesGroup) {
                     validMessage.id = messagesGroup.id + '-valid';
                     messagesGroup.appendChild(validMessage);
                 }
-                validMessage.textContent = 'Merci d\'avoir répondu';
+                validMessage.textContent = tUI('thanks_answered');
             }
 
             setTimeout(updateErrorSummary, 50);

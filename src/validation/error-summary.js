@@ -41,6 +41,7 @@
  *     au clavier doit pouvoir rester sur son champ pendant qu'il corrige.
  */
 
+import { tUI } from '../core/i18n.js';
 import { isQuestionHidden } from '../core/dom-utils.js';
 
 const SUMMARY_ID = 'dsfr-error-summary';
@@ -118,7 +119,7 @@ function describeErrorQuestion(question) {
     const id = question.id;
 
     const textEl = question.querySelector('.ls-label-question, .question-text');
-    const text = textEl ? textEl.textContent.trim() : 'Question sans titre';
+    const text = textEl ? textEl.textContent.trim() : tUI('summary_untitled_question');
 
     const msgEl = question.querySelector('.fr-message--error');
     const msg = msgEl ? msgEl.textContent.trim() : '';
@@ -165,18 +166,18 @@ function updateHeader(summary, remaining) {
 
     if (remaining === 0) {
         summary.className = 'fr-alert fr-alert--success fr-mb-4w';
-        if (title) title.textContent = 'Toutes les erreurs ont été corrigées';
-        if (description) description.textContent = 'Vous pouvez maintenant soumettre le formulaire.';
+        if (title) title.textContent = tUI('summary_all_fixed_title');
+        if (description) description.textContent = tUI('summary_all_fixed_desc');
         return;
     }
 
     summary.className = 'fr-alert fr-alert--error fr-mb-4w';
     if (title) {
         title.textContent = remaining === 1
-            ? 'Une erreur à corriger'
-            : remaining + ' erreurs à corriger';
+            ? tUI('summary_one_error')
+            : tUI('summary_n_errors', null, remaining);
     }
-    if (description) description.textContent = 'Veuillez corriger les erreurs suivantes :';
+    if (description) description.textContent = tUI('summary_fix_following');
 }
 
 /* ──────────────── API publique ──────────────── */
@@ -310,19 +311,19 @@ export function updateErrorSummary() {
     if (removed > 0 || added > 0) {
         const parts = [];
         if (removed === 1) {
-            parts.push(correctedLabels[0] + ' corrigée.');
+            parts.push(tUI('summary_fixed_one', correctedLabels[0]));
         } else if (removed > 1) {
-            parts.push(removed + ' erreurs corrigées.');
+            parts.push(tUI('summary_fixed_n', null, removed));
         }
         if (added === 1) {
-            parts.push('Nouvelle erreur : ' + addedLabels[0] + '.');
+            parts.push(tUI('summary_new_error', addedLabels[0]));
         } else if (added > 1) {
-            parts.push(added + ' nouvelles erreurs.');
+            parts.push(tUI('summary_new_errors', null, added));
         }
         if (remaining === 0) {
-            parts.push('Toutes les erreurs ont été corrigées. Vous pouvez soumettre le formulaire.');
+            parts.push(tUI('summary_all_fixed_announce'));
         } else {
-            parts.push(remaining === 1 ? 'Il reste 1 erreur.' : 'Il reste ' + remaining + ' erreurs.');
+            parts.push(remaining === 1 ? tUI('summary_remaining_one') : tUI('summary_remaining_n', null, remaining));
         }
         announceStatus(parts.join(' '));
     }

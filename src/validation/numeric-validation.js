@@ -12,6 +12,7 @@
  *   ls-em-error (somme hors bornes) et synchronise les messages DSFR.
  */
 
+import { tUI } from '../core/i18n.js';
 import { isValidNumber } from '../core/dom-utils.js';
 import { updateErrorSummary } from './error-summary.js';
 
@@ -82,7 +83,7 @@ export function initNumericValidation() {
                     errorMessage.setAttribute('role', 'alert');
                     messagesGroup.appendChild(errorMessage);
                 }
-                errorMessage.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
+                errorMessage.textContent = tUI('numeric_chars_only');
 
             } else {
                 // Format valide et non vide → Retirer les erreurs
@@ -111,7 +112,7 @@ export function initNumericValidation() {
                         validMessage.id = messagesGroup.id + '-valid';
                         messagesGroup.appendChild(validMessage);
                     }
-                    validMessage.textContent = 'Merci d\'avoir répondu';
+                    validMessage.textContent = tUI('thanks_answered');
                 }
 
                 // Mettre à jour le récapitulatif d'erreurs
@@ -196,7 +197,7 @@ export function handleNumericMultiValidation() {
                         errorMsg.setAttribute('role', 'alert');
                         messagesGroup.appendChild(errorMsg);
                     }
-                    errorMsg.textContent = 'Ce champ est obligatoire';
+                    errorMsg.textContent = tUI('field_mandatory');
                 }
 
                 // Masquer le message LimeSurvey .ls-em-error si présent
@@ -260,7 +261,7 @@ export function handleNumericMultiValidation() {
                         errorMsg.setAttribute('role', 'alert');
                         messagesGroup.appendChild(errorMsg);
                     }
-                    errorMsg.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
+                    errorMsg.textContent = tUI('numeric_chars_only');
 
                     // Marquer que cette question a eu une erreur
                     question.dataset.hadError = 'true';
@@ -289,7 +290,7 @@ export function handleNumericMultiValidation() {
                             validMsg.className = 'fr-message fr-message--valid';
                             messagesGroup.appendChild(validMsg);
                         }
-                        validMsg.textContent = 'Merci d\'avoir répondu';
+                        validMsg.textContent = tUI('thanks_answered');
                     }
                 }
 
@@ -366,7 +367,7 @@ export function handleNumericMultiValidation() {
                                             vMsg.className = 'fr-message fr-message--valid';
                                             msgs.appendChild(vMsg);
                                         }
-                                        vMsg.textContent = 'Merci d\'avoir répondu';
+                                        vMsg.textContent = tUI('thanks_answered');
                                     }
                                 }
                             });

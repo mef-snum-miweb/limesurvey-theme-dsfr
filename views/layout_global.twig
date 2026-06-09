@@ -68,7 +68,7 @@
 #}
 
 {# Traductions centralisées du thème — rend {{ t.cle }} disponible dans tous les sous-templates #}
-{# Voir subviews/translations.twig pour la documentation complète #}
+{# Dictionnaire t : libellés d'interface du thème (fr/en), hors chaînes gT() du core #}
 {% set _currentLang = aSurveyInfo.alanguageChanger.datas.sSelected|default('fr') %}
 {% set _themeLang = {
     'fr': {

@@ -601,6 +601,68 @@
     }
     return str;
   }
+  var UI_I18N_FR = {
+    field_mandatory: "Ce champ est obligatoire",
+    thanks_answered: "Merci d'avoir répondu",
+    numeric_chars_only: "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.",
+    captcha_enter_answer: "Veuillez saisir votre réponse",
+    summary_all_fixed_title: "Toutes les erreurs ont été corrigées",
+    summary_all_fixed_desc: "Vous pouvez maintenant soumettre le formulaire.",
+    summary_one_error: "Une erreur à corriger",
+    summary_n_errors: "%n% erreurs à corriger",
+    summary_fix_following: "Veuillez corriger les erreurs suivantes :",
+    summary_untitled_question: "Question sans titre",
+    summary_fixed_one: "%s corrigée.",
+    summary_fixed_n: "%n% erreurs corrigées.",
+    summary_new_error: "Nouvelle erreur : %s.",
+    summary_new_errors: "%n% nouvelles erreurs.",
+    summary_all_fixed_announce: "Toutes les erreurs ont été corrigées. Vous pouvez soumettre le formulaire.",
+    summary_remaining_one: "Il reste 1 erreur.",
+    summary_remaining_n: "Il reste %n% erreurs.",
+    conditional_question: "Cette question est conditionnelle.",
+    conditional_a_question: "Une question",
+    conditional_revealed: "Nouvelle question affichée : %s",
+    ranking_max_reached: "Nombre maximum de réponses atteint",
+    ranking_added_at: "%s ajouté au classement en position %n%",
+    ranking_moved_to: "%s déplacé en position %n%"
+  };
+  var UI_I18N_EN = {
+    field_mandatory: "This field is mandatory",
+    thanks_answered: "Thank you for answering",
+    numeric_chars_only: "This field only accepts digits. Non-numeric characters are removed automatically.",
+    captcha_enter_answer: "Please enter your answer",
+    summary_all_fixed_title: "All errors have been fixed",
+    summary_all_fixed_desc: "You can now submit the form.",
+    summary_one_error: "One error to fix",
+    summary_n_errors: "%n% errors to fix",
+    summary_fix_following: "Please fix the following errors:",
+    summary_untitled_question: "Untitled question",
+    summary_fixed_one: "%s fixed.",
+    summary_fixed_n: "%n% errors fixed.",
+    summary_new_error: "New error: %s.",
+    summary_new_errors: "%n% new errors.",
+    summary_all_fixed_announce: "All errors have been fixed. You can submit the form.",
+    summary_remaining_one: "There is 1 error left.",
+    summary_remaining_n: "There are %n% errors left.",
+    conditional_question: "This question is conditional.",
+    conditional_a_question: "A question",
+    conditional_revealed: "New question displayed: %s",
+    ranking_max_reached: "Maximum number of answers reached",
+    ranking_added_at: "%s added to ranking at position %n%",
+    ranking_moved_to: "%s moved to position %n%"
+  };
+  function tUI(key, label, n) {
+    const lang = (document.documentElement.lang || "fr").toLowerCase().substring(0, 2);
+    const dict = lang === "en" ? UI_I18N_EN : UI_I18N_FR;
+    let str = dict[key] || UI_I18N_FR[key] || key;
+    if (typeof label !== "undefined" && label !== null) {
+      str = str.replace("%s", label);
+    }
+    if (typeof n !== "undefined") {
+      str = str.replace("%n%", n);
+    }
+    return str;
+  }
 
   // modules/theme-dsfr/src/core/dom-utils.js
   function isValidNumber(value) {
@@ -644,7 +706,7 @@
   function describeErrorQuestion(question) {
     const id = question.id;
     const textEl = question.querySelector(".ls-label-question, .question-text");
-    const text = textEl ? textEl.textContent.trim() : "Question sans titre";
+    const text = textEl ? textEl.textContent.trim() : tUI("summary_untitled_question");
     const msgEl = question.querySelector(".fr-message--error");
     const msg = msgEl ? msgEl.textContent.trim() : "";
     let label = text;
@@ -680,15 +742,15 @@
     const description = summary.querySelector(".dsfr-error-summary-desc");
     if (remaining === 0) {
       summary.className = "fr-alert fr-alert--success fr-mb-4w";
-      if (title) title.textContent = "Toutes les erreurs ont été corrigées";
-      if (description) description.textContent = "Vous pouvez maintenant soumettre le formulaire.";
+      if (title) title.textContent = tUI("summary_all_fixed_title");
+      if (description) description.textContent = tUI("summary_all_fixed_desc");
       return;
     }
     summary.className = "fr-alert fr-alert--error fr-mb-4w";
     if (title) {
-      title.textContent = remaining === 1 ? "Une erreur à corriger" : remaining + " erreurs à corriger";
+      title.textContent = remaining === 1 ? tUI("summary_one_error") : tUI("summary_n_errors", null, remaining);
     }
-    if (description) description.textContent = "Veuillez corriger les erreurs suivantes :";
+    if (description) description.textContent = tUI("summary_fix_following");
   }
   function createErrorSummary() {
     const existing = document.getElementById(SUMMARY_ID);
@@ -765,19 +827,19 @@
     if (removed > 0 || added > 0) {
       const parts = [];
       if (removed === 1) {
-        parts.push(correctedLabels[0] + " corrigée.");
+        parts.push(tUI("summary_fixed_one", correctedLabels[0]));
       } else if (removed > 1) {
-        parts.push(removed + " erreurs corrigées.");
+        parts.push(tUI("summary_fixed_n", null, removed));
       }
       if (added === 1) {
-        parts.push("Nouvelle erreur : " + addedLabels[0] + ".");
+        parts.push(tUI("summary_new_error", addedLabels[0]));
       } else if (added > 1) {
-        parts.push(added + " nouvelles erreurs.");
+        parts.push(tUI("summary_new_errors", null, added));
       }
       if (remaining === 0) {
-        parts.push("Toutes les erreurs ont été corrigées. Vous pouvez soumettre le formulaire.");
+        parts.push(tUI("summary_all_fixed_announce"));
       } else {
-        parts.push(remaining === 1 ? "Il reste 1 erreur." : "Il reste " + remaining + " erreurs.");
+        parts.push(remaining === 1 ? tUI("summary_remaining_one") : tUI("summary_remaining_n", null, remaining));
       }
       announceStatus(parts.join(" "));
     }
@@ -1274,7 +1336,7 @@
           const newErrorMessage = document.createElement("p");
           newErrorMessage.className = "fr-message fr-message--error";
           newErrorMessage.id = messagesGroup.id + "-error";
-          newErrorMessage.textContent = "Ce champ est obligatoire";
+          newErrorMessage.textContent = tUI("field_mandatory");
           newErrorMessage.setAttribute("role", "alert");
           messagesGroup.appendChild(newErrorMessage);
         }
@@ -1302,7 +1364,7 @@
             errorMsg2.setAttribute("role", "alert");
             messagesGroup.appendChild(errorMsg2);
           }
-          errorMsg2.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
+          errorMsg2.textContent = tUI("numeric_chars_only");
           setTimeout(updateErrorSummary, 50);
           return;
         }
@@ -1331,7 +1393,7 @@
           validMessage.id = messagesGroup.id + "-valid";
           messagesGroup.appendChild(validMessage);
         }
-        validMessage.textContent = "Merci d'avoir répondu";
+        validMessage.textContent = tUI("thanks_answered");
       }
       setTimeout(updateErrorSummary, 50);
     }
@@ -1371,7 +1433,7 @@
             validMessage.id = messagesGroup.id + "-valid";
             messagesGroup.appendChild(validMessage);
           }
-          validMessage.textContent = "Merci d'avoir répondu";
+          validMessage.textContent = tUI("thanks_answered");
         }
         setTimeout(updateErrorSummary, 50);
       });
@@ -1512,7 +1574,7 @@
             errorMessage.setAttribute("role", "alert");
             messagesGroup.appendChild(errorMessage);
           }
-          errorMessage.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
+          errorMessage.textContent = tUI("numeric_chars_only");
         } else {
           question.classList.remove("input-error");
           inputGroup.classList.remove("fr-input-group--error");
@@ -1533,7 +1595,7 @@
               validMessage.id = messagesGroup.id + "-valid";
               messagesGroup.appendChild(validMessage);
             }
-            validMessage.textContent = "Merci d'avoir répondu";
+            validMessage.textContent = tUI("thanks_answered");
           }
           setTimeout(updateErrorSummary, 50);
         }
@@ -1592,7 +1654,7 @@
               errorMsg.setAttribute("role", "alert");
               messagesGroup.appendChild(errorMsg);
             }
-            errorMsg.textContent = "Ce champ est obligatoire";
+            errorMsg.textContent = tUI("field_mandatory");
           }
           const lsEmError = listItem.querySelector(".ls-em-error");
           if (lsEmError) {
@@ -1636,7 +1698,7 @@
               errorMsg.setAttribute("role", "alert");
               messagesGroup.appendChild(errorMsg);
             }
-            errorMsg.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
+            errorMsg.textContent = tUI("numeric_chars_only");
             question.dataset.hadError = "true";
           } else {
             this.classList.remove("fr-input--error");
@@ -1656,7 +1718,7 @@
                 validMsg.className = "fr-message fr-message--valid";
                 messagesGroup.appendChild(validMsg);
               }
-              validMsg.textContent = "Merci d'avoir répondu";
+              validMsg.textContent = tUI("thanks_answered");
             }
           }
           setTimeout(function() {
@@ -1715,7 +1777,7 @@
                         vMsg.className = "fr-message fr-message--valid";
                         msgs.appendChild(vMsg);
                       }
-                      vMsg.textContent = "Merci d'avoir répondu";
+                      vMsg.textContent = tUI("thanks_answered");
                     }
                   }
                 });
@@ -2306,7 +2368,7 @@
       const lastQuestion = pq.pop();
       descText = `Cette question dépend de vos réponses à ${pq.join(", ")} et ${lastQuestion}.`;
     } else {
-      descText = "Cette question est conditionnelle.";
+      descText = tUI("conditional_question");
     }
     descElement.textContent = descText;
     return descElement;
@@ -2419,7 +2481,7 @@
         var text = titleEl.textContent.trim();
         return text.length > 80 ? text.substring(0, 80) + "…" : text;
       }
-      return "Une question";
+      return tUI("conditional_a_question");
     }
     function clearRevealedErrorState(questionEl) {
       questionEl.classList.remove("input-error");
@@ -2459,7 +2521,7 @@
             el.dataset.conditionalWasHidden = "false";
             clearRevealedErrorState(el);
             var label = getQuestionLabel(el);
-            scheduleAnnouncement("Nouvelle question affichée : " + label);
+            scheduleAnnouncement(tUI("conditional_revealed", label));
           }
         }
       });
@@ -2834,7 +2896,7 @@
         inputGroup.classList.add("fr-input-group--error");
         const errorMessage = document.createElement("p");
         errorMessage.className = "fr-message fr-message--error";
-        errorMessage.textContent = "Veuillez saisir votre réponse";
+        errorMessage.textContent = tUI("captcha_enter_answer");
         messagesGroup.appendChild(errorMessage);
         captchaInput.focus();
         return false;
@@ -3022,13 +3084,13 @@
     var rankList = document.getElementById("sortable-rank-" + qId);
     var currentCount = rankList.querySelectorAll("li:not(.ls-remove):not(.d-none)").length;
     if (maxAnswers > 0 && currentCount >= maxAnswers) {
-      announce(qId, "Nombre maximum de réponses atteint");
+      announce(qId, tUI("ranking_max_reached"));
       return;
     }
     rankList.appendChild(item);
     var label = getItemLabel(item);
     var newPos = rankList.querySelectorAll("li:not(.ls-remove):not(.d-none)").length;
-    announce(qId, label + " ajouté au classement en position " + newPos);
+    announce(qId, tUI("ranking_added_at", label, newPos));
     syncHiddenSelects(qId);
     refreshAllItems(qId);
     var choiceList = document.getElementById("sortable-choice-" + qId);
@@ -3066,7 +3128,7 @@
     var label = getItemLabel(item);
     var items = item.parentNode.querySelectorAll("li:not(.ls-remove):not(.d-none)");
     var newPos = Array.from(items).indexOf(item) + 1;
-    announce(qId, label + " déplacé en position " + newPos);
+    announce(qId, tUI("ranking_moved_to", label, newPos));
     syncHiddenSelects(qId);
     refreshAllItems(qId);
     item.focus();
@@ -3081,7 +3143,7 @@
     var label = getItemLabel(item);
     var items = item.parentNode.querySelectorAll("li:not(.ls-remove):not(.d-none)");
     var newPos = Array.from(items).indexOf(item) + 1;
-    announce(qId, label + " déplacé en position " + newPos);
+    announce(qId, tUI("ranking_moved_to", label, newPos));
     syncHiddenSelects(qId);
     refreshAllItems(qId);
     item.focus();

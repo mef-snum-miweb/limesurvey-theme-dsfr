@@ -18,7 +18,7 @@
  * sont désormais orchestrés depuis `src/index.js` via `core/runtime.js`.
  */
 
-import { tRanking } from '../core/i18n.js';
+import { tRanking, tUI } from '../core/i18n.js';
 
 // ---- État module partagé ----
 let _isInternalUpdate = false;
@@ -303,7 +303,7 @@ export function addItemToRank(item, qId) {
     var currentCount = rankList.querySelectorAll('li:not(.ls-remove):not(.d-none)').length;
 
     if (maxAnswers > 0 && currentCount >= maxAnswers) {
-        announce(qId, 'Nombre maximum de réponses atteint');
+        announce(qId, tUI('ranking_max_reached'));
         return;
     }
 
@@ -311,7 +311,7 @@ export function addItemToRank(item, qId) {
 
     var label = getItemLabel(item);
     var newPos = rankList.querySelectorAll('li:not(.ls-remove):not(.d-none)').length;
-    announce(qId, label + ' ajouté au classement en position ' + newPos);
+    announce(qId, tUI('ranking_added_at', label, newPos));
 
     syncHiddenSelects(qId);
     refreshAllItems(qId);
@@ -372,7 +372,7 @@ export function moveItemUp(item, qId) {
     var label = getItemLabel(item);
     var items = item.parentNode.querySelectorAll('li:not(.ls-remove):not(.d-none)');
     var newPos = Array.from(items).indexOf(item) + 1;
-    announce(qId, label + ' déplacé en position ' + newPos);
+    announce(qId, tUI('ranking_moved_to', label, newPos));
 
     syncHiddenSelects(qId);
     refreshAllItems(qId);
@@ -395,7 +395,7 @@ export function moveItemDown(item, qId) {
     var label = getItemLabel(item);
     var items = item.parentNode.querySelectorAll('li:not(.ls-remove):not(.d-none)');
     var newPos = Array.from(items).indexOf(item) + 1;
-    announce(qId, label + ' déplacé en position ' + newPos);
+    announce(qId, tUI('ranking_moved_to', label, newPos));
 
     syncHiddenSelects(qId);
     refreshAllItems(qId);

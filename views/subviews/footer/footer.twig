@@ -66,17 +66,17 @@ Les liens pointent vers # - à personnaliser selon votre organisme
                     </li>
                     <li class="fr-footer__bottom-item">
                         <button class="fr-footer__bottom-link" data-fr-opened="false" aria-controls="legal-modal" aria-haspopup="dialog" aria-expanded="false">
-                            Mentions légales
+                            {{ t.legal_notices|default('Mentions légales') }}
                         </button>
                     </li>
                     <li class="fr-footer__bottom-item">
                         <button class="fr-footer__bottom-link" data-fr-opened="false" aria-controls="privacy-modal" aria-haspopup="dialog" aria-expanded="false">
-                            Données personnelles
+                            {{ t.privacy_policy|default('Données personnelles') }}
                         </button>
                     </li>
                     <li class="fr-footer__bottom-item">
                         <button class="fr-footer__bottom-link" data-fr-opened="false" aria-controls="cookies-modal" aria-haspopup="dialog" aria-expanded="false">
-                            Gestion des cookies
+                            {{ t.cookies_management|default('Gestion des cookies') }}
                         </button>
                     </li>
                 </ul>

@@ -25,37 +25,13 @@
     These warnings are complementary to the popup ones. If you're using popups (set in config file), and then don't want to show these alerts, you can uncomment the hiddenClass checker
 #}
 
-{# Traductions personnalisées pour les warnings (non disponibles dans LimeSurvey) #}
-{% set warningsLang = {
-    'fr': {
-        'previewMode': 'Mode prévisualisation',
-        'previewText': 'Cette enquête n\'est actuellement pas active. Vous ne pourrez pas sauvegarder vos réponses.'
-    },
-    'en': {
-        'previewMode': 'Preview mode',
-        'previewText': 'This survey is currently not active. You will not be able to save your responses.'
-    },
-    'es': {
-        'previewMode': 'Modo de vista previa',
-        'previewText': 'Esta encuesta no está activa actualmente. No podrá guardar sus respuestas.'
-    },
-    'de': {
-        'previewMode': 'Vorschaumodus',
-        'previewText': 'Diese Umfrage ist derzeit nicht aktiv. Sie können Ihre Antworten nicht speichern.'
-    }
-} %}
-
-{# Détecter la langue active (fallback: anglais pour cohérence LimeSurvey) #}
-{% set currentLang = aSurveyInfo.alanguageChanger.datas.sSelected|default('en') %}
-{% set lang = warningsLang[currentLang]|default(warningsLang.en) %}
-
 {# Preview mode warning - DSFR Alert #}
 {% if (aSurveyInfo.active != 'Y') and (not aSurveyInfo.popupPreview) %}
     <!-- Preview mode warning -->
     <div class="fr-container fr-my-2w">
         <div class="fr-alert fr-alert--warning {{ aSurveyInfo.class.activealert }}" role="alert" {{ aSurveyInfo.attr.activealert }}>
-            <h3 class="fr-alert__title">{{ lang.previewMode }}</h3>
-            <p>{{ lang.previewText }}</p>
+            <h3 class="fr-alert__title">{{ gT("Warning") }}</h3>
+            <p>{{ gT("This survey is currently not active. You will not be able to save your responses.") }}</p>
         </div>
     </div>
 {% endif %}

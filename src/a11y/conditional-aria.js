@@ -20,6 +20,7 @@
  * instancient des MutationObserver qui doivent n'être appelés qu'une fois.
  */
 
+import { tUI } from '../core/i18n.js';
 import { isQuestionHidden } from '../core/dom-utils.js';
 
 export function extractQuestionCodes(expression) {
@@ -117,7 +118,7 @@ export function createConditionalDescription(questionId, parentQuestions) {
         const lastQuestion = pq.pop();
         descText = `Cette question dépend de vos réponses à ${pq.join(', ')} et ${lastQuestion}.`;
     } else {
-        descText = 'Cette question est conditionnelle.';
+        descText = tUI('conditional_question');
     }
 
     descElement.textContent = descText;
@@ -303,7 +304,7 @@ export function initConditionalVisibilityNotifier() {
             var text = titleEl.textContent.trim();
             return text.length > 80 ? text.substring(0, 80) + '…' : text;
         }
-        return 'Une question';
+        return tUI('conditional_a_question');
     }
 
     // Nettoie l'état d'erreur périmé d'une question qui vient d'être révélée.
@@ -369,7 +370,7 @@ export function initConditionalVisibilityNotifier() {
                     // question était encore masquée (cf. clearRevealedErrorState).
                     clearRevealedErrorState(el);
                     var label = getQuestionLabel(el);
-                    scheduleAnnouncement('Nouvelle question affichée : ' + label);
+                    scheduleAnnouncement(tUI('conditional_revealed', label));
                 }
             }
         });
