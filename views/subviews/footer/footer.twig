@@ -44,6 +44,7 @@ Les liens pointent vers # - à personnaliser selon votre organisme
             </div>
         </div>
         <div class="fr-footer__bottom">
+            {% if aSurveyInfo.options.show_footer_links != "off" %}
             <nav role="navigation" aria-label="{{ t.footer }}">
                 <ul class="fr-footer__bottom-list">
                     {# Mention de conformité pilotée par l'option rgaa_conformity
@@ -81,6 +82,7 @@ Les liens pointent vers # - à personnaliser selon votre organisme
                     </li>
                 </ul>
             </nav>
+            {% endif %}
             <div class="fr-footer__bottom-copy">
                 {% if aSurveyInfo.options.intellectual_property %}
                     {# DSFR attend un <p> direct dans .fr-footer__bottom-copy —

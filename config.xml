@@ -25,6 +25,7 @@
 
     <!-- Compatibilité -->
     <compatibility>
+        <version>7.0</version>
         <version>6.0</version>
     </compatibility>
 
@@ -59,10 +60,10 @@
     <!-- Options du thème (configurables dans l'interface admin) -->
     <options>
         <!-- Options simples -->
-        <!-- <container type="buttons" category="Options générales" width="4" title="Conteneur de l'enquête" options="on|off" optionlabels="Oui|Non">on</container> -->
-        <!-- <showpopups type="buttons" category="Options générales" width="4" title="Afficher les popups" options="1|0|-1" optionlabels="Popup|Sur la page|Non">1</showpopups> -->
+        <container type="buttons" category="Options générales" width="4" title="Conteneur de l'enquête centré (off = pleine largeur)" options="on|off" optionlabels="Oui|Non">off</container>
+        <showpopups type="buttons" category="Options générales" width="4" title="Affichage des messages (sauvegarde, soft mandatory)" options="1|0|-1" optionlabels="Popup|Sur la page|Non">0</showpopups>
         <showclearall type="buttons" category="Options générales" width="4" title="Bouton 'Tout effacer'" options="on|off" optionlabels="Oui|Non">off</showclearall>
-        <!-- <questionhelptextposition type="buttons" category="Options générales" width="4" title="Position de l'aide" options="top|bottom" optionlabels="Haut|Bas">top</questionhelptextposition> -->
+        <questionhelptextposition type="buttons" category="Options générales" width="4" title="Position de l'aide de question" options="top|bottom" optionlabels="Haut|Bas">top</questionhelptextposition>
         <fixnumauto type="buttons" category="Options générales" width="4" title="Correction automatique des valeurs numériques" options="enable|partial|disable" optionlabels="Oui|Pour expression|Non">enable</fixnumauto>
         <showquestioncode type="buttons" category="Options générales" width="4" title="Afficher le code/numéro de question (utile pour les questions conditionnelles)" options="on|off" optionlabels="Oui|Non">on</showquestioncode>
         <sanitize_rte_content type="buttons" category="Options générales" width="12" title="Nettoyer les styles inline du titre et de l'aide des questions (conformité DSFR)" options="on|off" optionlabels="Oui|Non" default="on">on</sanitize_rte_content>
@@ -71,7 +72,7 @@
         <!-- Images et logos -->
         <brandlogo type="buttons" category="Images" width="12" title="⚠ AVERTISSEMENT DSFR : Seuls les opérateurs et directions recevant du public sont autorisés à afficher leur logo dans l'en-tête. Si un logo est utilisé, vous devez modifier le texte Marianne (onglet 'Header et footer') pour qu'il affiche 'République Française'.|Afficher le logo" options="on|off" optionlabels="Oui|Non" default="off">off</brandlogo>
         <brandlogo_sircom_certified type="buttons" category="Images" width="12" title="Je certifie avoir eu l'accord du SIRCOM pour utiliser le logo de mon entité dans l'en-tête d'un site en Design System" options="on|off" optionlabels="Oui|Non" default="off">off</brandlogo_sircom_certified>
-        <brandlogofile type="dropdown" category="Images" width="6" title="Fichier logo">./files/logo.png</brandlogofile>
+        <brandlogofile type="dropdown" category="Images" width="6" title="Fichier logo" parent="brandlogo">./files/logo.png</brandlogofile>
         <!-- <hideprivacyinfo type="buttons" category="Options générales" width="4" title="Masquer les informations de confidentialité" options="on|off" optionlabels="Oui|Non">off</hideprivacyinfo> -->
 
         <!-- Variantes DSFR (thème clair/sombre) -->
