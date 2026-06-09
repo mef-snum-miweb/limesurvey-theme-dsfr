@@ -156,102 +156,12 @@ table td input[type="checkbox"] {
     display: inline-block;
     margin: 0 auto;
 }
-
-/* ============================================
-   CHECKBOXES DSFR DANS TABLEAUX
-   Style custom pour checkbox-array et multiflexi
-   Sélecteurs très spécifiques pour override DSFR
-   ============================================ */
-
-/* Container de la cellule checkbox */
-td.checkbox-item-item {
-    text-align: center !important;
-    vertical-align: middle !important;
-}
-
 /* Checkbox DSFR custom dans tableaux - sélecteurs très spécifiques */
-.fr-table table.checkbox-array td.checkbox-item-item input[type="checkbox"],
-table.checkbox-array td.checkbox-item-item input[type="checkbox"],
-.answer-container table td input[type="checkbox"][id^="cbox"] {
-    /* Masquer le checkbox natif mais garder accessible */
-    -webkit-appearance: none !important;
-    -moz-appearance: none !important;
-    appearance: none !important;
-    /* Dimensions DSFR */
-    width: 1.5rem !important;
-    height: 1.5rem !important;
-    min-width: 1.5rem !important;
-    min-height: 1.5rem !important;
-    /* Style DSFR */
-    border: 1px solid var(--border-action-high-blue-france) !important;
-    border-radius: 0.25rem !important;
-    background-color: var(--background-default-grey) !important;
-    /* Centrage */
-    display: inline-block !important;
-    vertical-align: middle !important;
-    margin: 0 auto !important;
-    /* Curseur */
-    cursor: pointer !important;
-    /* Position relative pour le checkmark */
-    position: relative !important;
-    /* Transition */
-    transition: background-color 0.1s ease, border-color 0.1s ease !important;
-    /* Reset flex qui pourrait interférer */
-    flex: none !important;
-}
-
 /* Hover sur checkbox */
-.fr-table table.checkbox-array td.checkbox-item-item input[type="checkbox"]:hover,
-table.checkbox-array td.checkbox-item-item input[type="checkbox"]:hover,
-.answer-container table td input[type="checkbox"][id^="cbox"]:hover {
-    background-color: var(--background-alt-blue-france) !important;
-}
-
 /* Focus visible pour accessibilité */
-.fr-table table.checkbox-array td.checkbox-item-item input[type="checkbox"]:focus-visible,
-table.checkbox-array td.checkbox-item-item input[type="checkbox"]:focus-visible,
-.answer-container table td input[type="checkbox"][id^="cbox"]:focus-visible {
-    outline: 2px solid var(--border-action-high-blue-france) !important;
-    outline-offset: 2px !important;
-}
-
 /* État coché - fond bleu */
-.fr-table table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked,
-table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked,
-.answer-container table td input[type="checkbox"][id^="cbox"]:checked {
-    background-color: var(--background-action-high-blue-france) !important;
-    border-color: var(--background-action-high-blue-france) !important;
-}
-
 /* Checkmark via pseudo-element */
-.fr-table table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after,
-table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after,
-.answer-container table td input[type="checkbox"][id^="cbox"]:checked::after {
-    content: "" !important;
-    position: absolute !important;
-    left: 0.45rem !important;
-    top: 0.2rem !important;
-    width: 0.4rem !important;
-    height: 0.7rem !important;
-    border: solid white !important;
-    border-width: 0 2px 2px 0 !important;
-    transform: rotate(45deg) !important;
-}
-
 /* ============================================
-   BLOCS QUESTIONS - Style Card DSFR
-   ============================================ */
-
-.question-container,
-.group-description-card {
-    background-color: var(--background-raised-grey);
-    border: 1px solid var(--border-default-grey);
-    border-radius: 0;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    box-shadow: var(--overlap-shadow);
-}
-
 /* Questions/groupes conditionnels - EM (ExpressionScript) ajoute ces classes
    sur les .question-container ou .group-container quand la pertinence calcule
    `false`. On les masque visuellement et on les rend non focusables.
@@ -285,12 +195,6 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
 .question-container:not(.ls-irrelevant):not(.ls-hidden) {
     opacity: 1;
 }
-
-/* État initial avant animation (pour JS) */
-.question-container.ls-animating-in {
-    opacity: 0;
-}
-
 /* Sub-question items désactivés par une option exclusive (ex. « Aucun ») :
    ils gardent leur place dans le DOM et restent visibles, mais on signale
    visuellement qu'ils sont inactifs. LimeSurvey core applique
@@ -881,12 +785,6 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
 .modal {
     display: none !important;
 }
-
-/* Ne l'afficher QUE si elle a du contenu valide ET la classe dsfr-show */
-.modal.dsfr-show {
-    display: block !important;
-}
-
 /* Supprimer le backdrop Bootstrap */
 .modal-backdrop {
     display: none !important;
@@ -1945,48 +1843,9 @@ select.fr-select:focus,
 .ls-columns > div {
     margin: 0;
 }
-
-/* ============================================
-   OUI/NON - ALIGNEMENT DES LABELS
-   Issue #13: Oui/Non alignement
-   ============================================ */
-
-/* Alignement vertical des icônes et texte dans les labels Oui/Non */
-.question-yesno .fr-radio-group .fr-label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
 /* Style des icônes Oui/Non */
-.question-yesno .fr-label [class^="ri-"],
-.question-yesno .fr-label .ri-checkbox-circle-line,
-.question-yesno .fr-label .ri-close-circle-line {
-    font-size: 1.25rem;
-    line-height: 1;
-    flex-shrink: 0;
-}
-
 /* Couleurs des icônes */
-.question-yesno .fr-label .ri-checkbox-circle-line {
-    color: var(--text-default-success, #18753C);
-}
-
-.question-yesno .fr-label .ri-close-circle-line {
-    color: var(--text-default-error, #CE0500);
-}
-
-/* Assurer l'alignement des radio-group dans la grille */
-.question-yesno .fr-grid-row .fr-radio-group {
-    display: flex;
-    align-items: flex-start;
-}
-
 /* Espacement égal entre les options */
-.question-yesno .fr-grid-row--gutters > [class*="fr-col"] {
-    margin-bottom: 1rem;
-}
-
 /* ============================================
    BOOTSTRAP BUTTONS → DSFR STYLE
    Question theme "Bootstrap buttons" avec apparence DSFR
