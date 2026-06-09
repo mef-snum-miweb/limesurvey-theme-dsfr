@@ -38,10 +38,17 @@ export function transformErrorsToDsfr() {
 
     // Passe systématique : poser aria-invalid sur TOUS les champs en erreur,
     // indépendamment du handler spécialisé qui gère le message d'erreur.
+    // Pour les questions à fieldset (radios/cases), l'état d'erreur DSFR
+    // normatif est fr-fieldset--error sur le <fieldset> (pas une classe
+    // input-group sur le conteneur de question).
     errorQuestions.forEach(function(question) {
         question.querySelectorAll('input:not([type="hidden"]), textarea, select').forEach(function(field) {
             field.setAttribute('aria-invalid', 'true');
         });
+        const fieldset = question.querySelector('fieldset.fr-fieldset');
+        if (fieldset) {
+            fieldset.classList.add('fr-fieldset--error');
+        }
     });
 
     errorQuestions.forEach(function(question) {
@@ -227,6 +234,10 @@ function attachErrorRemovalListeners(question, inputGroup, messagesGroup) {
         // Champ valide → succès
         inputGroup.classList.remove('fr-input-group--error');
         question.classList.remove('input-error');
+        const okFieldset = question.querySelector('fieldset.fr-fieldset--error');
+        if (okFieldset) {
+            okFieldset.classList.remove('fr-fieldset--error');
+        }
 
         // Retirer la classe d'erreur de l'input
         input.classList.remove('fr-input--error');
@@ -280,6 +291,10 @@ function attachErrorRemovalListeners(question, inputGroup, messagesGroup) {
             // Pour radio/checkbox, retirer les erreurs
             inputGroup.classList.remove('fr-input-group--error');
             question.classList.remove('input-error');
+            const okFieldset = question.querySelector('fieldset.fr-fieldset--error');
+            if (okFieldset) {
+                okFieldset.classList.remove('fr-fieldset--error');
+            }
 
             // Retirer aria-invalid de tous les champs de la question
             question.querySelectorAll('[aria-invalid]').forEach(function(f) {

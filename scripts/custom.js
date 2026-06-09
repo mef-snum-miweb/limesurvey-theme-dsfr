@@ -1163,6 +1163,10 @@
       question.querySelectorAll('input:not([type="hidden"]), textarea, select').forEach(function(field) {
         field.setAttribute("aria-invalid", "true");
       });
+      const fieldset = question.querySelector("fieldset.fr-fieldset");
+      if (fieldset) {
+        fieldset.classList.add("fr-fieldset--error");
+      }
     });
     errorQuestions.forEach(function(question) {
       if (question.classList.contains("multiple-short-txt")) {
@@ -1284,6 +1288,10 @@
       }
       inputGroup.classList.remove("fr-input-group--error");
       question.classList.remove("input-error");
+      const okFieldset = question.querySelector("fieldset.fr-fieldset--error");
+      if (okFieldset) {
+        okFieldset.classList.remove("fr-fieldset--error");
+      }
       input.classList.remove("fr-input--error");
       input.removeAttribute("aria-invalid");
       const errorMsg = messagesGroup.querySelector(".fr-message--error");
@@ -1320,6 +1328,10 @@
       input.addEventListener("change", function() {
         inputGroup.classList.remove("fr-input-group--error");
         question.classList.remove("input-error");
+        const okFieldset = question.querySelector("fieldset.fr-fieldset--error");
+        if (okFieldset) {
+          okFieldset.classList.remove("fr-fieldset--error");
+        }
         question.querySelectorAll("[aria-invalid]").forEach(function(f) {
           f.removeAttribute("aria-invalid");
         });
