@@ -83,7 +83,7 @@
                         <th id="answer{{ basename }}-s1-{{ labelcode1[code] }}" class="fr-text--bold answertext">{{ processString(label) }}</th>
                     {% endfor %}
                     {% if shownoanswer %}
-                        <th class="fr-text--bold noanswer-text">{{ gT('No answer') }}</th>
+                        <th id="noanswer-header-{{ basename }}" class="fr-text--bold noanswer-text">{{ gT('No answer') }}</th>
                     {% endif %}
                     {% if rightexists %}
                         <th></th>
@@ -97,9 +97,24 @@
                         {{ include('./survey/questions/answer/arrays/dualscale/repeat_header.twig') }}
                     {% endif %}
 
-                    <tr id="javatbd{{ subquestion.myfname }}" class="answers-list dualscale-row {% if i % 2 %}ls-odd{% else %}ls-even{% endif %}{% if subquestion.alert %} ls-mandatory-error{% endif %}" role="group">
+                    <tr id="javatbd{{ subquestion.myfname }}" class="answers-list dualscale-row {% if i % 2 %}ls-odd{% else %}ls-even{% endif %}{% if subquestion.showmandatoryviolation %} ls-error-mandatory has-error{% endif %}" role="group" aria-labelledby="answertext{{ subquestion.myfname }}">
                         <th scope="row" id="answertext{{ subquestion.myfname }}" class="answertext fr-text--bold{% if answerwidth==0 %} fr-sr-only{% endif %}">
                             {{ processString(subquestion.answertext) }}
+                            {# Valeurs pour l'Expression Manager (adressées par id,
+                               jamais soumises). Ids en myfid (séparateur « _ ») :
+                               em_javascript remplace le « # » des SGQA par « _ »
+                               pour construire ses sélecteurs — un id contenant
+                               « # » casse relevance/validation/équations. #}
+                            {{ C.Html.hiddenField("java"~subquestion.myfid0, subquestion.sessionfname0, ({
+                                'id': "java"~subquestion.myfid0,
+                                'disabled': true
+                            })) }}
+                            {% if labelcode1 is not empty %}
+                                {{ C.Html.hiddenField("java"~subquestion.myfid1, subquestion.sessionfname1, ({
+                                    'id': "java"~subquestion.myfid1,
+                                    'disabled': true
+                                })) }}
+                            {% endif %}
                         </th>
 
                         {# Entête de groupe Échelle 1 — visible uniquement en
@@ -120,12 +135,12 @@
                                     type="radio"
                                     name="{{ subquestion.myfname0 }}"
                                     value="{{ ld }}"
-                                    id="answer{{ subquestion.myfname0 }}-{{ ld }}"
+                                    id="answer{{ subquestion.myfid0 }}-{{ ld }}"
                                     aria-labelledby="answer{{ basename }}-s0-{{ ld }} answertext{{ subquestion.myfname }}"
                                     {{ labelcode0_checked[subquestion.title][ld]|raw }}
                                 />
                                 {# Label visible en mode linéarisé mobile. #}
-                                <label for="answer{{ subquestion.myfname0 }}-{{ ld }}" class="ls-label-xs-visibility" aria-hidden="true">
+                                <label for="answer{{ subquestion.myfid0 }}-{{ ld }}" class="ls-label-xs-visibility" aria-hidden="true">
                                     {{ processString(labelans0[j]) }}
                                 </label>
                             </td>
@@ -153,21 +168,52 @@
                                     type="radio"
                                     name="{{ subquestion.myfname1 }}"
                                     value="{{ ld }}"
-                                    id="answer{{ subquestion.myfname1 }}-{{ ld }}"
+                                    id="answer{{ subquestion.myfid1 }}-{{ ld }}"
                                     aria-labelledby="answer{{ basename }}-s1-{{ ld }} answertext{{ subquestion.myfname }}"
                                     {{ labelcode1_checked[subquestion.title][ld]|raw }}
                                 />
                                 {# Label visible en mode linéarisé mobile. #}
-                                <label for="answer{{ subquestion.myfname1 }}-{{ ld }}" class="ls-label-xs-visibility" aria-hidden="true">
+                                <label for="answer{{ subquestion.myfid1 }}-{{ ld }}" class="ls-label-xs-visibility" aria-hidden="true">
                                     {{ processString(labelans1[j]) }}
                                 </label>
                             </td>
                         {% endfor %}
 
-                        {# No answer option #}
+                        {# No answer : un radio par échelle, value="" (état
+                           « non répondu »). Le core 6.16.16 masque celui de
+                           l'échelle 1 derrière ls-js-hidden ; on les rend
+                           tous les deux visibles (RGAA — l'utilisateur doit
+                           pouvoir annuler son choix sur chaque échelle). #}
                         {% if shownoanswer %}
-                            <td class="answer-item noanswer-item">
-                                {# No answer is handled by JavaScript #}
+                            <td class="answer-item radio-item noanswer-item" headers="answertext{{ subquestion.myfname }} noanswer-header-{{ basename }}">
+                                <div class="dualscale-noanswer">
+                                    <input
+                                        type="radio"
+                                        name="{{ subquestion.myfname0 }}"
+                                        value=""
+                                        id="answer{{ subquestion.myfid0 }}-"
+                                        aria-label="{{ gT("No answer") }}{% if leftheader %} — {{ processString(leftheader)|striptags }}{% endif %}"
+                                        {{ subquestion.myfname0_notset|raw }}
+                                    />
+                                    <label for="answer{{ subquestion.myfid0 }}-" class="ls-label-xs-visibility" aria-hidden="true">
+                                        {{ gT("No answer") }}
+                                    </label>
+                                </div>
+                                {% if labelcode1 is not empty %}
+                                    <div class="dualscale-noanswer">
+                                        <input
+                                            type="radio"
+                                            name="{{ subquestion.myfname1 }}"
+                                            value=""
+                                            id="answer{{ subquestion.myfid1 }}-"
+                                            aria-label="{{ gT("No answer") }}{% if rightheader %} — {{ processString(rightheader)|striptags }}{% endif %}"
+                                            {{ subquestion.myfname1_notset|raw }}
+                                        />
+                                        <label for="answer{{ subquestion.myfid1 }}-" class="ls-label-xs-visibility" aria-hidden="true">
+                                            {{ gT("No answer") }}
+                                        </label>
+                                    </div>
+                                {% endif %}
                             </td>
                         {% endif %}
 
@@ -179,17 +225,6 @@
                         {% endif %}
                     </tr>
 
-                    {# Hidden fields for expression manager #}
-                    {{ C.Html.hiddenField("java"~subquestion.myfname0, subquestion.sessionfname0, ({
-                        'id': "java"~subquestion.myfname0,
-                        'disabled': true
-                    })) }}
-                    {% if labelcode1 is not empty %}
-                        {{ C.Html.hiddenField("java"~subquestion.myfname1, subquestion.sessionfname1, ({
-                            'id': "java"~subquestion.myfname1,
-                            'disabled': true
-                        })) }}
-                    {% endif %}
                 {% endfor %}
             </tbody>
         </table>
