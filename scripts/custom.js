@@ -1915,7 +1915,11 @@
       } else if (message.classList.contains("ls-em-success") || message.classList.contains("ls-em-tip")) {
         messageType = "info";
       }
-      message.classList.add("fr-message", "fr-message--" + messageType);
+      const dsfrMessage = document.createElement("p");
+      dsfrMessage.className = `fr-message fr-message--${messageType}`;
+      dsfrMessage.textContent = message.textContent.trim();
+      dsfrMessage.id = message.id ? `${message.id}-dsfr` : "";
+      message.replaceWith(dsfrMessage);
     });
   }
 
