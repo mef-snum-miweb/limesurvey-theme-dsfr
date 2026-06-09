@@ -1886,7 +1886,7 @@
   }
 
   // modules/theme-dsfr/src/dropdowns/combobox.js
-  var ACTIVE_SELECTOR = "select.list-question-select, select.dsfr-input[data-width]";
+  var ACTIVE_SELECTOR = "select.list-question-select, select[data-width]";
   var UPGRADED_FLAG = "data-dsfr-combobox";
   var comboboxCounter = 0;
   var globalClickHandler = null;
