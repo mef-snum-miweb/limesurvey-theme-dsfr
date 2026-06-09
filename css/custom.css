@@ -779,6 +779,14 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
     display: block;
 }
 
+/* Masquage JS du core LimeSurvey. Cette classe était fournie par
+   template-core.css, retiré via <remove> dans config.xml : sans cette
+   redéfinition, l'alerte RGPD #datasecurity_error (privacy_text.twig)
+   et d'autres éléments restent visibles en permanence. */
+.ls-js-hidden {
+    display: none !important;
+}
+
 .ls-js-hidden-sr {
     position: absolute;
     width: 1px;
