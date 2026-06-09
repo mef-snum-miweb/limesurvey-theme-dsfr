@@ -5,6 +5,51 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/). L'historique antérieur à
 `1.4.0` est consultable via les tags Git (`git tag`) et les *releases* GitHub.
 
+## [1.10.0] — 2026-06-10
+
+Release de l'**épic P2 — options, backoffice & documentation** (#40),
+qui clôt le plan d'action de la [revue du 2026-06-09](docs/REVUE-2026-06-09.md).
+
+### Ajouté
+
+- Options `showpopups`, `container`, `questionhelptextposition` re-déclarées
+  (consommées mais commentées → comportement figé invisible dans l'admin) ;
+  défauts = comportement effectif actuel. `compatibility` 7.0. _Closes #32._
+
+### Corrigé
+
+- `show_footer_links` enfin consommée (masque la barre de liens du footer) ;
+  `showclearall` gate réellement le bouton « Tout effacer » (défaut off) ;
+  `brandlogofile` dépend de `brandlogo`. _Closes #32._
+- `main.twig` : commentaire Twig mal fermé. _Closes #34._
+
+### Modifié
+
+- `css/icons-system.min.css` supprimé (jamais chargé, sous-ensemble redondant
+  de `icons.min.css`). _Closes #32._
+- Derniers fichiers Twig morts purgés (`date/answer.twig`,
+  `upload/answer.twig`, `listradio_with_comment/`,
+  `multiplenumeric/rows/answer_row.twig`, `arrays/increase_same_decrease/`).
+  _Closes #34._
+
+### Annulé
+
+- La transformation « sur place » des messages EM (1.8.0, #29) est revenue au
+  remplacement avec id suffixé `-dsfr` : conserver l'id `vmsg_*` réactivait le
+  marquage `input-error` du core sur les multi-textes obligatoires dès la page
+  vierge (diagnostic par bisect E2E). Le sujet de fond est retracé dans #42.
+
+### Documentation
+
+- Politiques RGPD token/register, attributs DD/DP, opt-out POST : vérifiés
+  **absents du vanilla 6.16.16 déployé** (features master-only) — le thème est
+  iso-fonctionnel avec sa version cible ; portage tracé dans la check-list de
+  montée de version du README. `hideMultipleColumn` documenté sans objet
+  (grille CSS unique). _Closes #33._
+- THEME_COVERAGE honnête sur les fallbacks core assumés ; THEME_OPTIONS :
+  11 options manquantes documentées, défaut `brandlogo` corrigé, section
+  Traductions rectifiée. _Closes #34._
+
 ## [1.9.0] — 2026-06-10
 
 Release de l'**épic P2 — dette CSS** (#39).
