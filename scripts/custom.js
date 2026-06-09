@@ -2694,6 +2694,20 @@
           otherInput.value = hiddenInput.value;
         }
       }
+      document.querySelectorAll('input[type="radio"][name="' + name + '"]').forEach(function(sibling) {
+        if (sibling.dataset.dsfrOtherClear) {
+          return;
+        }
+        sibling.dataset.dsfrOtherClear = "1";
+        sibling.addEventListener("change", function() {
+          if (this.checked && this.value !== "-oth-") {
+            otherInput.value = "";
+            if (hiddenInput) {
+              hiddenInput.value = "";
+            }
+          }
+        });
+      });
     });
   }
 
