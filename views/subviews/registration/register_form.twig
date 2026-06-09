@@ -21,7 +21,7 @@
 
     {{aSurveyInfo.registerform.hiddeninputs}}
 
-    <div class='{{ aSurveyInfo.class.registerformcol }} fr-col-lg-8 fr-col-offset-2--lg' {{ aSurveyInfo.attr.registerformcol }}>
+    <div class='{{ aSurveyInfo.class.registerformcol }} fr-col-lg-8 fr-col-offset-lg-2' {{ aSurveyInfo.attr.registerformcol }}>
         <div class="ls-js-hidden fr-mb-3w">
             {{ include('./subviews/navigation/language_changer.twig') }}
         </div>
@@ -92,7 +92,7 @@
 
         {# If there is additional form parts, a.e. trhough a plugin render it out here #}
     </div>
-    <div class='{{ aSurveyInfo.class.registerformcoladdidtions }} fr-col-lg-8 fr-col-offset-2--lg' {{ aSurveyInfo.attr.registerformcoladdidtions }}>
+    <div class='{{ aSurveyInfo.class.registerformcoladdidtions }} fr-col-lg-8 fr-col-offset-lg-2' {{ aSurveyInfo.attr.registerformcoladdidtions }}>
         {{ aSurveyInfo.formAdditions | raw  }}
     </div>
 

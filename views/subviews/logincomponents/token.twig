@@ -5,7 +5,7 @@
     {% endblock %}
 
     {% block description %}
-        <div class="fr-col-lg-8 fr-col-offset-2--lg">
+        <div class="fr-col-lg-8 fr-col-offset-lg-2">
             <p class='{{ aSurveyInfo.class.maincoldivdivbp }} text-info' {{ aSurveyInfo.attr.maincoldivdivbp }}>
                 {% if aSurveyInfo.aForm.token == null %}
                     {{ gT("If you have been issued an access code, please enter it in the box below and click continue.") }}
@@ -18,7 +18,7 @@
 
 
     {% block formcontent %}
-        <div class="fr-col-lg-8 fr-col-offset-2--lg">
+        <div class="fr-col-lg-8 fr-col-offset-lg-2">
             <div class='fr-input-group {{ aSurveyInfo.class.maincolform }} fr-mb-3w{% if aSurveyInfo.aForm.aEnterErrors is defined and aSurveyInfo.aForm.aEnterErrors is not empty %} fr-input-group--error{% endif %}' {{ aSurveyInfo.attr.maincolform }}>
                 <label class='{{ aSurveyInfo.class.maincolformlabel }} fr-label' {{ aSurveyInfo.attr.maincolformlabel }} for='token'>
                     {{ gT("Access code:") }}
