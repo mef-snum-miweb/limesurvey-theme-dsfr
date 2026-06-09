@@ -92,6 +92,13 @@ le thème est strictement aligné (`{name}other`, `{fileid}_filecount`, `javatbd
 > version cible — sans adaptation du thème, **le texte « autre » et le compteur
 > d'upload ne seraient plus enregistrés**. Recommandation : épingler le tag Docker sur
 > une version vérifiée (ex. `martialblog/limesurvey:6.16-apache`) plutôt que `6-apache`.
+>
+> À la montée de version, porter aussi les fonctionnalités **introduites après 6.16.16**
+> (absentes du thème comme du vanilla 6.16.16, vérifié dans le conteneur) :
+> politique de confidentialité sur les pages code d'accès et inscription
+> (`showtokenpolicy`/`showregisterpolicy` + partials `token_privacy`/`register_privacy`),
+> attributs d'inscription typés liste/date (`DD`/`DP`), confirmation d'opt-out en POST
+> (`optin_post_link`).
 
 ## Mise à jour
 

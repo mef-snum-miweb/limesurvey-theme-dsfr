@@ -64,7 +64,15 @@
     window.basicThemeScripts.init = function() {
     };
 
-    // Méthode initGlobal requise par LimeSurvey
+    // Méthode initGlobal requise par LimeSurvey.
+    // Volontairement vide : le vanilla y appelle
+    // templateCore.hideQuestionWithRelevanceSubQuestion() — réimplémenté
+    // dans src/relevance/relevance-jquery.js — et
+    // templateCore.hideMultipleColumn(), qui masque une COLONNE (ul
+    // .list-unstyled) de choix multiple quand tous ses items sont cachés
+    // par relevance. Sans objet ici : le thème DSFR rend les choix
+    // multiples dans UNE grille CSS (ls-columns), pas en listes par
+    // colonne — chaque item masqué l'est individuellement (revue 2026-06, #33).
     window.basicThemeScripts.initGlobal = function() {
     };
 
