@@ -17,16 +17,18 @@
 
 <!-- Array by column - DSFR -->
 <div class="ls-table-wrapper" role="group" aria-labelledby="ls-question-text-{{ basename }}">
-    <div class="fr-table fr-table--bordered" data-fr-js-table="true">
-        <table class="{{ coreClass }}" data-fr-js-table-element="true" aria-label="{{ t.response_matrix_column|default('Matrice de réponses par colonne') }}">
+    <div class="fr-table fr-table--bordered">
+    <div class="fr-table__wrapper">
+        <div class="fr-table__container">
+            <div class="fr-table__content">
+        <table class="{{ coreClass }}">
+                    <caption class="fr-sr-only">{{ t.response_matrix_column|default('Matrice de réponses par colonne') }}</caption>
         <colgroup>
             <col class="col-answers" style="width: {{ answerwidth }}%;" />
             {% for i, question in aQuestions %}
                 <col
                     class="answers-list radio-list {% if i % 2 %}ls-odd{% else %}ls-even{% endif %} dsfr-answers"
                     style="width: {{ cellwidth }}%;"
-                    role="radiogroup"
-                    aria-labelledby="answertext{{ question.myfname }}"
                 >
             {% endfor %}
         </colgroup>
@@ -73,6 +75,9 @@
             {% endfor %}
         </tbody>
         </table>
+            </div>
+        </div>
+    </div>
     </div>
 </div>
 

@@ -19,8 +19,12 @@
 
 <!-- Array Multi-Flexi (Type :) - DSFR -->
 <div role="group" aria-labelledby="ls-question-text-{{ basename }}">
-    <div class="fr-table fr-table--bordered" data-fr-js-table="true">
-        <table class="{{ coreClass }} {{ extraclass }}" style="table-layout: fixed;" aria-label="{{ t.multiflexi_matrix|default('Matrice de réponses multi-flexible') }}">
+    <div class="fr-table fr-table--bordered">
+    <div class="fr-table__wrapper">
+        <div class="fr-table__container">
+            <div class="fr-table__content">
+        <table class="{{ coreClass }} {{ extraclass }}" style="table-layout: fixed;">
+                    <caption class="fr-sr-only">{{ t.multiflexi_matrix|default('Matrice de réponses multi-flexible') }}</caption>
             <colgroup class="col-responses">
                 <!-- Column for answer label -->
                 <col class="answertext" style="width: {{ answerwidth }}%;" />
@@ -57,6 +61,9 @@
                 {{ sAnswerRows|raw }}
             </tbody>
         </table>
+            </div>
+        </div>
+    </div>
     </div>
 </div>
 <!-- end of Array Multi-Flexi -->

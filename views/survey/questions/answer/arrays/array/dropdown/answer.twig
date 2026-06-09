@@ -14,7 +14,11 @@
 <!-- Array Dropdown - DSFR -->
 <!-- answer -->
 <div class="fr-table fr-table--bordered" role="group" aria-labelledby="ls-question-text-{{ basename }}">
-    <table class="{{ coreClass }}" aria-label="{{ t.response_matrix|default('Matrice de réponses') }}">
+    <div class="fr-table__wrapper">
+        <div class="fr-table__container">
+            <div class="fr-table__content">
+    <table class="{{ coreClass }}">
+                    <caption class="fr-sr-only">{{ t.response_matrix|default('Matrice de réponses') }}</caption>
         {# Largeurs configurées en backoffice (answer_width / columns_width). #}
         <colgroup class="col-responses">
             <col class="col-answers" style='width: {{ answerwidth }}%;' />
@@ -29,5 +33,8 @@
             {% endfor %}
         </tbody>
     </table>
+            </div>
+        </div>
+    </div>
 </div>
 <!-- end of answer -->

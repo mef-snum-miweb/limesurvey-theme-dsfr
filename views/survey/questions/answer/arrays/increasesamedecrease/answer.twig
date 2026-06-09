@@ -17,8 +17,12 @@
 
 <!-- Array Increase/Same/Decrease (Type E) - DSFR -->
 <div class="ls-table-wrapper array-increase-same-decrease" role="group" aria-labelledby="ls-question-text-{{ basename }}">
-    <div class="fr-table fr-table--bordered" data-fr-js-table="true">
-        <table class="{{ coreClass }} array-isd-table" data-fr-js-table-element="true" aria-label="{{ t.increase_same_decrease_matrix|default('Matrice Augmentation/Identique/Diminution') }}">
+    <div class="fr-table fr-table--bordered">
+    <div class="fr-table__wrapper">
+        <div class="fr-table__container">
+            <div class="fr-table__content">
+        <table class="{{ coreClass }} array-isd-table">
+                    <caption class="fr-sr-only">{{ t.increase_same_decrease_matrix|default('Matrice Augmentation/Identique/Diminution') }}</caption>
             <colgroup class="col-responses">
                 <col class="col-answers" style="width: {{ answerwidth }}%;" />
                 {{ sColumns|raw }}
@@ -39,6 +43,9 @@
                 {{ sRows|raw }}
             </tbody>
         </table>
+            </div>
+        </div>
+    </div>
     </div>
 </div>
 <!-- end of Array Increase/Same/Decrease - DSFR -->

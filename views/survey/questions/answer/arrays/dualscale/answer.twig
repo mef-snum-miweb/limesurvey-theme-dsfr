@@ -28,8 +28,11 @@
 
 <!-- Array Dual Scale (Type 1) - DSFR -->
 <div role="group" aria-labelledby="ls-question-text-{{ basename }}">
-    <div class="fr-table fr-table--bordered" data-fr-js-table="true">
-        <table class="{{ coreClass }}" aria-label="{{ t.dual_scale_matrix|default('Matrice de réponses à double échelle') }}">
+    <div class="fr-table fr-table--bordered">
+    <div class="fr-table__wrapper">
+        <div class="fr-table__container">
+            <div class="fr-table__content">
+        <table class="{{ coreClass }}">
             <caption class="fr-sr-only">
                 Tableau de {{ aSubQuestions|length }} sous-questions avec deux échelles de réponse
                 {%- if leftheader and rightheader -%}
@@ -228,6 +231,9 @@
                 {% endfor %}
             </tbody>
         </table>
+            </div>
+        </div>
+    </div>
     </div>
 </div>
 
