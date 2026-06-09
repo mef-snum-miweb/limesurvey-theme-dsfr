@@ -2547,6 +2547,112 @@
     document.querySelectorAll('input[type="range"][data-ls-slider]').forEach(initOneSlider);
   }
 
+  // modules/theme-dsfr/src/inputs/date-native.js
+  var TOKENS = ["YYYY", "MM", "DD", "HH", "mm", "ss"];
+  var TOKEN_PATTERN = "(\\d{1,4})";
+  function tokenizeFormat(fmt) {
+    const parts = [];
+    for (let i = 0; i < fmt.length; ) {
+      const token = TOKENS.find((t) => fmt.startsWith(t, i));
+      if (token) {
+        parts.push({ token });
+        i += token.length;
+      } else {
+        parts.push({ literal: fmt[i] });
+        i += 1;
+      }
+    }
+    return parts;
+  }
+  function parseDisplayValue(value, fmt) {
+    const parts = tokenizeFormat(fmt);
+    const order = [];
+    let re = "^\\s*";
+    parts.forEach((p) => {
+      if (p.token) {
+        order.push(p.token);
+        re += TOKEN_PATTERN;
+      } else {
+        re += "\\" + p.literal;
+      }
+    });
+    re += "\\s*$";
+    const m = value.match(new RegExp(re));
+    if (!m) {
+      return null;
+    }
+    const comp = { YYYY: "", MM: "01", DD: "01", HH: "00", mm: "00", ss: "00" };
+    order.forEach((token, idx) => {
+      comp[token] = m[idx + 1].padStart(token === "YYYY" ? 4 : 2, "0");
+    });
+    return comp.YYYY ? comp : null;
+  }
+  function formatDisplayValue(comp, fmt) {
+    return tokenizeFormat(fmt).map((p) => p.token ? comp[p.token] : p.literal).join("");
+  }
+  function parseNativeValue(value) {
+    const m = value.match(/^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+    if (!m) {
+      return null;
+    }
+    return { YYYY: m[1], MM: m[2], DD: m[3], HH: m[4] || "00", mm: m[5] || "00", ss: m[6] || "00" };
+  }
+  function formatNativeValue(comp, withTime) {
+    const date = comp.YYYY + "-" + comp.MM + "-" + comp.DD;
+    return withTime ? date + "T" + comp.HH + ":" + comp.mm : date;
+  }
+  function notifyExpressionManager2(answerField) {
+    if (typeof window.$ !== "undefined") {
+      window.$(answerField).trigger("change");
+    }
+    if (typeof window.checkconditions === "function") {
+      window.checkconditions(answerField.value, answerField.name, "text");
+    }
+  }
+  function initOneDateInput(native) {
+    if (native.dataset.lsDateInit) {
+      return;
+    }
+    native.dataset.lsDateInit = "1";
+    const name = native.dataset.lsDate;
+    const fmt = native.dataset.format || "YYYY-MM-DD";
+    const withTime = native.type === "datetime-local";
+    const answerField = document.getElementById("answer" + name);
+    if (!answerField) {
+      return;
+    }
+    if (answerField.value) {
+      const comp = parseDisplayValue(answerField.value, fmt);
+      if (comp) {
+        native.value = formatNativeValue(comp, withTime);
+      }
+    }
+    native.addEventListener("change", () => {
+      if (native.value === "") {
+        answerField.value = "";
+      } else {
+        const comp = parseNativeValue(native.value);
+        if (comp) {
+          answerField.value = formatDisplayValue(comp, fmt);
+        }
+      }
+      notifyExpressionManager2(answerField);
+    });
+    answerField.addEventListener("change", () => {
+      if (answerField.value === "") {
+        native.value = "";
+        return;
+      }
+      const comp = parseDisplayValue(answerField.value, fmt);
+      if (comp) {
+        native.value = formatNativeValue(comp, withTime);
+      }
+    });
+  }
+  function initNativeDateInputs() {
+    document.querySelectorAll("input[data-ls-date]").forEach(initOneDateInput);
+  }
+
   // modules/theme-dsfr/src/inputs/radio-buttons.js
   function initBootstrapButtonsRadio() {
     const radioGroups = document.querySelectorAll('.radio-list[data-bs-toggle="buttons"]');
@@ -3159,6 +3265,7 @@
     safeInit(initBootstrapButtonsRadio);
     safeInit(initRadioOtherField);
     safeInit(initNativeSliders);
+    safeInit(initNativeDateInputs);
     safeInit(initCaptchaReload);
     safeInit(initCaptchaValidation);
     safeInit(initAllRankingQuestions);
@@ -3196,6 +3303,7 @@
     safeInit(initBootstrapButtonsRadio);
     safeInit(initRadioOtherField);
     safeInit(initNativeSliders);
+    safeInit(initNativeDateInputs);
     safeInit(initCaptchaReload);
     safeInit(initCaptchaValidation);
     setTimeout(() => safeInit(initAllRankingQuestions), 300);
@@ -3208,6 +3316,7 @@
     safeInit(initSearchableDropdowns);
     safeInit(initStepperProgress);
     safeInit(initNativeSliders);
+    safeInit(initNativeDateInputs);
     setTimeout(() => safeInit(createErrorSummary), 200);
   });
   var dropdownResizeTimer;

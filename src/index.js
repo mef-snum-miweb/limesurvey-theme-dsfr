@@ -38,6 +38,7 @@ import {
 } from './a11y/conditional-aria.js';
 import { initMultipleShortText } from './inputs/input-on-demand.js';
 import { initNativeSliders } from './inputs/slider-native.js';
+import { initNativeDateInputs } from './inputs/date-native.js';
 import { initBootstrapButtonsRadio, initRadioOtherField } from './inputs/radio-buttons.js';
 import { initCaptchaReload, initCaptchaValidation } from './captcha/captcha.js';
 import { initAllRankingQuestions } from './ranking/ranking.js';
@@ -117,6 +118,7 @@ onReady(() => {
     safeInit(initBootstrapButtonsRadio);
     safeInit(initRadioOtherField);
     safeInit(initNativeSliders);
+    safeInit(initNativeDateInputs);
     safeInit(initCaptchaReload);
     safeInit(initCaptchaValidation);
 
@@ -168,6 +170,7 @@ onQuestionsLoaded(() => {
     safeInit(initBootstrapButtonsRadio);
     safeInit(initRadioOtherField);
     safeInit(initNativeSliders);
+    safeInit(initNativeDateInputs);
     safeInit(initCaptchaReload);
     safeInit(initCaptchaValidation);
 
@@ -188,6 +191,7 @@ onPjax(() => {
     safeInit(initSearchableDropdowns);
     safeInit(initStepperProgress);
     safeInit(initNativeSliders);
+    safeInit(initNativeDateInputs);
     // Si la page pjax répond avec des erreurs de validation côté serveur,
     // le résumé doit être (re)construit — à l'identique des branches onReady
     // et onQuestionsLoaded.
