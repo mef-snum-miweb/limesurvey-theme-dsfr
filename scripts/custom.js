@@ -361,9 +361,17 @@
   // modules/theme-dsfr/src/validation/required-fields.js
   function handleRequiredFields() {
     const requiredFields = document.querySelectorAll('input[required], textarea[required], select[required], input[aria-required="true"], textarea[aria-required="true"], select[aria-required="true"]');
-    const mandatoryQuestions = document.querySelectorAll('.mandatory.question-container, .mandatory[id^="question"], .question-container:has(.mandatory-question)');
+    const mandatoryQuestions = new Set(
+      document.querySelectorAll('.mandatory.question-container, .mandatory[id^="question"]')
+    );
+    document.querySelectorAll(".mandatory-question").forEach((el) => {
+      const container = el.closest(".question-container");
+      if (container) {
+        mandatoryQuestions.add(container);
+      }
+    });
     const mandatoryBadges = document.querySelectorAll('.fr-badge[aria-label*="Mandatory"], .fr-badge[aria-label*="Obligatoire"]');
-    if (requiredFields.length === 0 && mandatoryQuestions.length === 0 && mandatoryBadges.length === 0) {
+    if (requiredFields.length === 0 && mandatoryQuestions.size === 0 && mandatoryBadges.length === 0) {
       return;
     }
     requiredFields.forEach((field) => {
@@ -3033,94 +3041,103 @@
   }
 
   // modules/theme-dsfr/src/index.js
+  function safeInit(fn) {
+    try {
+      fn();
+    } catch (e) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn('[DSFR] init "' + (fn.name || "anonyme") + '" en échec :', e);
+      }
+    }
+  }
   registerRelevanceGlobals(window);
   window.DSFRSanitizeRTEContent = sanitizeRTEContent;
   onReady(() => {
-    sanitizeRTEContent();
-    enableImageLazyLoading();
-    extendDescribedByForValidationTips();
-    addInputmodeNumericToNumericFields();
-    reorderListRadioNoAnswer();
-    fixTableAccessibility();
-    handleRequiredFields();
-    transformErrorsToDsfr();
-    handleMultipleShortTextErrors();
-    observeErrorChanges();
-    initAriaInvalidSync();
-    initNumericValidation();
-    handleArrayValidation();
-    handleNumericMultiValidation();
-    handleSimpleQuestionValidation();
-    transformValidationMessages();
-    setTimeout(transformValidationMessages, 100);
-    setTimeout(observeNumericMultiSumValidation, 200);
-    setTimeout(createErrorSummary, 100);
-    fixDropdownArrayInlineStyles();
-    setupStyleObserver();
-    initSearchableDropdowns();
-    initStepperProgress();
-    initConditionalQuestionsAria();
-    setupConditionalQuestionsObserver();
-    initConditionalVisibilityNotifier();
-    excludeIrrelevantInputsFromTabOrder();
-    initMultipleShortText();
-    initBootstrapButtonsRadio();
-    initRadioOtherField();
-    initCaptchaReload();
-    initCaptchaValidation();
-    initAllRankingQuestions();
-    setTimeout(initRelevanceHandlers, 100);
+    safeInit(sanitizeRTEContent);
+    safeInit(enableImageLazyLoading);
+    safeInit(extendDescribedByForValidationTips);
+    safeInit(addInputmodeNumericToNumericFields);
+    safeInit(reorderListRadioNoAnswer);
+    safeInit(fixTableAccessibility);
+    safeInit(handleRequiredFields);
+    safeInit(transformErrorsToDsfr);
+    safeInit(handleMultipleShortTextErrors);
+    safeInit(observeErrorChanges);
+    safeInit(initAriaInvalidSync);
+    safeInit(initNumericValidation);
+    safeInit(handleArrayValidation);
+    safeInit(handleNumericMultiValidation);
+    safeInit(handleSimpleQuestionValidation);
+    safeInit(transformValidationMessages);
+    setTimeout(() => safeInit(transformValidationMessages), 100);
+    setTimeout(() => safeInit(observeNumericMultiSumValidation), 200);
+    setTimeout(() => safeInit(createErrorSummary), 100);
+    safeInit(fixDropdownArrayInlineStyles);
+    safeInit(setupStyleObserver);
+    safeInit(initSearchableDropdowns);
+    safeInit(initStepperProgress);
+    safeInit(initConditionalQuestionsAria);
+    safeInit(setupConditionalQuestionsObserver);
+    safeInit(initConditionalVisibilityNotifier);
+    safeInit(excludeIrrelevantInputsFromTabOrder);
+    safeInit(initMultipleShortText);
+    safeInit(initBootstrapButtonsRadio);
+    safeInit(initRadioOtherField);
+    safeInit(initCaptchaReload);
+    safeInit(initCaptchaValidation);
+    safeInit(initAllRankingQuestions);
+    setTimeout(() => safeInit(initRelevanceHandlers), 100);
     const forms = document.querySelectorAll('form#limesurvey, form[name="limesurvey"]');
     forms.forEach((form) => {
       form.addEventListener("submit", () => {
         setTimeout(() => {
-          transformErrorsToDsfr();
-          createErrorSummary();
+          safeInit(transformErrorsToDsfr);
+          safeInit(createErrorSummary);
         }, 500);
       });
     });
   });
   onQuestionsLoaded(() => {
-    enableImageLazyLoading();
-    extendDescribedByForValidationTips();
-    addInputmodeNumericToNumericFields();
-    reorderListRadioNoAnswer();
-    handleRequiredFields();
-    transformErrorsToDsfr();
-    handleMultipleShortTextErrors();
-    initNumericValidation();
-    handleArrayValidation();
-    handleNumericMultiValidation();
-    handleSimpleQuestionValidation();
-    transformValidationMessages();
-    fixDropdownArrayInlineStyles();
-    setupStyleObserver();
-    initSearchableDropdowns();
-    setTimeout(fixTableAccessibility, 200);
-    setTimeout(observeNumericMultiSumValidation, 200);
-    setTimeout(createErrorSummary, 100);
-    initMultipleShortText();
-    initBootstrapButtonsRadio();
-    initRadioOtherField();
-    initCaptchaReload();
-    initCaptchaValidation();
-    setTimeout(initAllRankingQuestions, 300);
-    initRelevanceHandlers();
+    safeInit(enableImageLazyLoading);
+    safeInit(extendDescribedByForValidationTips);
+    safeInit(addInputmodeNumericToNumericFields);
+    safeInit(reorderListRadioNoAnswer);
+    safeInit(handleRequiredFields);
+    safeInit(transformErrorsToDsfr);
+    safeInit(handleMultipleShortTextErrors);
+    safeInit(initNumericValidation);
+    safeInit(handleArrayValidation);
+    safeInit(handleNumericMultiValidation);
+    safeInit(handleSimpleQuestionValidation);
+    safeInit(transformValidationMessages);
+    safeInit(fixDropdownArrayInlineStyles);
+    safeInit(setupStyleObserver);
+    safeInit(initSearchableDropdowns);
+    setTimeout(() => safeInit(fixTableAccessibility), 200);
+    setTimeout(() => safeInit(observeNumericMultiSumValidation), 200);
+    setTimeout(() => safeInit(createErrorSummary), 100);
+    safeInit(initMultipleShortText);
+    safeInit(initBootstrapButtonsRadio);
+    safeInit(initRadioOtherField);
+    safeInit(initCaptchaReload);
+    safeInit(initCaptchaValidation);
+    setTimeout(() => safeInit(initAllRankingQuestions), 300);
+    safeInit(initRelevanceHandlers);
   });
   onPjax(() => {
-    setTimeout(sanitizeRTEContent, 100);
-    setTimeout(initAllRankingQuestions, 300);
-    initRelevanceHandlers();
-    initSearchableDropdowns();
-    initStepperProgress();
-    setTimeout(createErrorSummary, 200);
+    setTimeout(() => safeInit(sanitizeRTEContent), 100);
+    setTimeout(() => safeInit(initAllRankingQuestions), 300);
+    safeInit(initRelevanceHandlers);
+    safeInit(initSearchableDropdowns);
+    safeInit(initStepperProgress);
+    setTimeout(() => safeInit(createErrorSummary), 200);
   });
   var dropdownResizeTimer;
   window.addEventListener("resize", () => {
     clearTimeout(dropdownResizeTimer);
     dropdownResizeTimer = setTimeout(() => {
-      fixDropdownArrayInlineStyles();
-      setupStyleObserver();
+      safeInit(fixDropdownArrayInlineStyles);
+      safeInit(setupStyleObserver);
     }, 250);
   });
 })();
