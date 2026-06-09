@@ -11,7 +11,9 @@
         <table class="{{ coreClass }}" data-fr-js-table-element="true" aria-label="{{ t.response_matrix|default('Matrice de réponses') }}">
         <colgroup class="col-responses">
             <col class="col-answers" style='width: {{ answerwidth }}%;' />
-            {{ sColumns }}
+            {% for aColumn in aColumns %}
+                <col class="{{ aColumn.class }}" style='width: {{ aColumn.cellwidth }}%'/>
+            {% endfor %}
         </colgroup>
 
         <thead>
@@ -21,12 +23,19 @@
         </thead>
 
         <tbody>
+            {% if anscount == 0 %}
+                <tr>
+                    <th class="answertext">
+                        {{ gT('Error: This question has no answers.') }}
+                    </th>
+                </tr>
+            {% endif %}
+            {# Chaque ligne porte son template (answer_row OU repeat_header
+               quand l'attribut « Répéter les en-têtes » est actif) : il faut
+               inclure aRow.template comme le core — forcer answer_row rendait
+               les lignes repeat_header comme des answer_rows corrompues. #}
             {% for aRow in aRows %}
-                {% if aRow.template is defined %}
-                    {{ doRender('/survey/questions/answer/arrays/array/no_dropdown/rows/answer_row', aRow.content, true) }}
-                {% else %}
-                    {{ aRow }}
-                {% endif %}
+                {% include aRow.template with aRow.content %}
             {% endfor %}
         </tbody>
         </table>
