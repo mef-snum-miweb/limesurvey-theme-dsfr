@@ -61,7 +61,7 @@ body > article {
 }
 
 /* Navigation responsive */
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
     .lsd-text-right {
         text-align: center;
         margin-top: 1rem;
@@ -130,7 +130,7 @@ html, body {
 
 /* Mobile (< 768px) : rendre les séparateurs de groupe visibles et les styler
    comme des en-têtes de section (bold, border-top, fond). */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     table .ls-xs-only.dualscale-scale-header {
         display: block !important;
         width: 100% !important;
@@ -521,7 +521,7 @@ table td input[type="checkbox"] {
 
 /* Drag handle icon */
 .selector__dragHandle {
-    color: #666;
+    color: var(--text-mention-grey);
     opacity: 0.5;
     transition: opacity 0.2s ease;
 }
@@ -767,7 +767,7 @@ table td input[type="checkbox"] {
 }
 
 /* Responsive : boutons en colonne sur mobile */
-@media (max-width: 576px) {
+@media (max-width: 575.98px) {
     .fr-alert .fr-btns-group {
         flex-direction: column;
     }
@@ -1290,9 +1290,9 @@ table th > input[type="radio"]:checked,
 td.answer-item input[type="radio"]:checked,
 td.radio-item input[type="radio"]:checked,
 .dsfr-radio-table:checked {
-    border-color: #000091 !important;
-    background-color: #000091 !important;
-    box-shadow: inset 0 0 0 5px #FFF !important;
+    border-color: var(--border-action-high-blue-france) !important;
+    background-color: var(--background-action-high-blue-france) !important;
+    box-shadow: inset 0 0 0 5px var(--background-default-grey) !important;
 }
 
 table td > input[type="radio"]:checked:hover,
@@ -1300,8 +1300,8 @@ table th > input[type="radio"]:checked:hover,
 td.answer-item input[type="radio"]:checked:hover,
 td.radio-item input[type="radio"]:checked:hover,
 .dsfr-radio-table:checked:hover {
-    background-color: #1212FF !important;
-    border-color: #1212FF !important;
+    background-color: var(--background-action-high-blue-france-hover) !important;
+    border-color: var(--background-action-high-blue-france-hover) !important;
 }
 
 /* Centrage dans les cellules de tableau */
@@ -1339,7 +1339,7 @@ td.answer-item.radio-item {
  * où les règles DSFR écrasaient la linéarisation mobile.
  */
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     /* ============================================
        LINÉARISATION TABLEAUX EN VUE MOBILE
        Force l'affichage en cartes verticales
@@ -1817,7 +1817,7 @@ select.fr-select:focus,
 }
 
 /* Responsive: une seule colonne sur mobile */
-@media (max-width: 576px) {
+@media (max-width: 575.98px) {
     .ls-columns,
     .ls-columns-2,
     .ls-columns-3,
@@ -1828,7 +1828,7 @@ select.fr-select:focus,
 }
 
 /* Tablette: maximum 2 colonnes */
-@media (min-width: 577px) and (max-width: 768px) {
+@media (min-width: 576px) and (max-width: 767.98px) {
     .ls-columns-3,
     .ls-columns-4,
     .ls-columns-5 {
@@ -1938,7 +1938,7 @@ select.fr-select:focus,
 }
 
 /* Responsive - pleine largeur sur mobile */
-@media (max-width: 576px) {
+@media (max-width: 575.98px) {
     .bootstrap-buttons-div {
         flex: 0 0 100%;
         max-width: 100%;
@@ -2120,7 +2120,7 @@ table.fr-table--bordered {
    BORDURES TABLEAUX LINÉARISÉS MOBILE
    Cohérence visuelle : 4 bordures sur chaque carte (au lieu de partielles).
    ============================================ */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .fr-table table tbody tr,
     .fr-table--bordered table tbody tr,
     div[class*="fr-table"] table tbody tr,
@@ -2471,7 +2471,7 @@ table.fr-table--bordered {
 }
 
 /* Mobile: responsive adjustments for star rating */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     /* Étoiles plus grandes sur mobile pour faciliter le touch */
     .star-rating-container {
         gap: 0.75rem !important;
@@ -2536,7 +2536,7 @@ table.fr-table--bordered {
 }
 
 /* Responsive adjustments for 5-point choice */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     /* Stack radio buttons vertically on mobile */
     .fr-fieldset[data-display-mode] .fr-grid-row {
         flex-direction: column;
@@ -2688,7 +2688,7 @@ li.imageselect-container > input:checked + label.imageselect-radiobutton::after 
     width: 1.5rem;
     height: 1.5rem;
     background: var(--background-action-high-blue-france);
-    color: white;
+    color: var(--text-inverted-blue-france);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -2707,7 +2707,7 @@ li.imageselect-listitem .imageselect-checkbox:checked ~ .imageselect-label::afte
     width: 1.5rem;
     height: 1.5rem;
     background: var(--background-action-high-blue-france);
-    color: white;
+    color: var(--text-inverted-blue-france);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -2804,7 +2804,7 @@ ul.imageselect-list > li.no-anwser-item > label:hover::before {
 }
 
 /* Responsive - images 2 colonnes sur mobile */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     li.imageselect-container {
         flex: 1 1 calc(50% - 0.5rem) !important;
         max-width: calc(50% - 0.5rem) !important;
@@ -2818,7 +2818,7 @@ ul.imageselect-list > li.no-anwser-item > label:hover::before {
 }
 
 /* Responsive - Images sur mobile */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .answer-item img,
     .fr-fieldset__content img,
     .answertext img {
@@ -2933,7 +2933,7 @@ ul.imageselect-list > li.no-anwser-item > label:hover::before {
 }
 
 /* Responsive - colonnes sur mobile */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .bootstrap-buttons-div {
         flex: 1 1 100% !important;
         max-width: 100% !important;

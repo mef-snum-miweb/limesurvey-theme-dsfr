@@ -149,7 +149,9 @@ textarea.form-control:focus,
 }
 
 html {
-    font-size: 16px;
+    /* 100% (= 16px par défaut) : respecte le réglage de taille de police
+       du navigateur (RGAA), contrairement à une valeur en px figée. */
+    font-size: 100%;
     background-color: var(--background-default-grey);
 }
 
@@ -291,7 +293,7 @@ body > article {
 .progress-text {
     margin-top: 0.5rem;
     font-size: 0.875rem;
-    color: #666;
+    color: var(--text-mention-grey);
     text-align: center;
 }
 
@@ -784,7 +786,7 @@ input[type="submit"]:hover {
 }
 
 /* Sur mobile, empiler verticalement */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .ls-input-group {
         flex-direction: column;
         align-items: stretch;
@@ -796,7 +798,7 @@ input[type="submit"]:hover {
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
     .survey-navigation {
         flex-direction: column;
     }
@@ -937,7 +939,7 @@ footer.fr-footer,
    RESPONSIVE
    ============================================ */
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
     body {
         font-size: 0.875rem;
     }
@@ -1113,7 +1115,7 @@ li.ls-group-dynamic {
 }
 
 /* Sur mobile, retirer la marge supplémentaire */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .ls-slider-item-horizontal .fr-range-group {
         margin-right: 0;
     }
@@ -1570,7 +1572,7 @@ table.array-flexible-dual-scale thead th {
     /* DISABLED - Let DSFR thead background-image show through */
     /*     background-color: var(--background-contrast-grey, #f6f6f6); */
     font-weight: 700;
-    color: #161616;
+    color: var(--text-title-grey);
     text-align: center;
 }
 
@@ -1603,7 +1605,7 @@ table.array-flexible-dual-scale thead tr.ls-heading td {
 .ls-table-wrapper table.array-flexible-dual-scale tbody th.answertext,
 table.array-flexible-dual-scale tbody th.answertext {
     font-weight: 700;
-    color: #161616;
+    color: var(--text-title-grey);
 }
 
 /* Cellules avec radio buttons - centrage */
@@ -1633,7 +1635,7 @@ table.array-flexible-dual-scale thead tr.ls-heading.groups th.dsheader {
     /* DISABLED - Let DSFR thead background-image show through */
     /*     background-color: var(--background-contrast-grey, #f6f6f6); */
     font-weight: 700;
-    color: #161616;
+    color: var(--text-title-grey);
     /* DISABLED - Testing global rule (line 1680) - Can be restored if needed */
     /* border-bottom: 2px solid var(--border-default-grey); */
 }
@@ -1758,7 +1760,7 @@ table.array-flexible-dual-scale td.dual_scale_separator {
     padding: 0.5rem;
     border: 1px solid var(--border-default-grey, #ddd);
     border-radius: 0.25rem;
-    background-color: #fff;
+    background-color: var(--background-default-grey);
     font-size: 1rem;
     line-height: 1.5;
 }
@@ -1766,7 +1768,7 @@ table.array-flexible-dual-scale td.dual_scale_separator {
 .ls-table-wrapper table td.dropdown-item select.form-select:focus {
     outline: 2px solid #0a76f6;
     outline-offset: 2px;
-    border-color: #000091;
+    border-color: var(--border-action-high-blue-france);
 }
 /* Full width for ranking items */
 /* Source items styling (same as ranked but clickable) */
@@ -1812,7 +1814,7 @@ button.selector--inputondemand-addlinebutton,
 button.selector--inputondemand-addlinebutton:hover,
 .btn.selector--inputondemand-addlinebutton:hover {
     background-color: var(--background-action-high-blue-france-hover, #1212ff) !important;
-    color: white !important;
+    color: var(--text-inverted-blue-france) !important;
     border-color: var(--background-action-high-blue-france-hover, #1212ff) !important;
     text-decoration: none !important;
 }
@@ -1821,7 +1823,7 @@ button.selector--inputondemand-addlinebutton:hover,
 button.selector--inputondemand-addlinebutton:active,
 .btn.selector--inputondemand-addlinebutton:active {
     background-color: var(--background-action-high-blue-france-active, #2323ff) !important;
-    color: white !important;
+    color: var(--text-inverted-blue-france) !important;
     border-color: var(--background-action-high-blue-france-active, #2323ff) !important;
 }
 
@@ -2009,7 +2011,7 @@ li.selector--inputondemand-list-item label.control-label {
 
 /* Focus visible */
 .bootstrap-buttons-div .btn-check:focus-visible + label.btn {
-    outline: 2px solid #000091;
+    outline: 2px solid #0a76f6;
     outline-offset: 2px;
 }
 
@@ -2028,7 +2030,7 @@ li.selector--inputondemand-list-item label.control-label {
 }
 
 /* Responsive: Ajuster la disposition sur mobile */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .bootstrap-buttons-div {
         margin-bottom: 0.75rem;
     }
@@ -2212,7 +2214,7 @@ li.selector--inputondemand-list-item label.control-label {
         overflow: visible !important;
         resize: none !important;
         padding: 0.1cm !important;
-        border: 1px solid #666 !important;
+        border: 1px solid var(--border-plain-grey) !important;
     }
 
     /* Textarea vide : hauteur d'une ligne */
@@ -2229,7 +2231,7 @@ li.selector--inputondemand-list-item label.control-label {
     .form-control.print-control {
         height: auto !important;
         padding: 0.05cm 0.1cm !important;
-        border: 1px solid #666 !important;
+        border: 1px solid var(--border-plain-grey) !important;
     }
 
     /* Labels et textes de questions */
