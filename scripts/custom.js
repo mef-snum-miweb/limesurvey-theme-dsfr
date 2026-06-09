@@ -724,18 +724,41 @@
       item.remove();
       removed++;
     });
+    let added = 0;
+    const addedLabels = [];
+    const list = summary.querySelector("ul");
+    if (list) {
+      const presentIds = new Set(
+        Array.from(summary.querySelectorAll(".error-item")).map((item) => item.getAttribute("data-question-id"))
+      );
+      Array.from(document.querySelectorAll(ERROR_QUESTION_SELECTOR)).filter(isListableError).forEach((question) => {
+        if (!question.id || presentIds.has(question.id)) return;
+        const error = describeErrorQuestion(question);
+        list.appendChild(buildErrorItem(error));
+        addedLabels.push(error.label.split(" : ")[0]);
+        added++;
+      });
+    }
     const remaining = summary.querySelectorAll(".error-item").length;
     updateHeader(summary, remaining);
-    if (removed > 0) {
-      let msg;
-      if (remaining === 0) {
-        msg = "Toutes les erreurs ont été corrigées. Vous pouvez soumettre le formulaire.";
-      } else if (removed === 1) {
-        msg = correctedLabels[0] + " corrigée. " + (remaining === 1 ? "Il reste 1 erreur." : "Il reste " + remaining + " erreurs.");
-      } else {
-        msg = removed + " erreurs corrigées. " + (remaining === 1 ? "Il reste 1 erreur." : "Il reste " + remaining + " erreurs.");
+    if (removed > 0 || added > 0) {
+      const parts = [];
+      if (removed === 1) {
+        parts.push(correctedLabels[0] + " corrigée.");
+      } else if (removed > 1) {
+        parts.push(removed + " erreurs corrigées.");
       }
-      announceStatus(msg);
+      if (added === 1) {
+        parts.push("Nouvelle erreur : " + addedLabels[0] + ".");
+      } else if (added > 1) {
+        parts.push(added + " nouvelles erreurs.");
+      }
+      if (remaining === 0) {
+        parts.push("Toutes les erreurs ont été corrigées. Vous pouvez soumettre le formulaire.");
+      } else {
+        parts.push(remaining === 1 ? "Il reste 1 erreur." : "Il reste " + remaining + " erreurs.");
+      }
+      announceStatus(parts.join(" "));
     }
   }
 
@@ -848,6 +871,13 @@
             setTimeout(updateErrorSummary, 50);
           }
         } else {
+          if (!counterContainer.isConnected) {
+            if (answersList) {
+              answersList.parentNode.insertBefore(counterContainer, answersList.nextSibling);
+            } else {
+              question.appendChild(counterContainer);
+            }
+          }
           question.classList.add("input-error");
           question.classList.remove("input-valid");
           if (emptyCount === totalFields) {
@@ -969,6 +999,9 @@
             setTimeout(updateErrorSummary, 50);
           }
         } else {
+          if (!counterContainer.isConnected && tableWrapper) {
+            tableWrapper.parentNode.insertBefore(counterContainer, tableWrapper.nextSibling);
+          }
           question.classList.add("input-error");
           question.classList.remove("input-valid");
           if (emptyCount === totalFields) {

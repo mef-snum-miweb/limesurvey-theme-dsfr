@@ -156,6 +156,17 @@ export function handleMultipleShortTextErrors() {
                     setTimeout(updateErrorSummary, 50);
                 }
             } else {
+                // Ré-insérer le compteur s'il avait été retiré (champ re-vidé
+                // après que tout était rempli) — sinon question en erreur sans
+                // message visible ni annonce SR. Même pattern que
+                // handleChoiceArray (array-validation.js).
+                if (!counterContainer.isConnected) {
+                    if (answersList) {
+                        answersList.parentNode.insertBefore(counterContainer, answersList.nextSibling);
+                    } else {
+                        question.appendChild(counterContainer);
+                    }
+                }
                 // Il reste des champs à remplir
                 question.classList.add('input-error');
                 question.classList.remove('input-valid');
