@@ -91,7 +91,6 @@
     if (typeof window.LSThemeOptions === "undefined" || window.LSThemeOptions.sanitize_rte_content !== "on") {
       return;
     }
-    console.log("[DSFR] Nettoyage du contenu RTE...");
     RTE_CONTENT_SELECTORS.forEach((selector) => {
       try {
         const elements = document.querySelectorAll(selector);
@@ -101,7 +100,6 @@
       } catch (e) {
       }
     });
-    console.log("[DSFR] Contenu RTE nettoyé");
   }
 
   // modules/theme-dsfr/src/a11y/lazy-images.js
@@ -1682,26 +1680,20 @@
   }
   function observeNumericMultiSumValidation() {
     var numericMultiQuestions = document.querySelectorAll(".question-container.numeric-multi");
-    console.log("[DSFR SumValidation] Questions numeric-multi trouvées:", numericMultiQuestions.length);
     numericMultiQuestions.forEach(function(question) {
       var totalEl = question.querySelector(".dynamic-total");
-      console.log("[DSFR SumValidation] totalEl:", totalEl ? totalEl.id : "NON TROUVÉ");
       if (!totalEl) return;
       var qId = totalEl.id ? totalEl.id.replace("totalvalue_", "") : null;
-      console.log("[DSFR SumValidation] qId:", qId);
       if (!qId) return;
       var sumRangeMsgId = "vmsg_" + qId + "_sum_range-dsfr";
       var sumRangeMsg = document.getElementById(sumRangeMsgId);
-      console.log("[DSFR SumValidation] sumRangeMsg (" + sumRangeMsgId + "):", sumRangeMsg ? sumRangeMsg.textContent : "NON TROUVÉ");
       if (!sumRangeMsg) {
         sumRangeMsg = document.getElementById("vmsg_" + qId + "_sum_range");
-        console.log("[DSFR SumValidation] fallback vmsg_" + qId + "_sum_range:", sumRangeMsg ? sumRangeMsg.textContent : "NON TROUVÉ");
       }
       if (!sumRangeMsg) return;
       if (totalEl.dataset.dsfrSumObserver) return;
       totalEl.dataset.dsfrSumObserver = "true";
       var rangeMatch = sumRangeMsg.textContent.match(/(\d+)\s+.+\s+(\d+)/);
-      console.log("[DSFR SumValidation] rangeMatch:", rangeMatch);
       if (!rangeMatch) return;
       var minSum = parseFloat(rangeMatch[1]);
       var maxSum = parseFloat(rangeMatch[2]);

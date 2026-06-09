@@ -418,24 +418,19 @@ export function handleNumericMultiValidation() {
 
 export function observeNumericMultiSumValidation() {
     var numericMultiQuestions = document.querySelectorAll('.question-container.numeric-multi');
-    console.log('[DSFR SumValidation] Questions numeric-multi trouvées:', numericMultiQuestions.length);
 
     numericMultiQuestions.forEach(function(question) {
         var totalEl = question.querySelector('.dynamic-total');
-        console.log('[DSFR SumValidation] totalEl:', totalEl ? totalEl.id : 'NON TROUVÉ');
         if (!totalEl) return;
 
         var qId = totalEl.id ? totalEl.id.replace('totalvalue_', '') : null;
-        console.log('[DSFR SumValidation] qId:', qId);
         if (!qId) return;
 
         var sumRangeMsgId = 'vmsg_' + qId + '_sum_range-dsfr';
         var sumRangeMsg = document.getElementById(sumRangeMsgId);
-        console.log('[DSFR SumValidation] sumRangeMsg (' + sumRangeMsgId + '):', sumRangeMsg ? sumRangeMsg.textContent : 'NON TROUVÉ');
         // Aussi chercher sans le suffixe -dsfr (si transformValidationMessages n'a pas encore tourné)
         if (!sumRangeMsg) {
             sumRangeMsg = document.getElementById('vmsg_' + qId + '_sum_range');
-            console.log('[DSFR SumValidation] fallback vmsg_' + qId + '_sum_range:', sumRangeMsg ? sumRangeMsg.textContent : 'NON TROUVÉ');
         }
         if (!sumRangeMsg) return;
 
@@ -444,7 +439,6 @@ export function observeNumericMultiSumValidation() {
 
         // Parser les limites depuis le texte du message (ex: "entre 3 et 10")
         var rangeMatch = sumRangeMsg.textContent.match(/(\d+)\s+.+\s+(\d+)/);
-        console.log('[DSFR SumValidation] rangeMatch:', rangeMatch);
         if (!rangeMatch) return;
         var minSum = parseFloat(rangeMatch[1]);
         var maxSum = parseFloat(rangeMatch[2]);

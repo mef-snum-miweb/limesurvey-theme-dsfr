@@ -1403,44 +1403,4 @@
         }
     }
 
-    // ============================================
-    // GESTION DES ERREURS DE VALIDATION
-    // ============================================
-
-    /**
-     * Retire les classes d'erreur quand l'utilisateur commence à saisir
-     * Utilise la délégation d'événements pour fonctionner avec les éléments dynamiques
-     * MODIFIÉ: Ne retire la classe input-error que s'il ne reste plus de messages d'erreur visibles
-     */
-    $(document).on('input change keyup', '.question-container.input-error input, .question-container.input-error textarea, .question-container.input-error select', function() {
-        const $input = $(this);
-        const $question = $input.closest('.question-container');
-
-        if ($question.length) {
-            // Ignorer les questions de type array (tableaux) - elles ont leur propre gestion dans custom.js
-            if ($question.attr('class').match(/array-/)) {
-                return;
-            }
-
-            // Retirer les classes d'erreur du groupe d'input parent
-            $input.closest('.fr-input-group').removeClass('fr-input-group--error');
-
-            // Cacher le message d'erreur initial
-            $question.find('.ls-question-mandatory-initial').fadeOut(300);
-
-            // Vérifier s'il reste des messages d'erreur visibles
-            setTimeout(function() {
-                const visibleErrors = $question.find('.ls-question-mandatory:visible, .ls-question-mandatory-array:visible').filter(function() {
-                    return $(this).css('display') !== 'none' && $(this).is(':visible');
-                });
-
-                // Ne retirer input-error que s'il n'y a plus d'erreurs visibles
-                if (visibleErrors.length === 0) {
-                    $question.removeClass('input-error fr-input-group--error');
-                }
-            }, 50);
-
-        }
-    });
-
 })();
