@@ -5,6 +5,38 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/). L'historique antérieur à
 `1.4.0` est consultable via les tags Git (`git tag`) et les *releases* GitHub.
 
+## [1.7.0] — 2026-06-10
+
+Release de l'**épic P2 — conformité DSFR des composants** (#37).
+
+### Modifié
+
+- **Pattern d'erreur normatif** : `fr-fieldset--error` posé sur les fieldsets
+  des questions radios/cases en erreur, `fr-input-group--error` cantonné au
+  groupe du champ (plus jamais sur le conteneur de question), message
+  obligatoire en `fr-error-text` + `gT()` (fini FontAwesome/`text-danger`/
+  `role=alert` statique). _Closes #22._
+- **Tableaux** : les 11 templates de matrices passent au markup fr-table
+  1.12+ (`__wrapper`/`__container`/`__content`), caption sr-only généralisée,
+  `data-fr-js-table*` et `role=radiogroup` sur `<tr>`/`<col>` retirés.
+  _Closes #23._
+- **Schéma de thème** : `data-fr-scheme` (light/dark/**system**, nouvelle
+  option) au lieu de `data-fr-theme` calculé ; appliqué aussi aux 3 layouts
+  autonomes (liste publique, erreurs, maintenance) qui n'avaient aucune
+  variante sombre. _Closes #24._
+- **Footer accessibilité** : mention de conformité paramétrable
+  (`rgaa_conformity`), date de déclaration réelle (`rgaa_declaration_date`),
+  lien vers une page dédiée possible (`accessibility_statement_url`).
+  _Closes #24._
+- **Purge Bootstrap/icônes-fontes** : gender/radio en fieldset DSFR,
+  sélecteur de langue en `fr-select-group`, case « tout effacer » en
+  `fr-checkbox-group`, évaluations en `fr-callout`, `fa-*`/`ri-*` →
+  `fr-icon-*`, classes `fr-*` inventées renommées `lsd-*`, 6 fichiers
+  morts supprimés. _Closes #25._
+- **Landmark `<main>`** : déplacé dans mainrow.twig — le lien d'évitement
+  fonctionne sur toutes les pages (welcome, submit, register…), plus
+  seulement sur les pages de questions. _Closes #26._
+
 ## [1.6.0] — 2026-06-10
 
 Release de l'**épic P1 — iso-fonctionnalité avec le thème vanilla** (#36).
