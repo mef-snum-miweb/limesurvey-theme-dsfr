@@ -5,6 +5,50 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/). L'historique antérieur à
 `1.4.0` est consultable via les tags Git (`git tag`) et les *releases* GitHub.
 
+## [1.6.0] — 2026-06-10
+
+Release de l'**épic P1 — iso-fonctionnalité avec le thème vanilla** (#36).
+Référence : core de la version réellement déployée (**LimeSurvey 6.16.16**,
+extrait du conteneur — et non le master, dont les conventions divergent).
+
+### Corrigé
+
+- **Dual-scale (type 1)** : ids en `myfid` (le « # » de `myfname` cassait les
+  sélecteurs de l'Expression Manager → relevance/validation/équations), hidden
+  fields déplacés hors du `<tbody>` (HTML invalide), radios « Sans réponse »
+  restaurées (un par échelle, visibles). _Closes #12._
+- **Sliders (type K)** : sémantique « non répondu » restaurée (champ réponse
+  séparé du range, vide tant que non touché), `slider_step` honoré (au lieu
+  d'une variable inexistante → pas toujours 1), valeur par défaut, reset →
+  état vide, prefix/suffix/séparateur. Logique extraite dans
+  `src/inputs/slider-native.js` (fini les scripts inline dupliqués). _Closes #13._
+- **Date (type D, selector)** : soumission au format du sondage
+  (`dateformatdetails`) au lieu d'ISO brut, `datetime-local` quand le format
+  contient l'heure, pré-remplissage générique par tokens (15 tests unitaires),
+  min/max évalués par `processString` (expressions EM). _Closes #14._
+- **Tableau (type F)** : `repeat_headings` réparé (`include aRow.template`
+  comme le core), message « no answers » et colgroup `aColumns` restaurés.
+  _Closes #15._
+- **Boilerplate (type X)** : `sTimer` + input caché restaurés (`time_limit*`
+  fonctionne), suppression du double rendu du texte de question. _Closes #16._
+- **Listradio (type L)** : `display_columns` honoré (grille `ls-columns`),
+  hooks EM de ligne (`javatbd`, `sDisplayStyle`) restaurés, choisir une autre
+  option vide le champ « autre ». _Closes #18._
+- **Compteur d'erreurs** (multi-textes + tableaux texte) : ré-inséré quand un
+  champ est re-vidé après correction ; le récapitulatif sait ré-ajouter une
+  erreur réactivée (annonce SR groupée). Reprend le chantier array-validation
+  du 2026-04-16. _Closes #20._
+- **Attributs backoffice** : `placeholder` (T/U), `label_input_columns` (K),
+  `answerwidth`/`columnswidth` (array dropdown), classes d'erreur serveur
+  `ls-error-mandatory`/`has-error` (multiflexi/texts). _Closes #21._
+
+### Documentation
+
+- Section README « Compatibilité LimeSurvey » : version testée 6.16.16,
+  avertissement breaking change `_C*`/`_S*` du master, recommandation de pin
+  du tag Docker. Le ranking (#17) est vérifié conforme au core 6.16.16 — les
+  ids `_S{sqid}` n'existent que dans master. _Closes #17, #19._
+
 ## [1.5.0] — 2026-06-10
 
 Release de l'**épic P0** de la [revue complète du 2026-06-09](docs/REVUE-2026-06-09.md)
