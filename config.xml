@@ -80,6 +80,7 @@
                 <optgroup>
                     <option value="light">Clair</option>
                     <option value="dark">Sombre</option>
+                    <option value="system">Système (préférence du navigateur)</option>
                 </optgroup>
             </dropdownoptions>
         </dsfr_theme>
@@ -94,6 +95,17 @@
         <intellectual_property type="textarea" category="Header et footer" width="12" rows="3" title="Propriété intellectuelle (licence, copyright)">Sauf mention explicite de propriété intellectuelle détenue par des tiers, les contenus de ce site sont proposés sous licence etalab-2.0</intellectual_property>
 
         <!-- Onglet Accessibilité -->
+        <rgaa_conformity type="dropdown" category="Accessibilité" width="6" title="Mention de conformité RGAA affichée dans le pied de page (doit refléter l'audit du site rendu, contenu éditorial compris)">totalement
+            <dropdownoptions>
+                <optgroup>
+                    <option value="non">Non conforme</option>
+                    <option value="partiellement">Partiellement conforme</option>
+                    <option value="totalement">Totalement conforme</option>
+                </optgroup>
+            </dropdownoptions>
+        </rgaa_conformity>
+        <rgaa_declaration_date type="text" category="Accessibilité" width="6" title="Date de publication de la déclaration d'accessibilité (JJ/MM/AAAA — date réelle, ne change pas à l'affichage)" />
+        <accessibility_statement_url type="text" category="Accessibilité" width="12" title="URL de la page dédiée de déclaration d'accessibilité (si renseignée, le lien du pied de page remplace la modale — recommandé : la déclaration RGAA doit être publiée à une URL pérenne)" />
         <accessibility_content type="textarea" category="Accessibilité" width="12" rows="40" title="Contenu Accessibilité (le titre H1 est déjà dans le template, ne pas le répéter ici)" />
 
         <!-- Onglet Mentions légales -->

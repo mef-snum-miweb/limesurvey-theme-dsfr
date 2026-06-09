@@ -46,10 +46,23 @@ Les liens pointent vers # - à personnaliser selon votre organisme
         <div class="fr-footer__bottom">
             <nav role="navigation" aria-label="{{ t.footer }}">
                 <ul class="fr-footer__bottom-list">
+                    {# Mention de conformité pilotée par l'option rgaa_conformity
+                       (elle doit refléter l'audit du site rendu, pas seulement
+                       du thème). Si une page dédiée existe (URL pérenne,
+                       obligation légale pour la déclaration RGAA), le lien
+                       remplace la modale. #}
+                    {% set conformityLabels = {'non': 'non conforme', 'partiellement': 'partiellement conforme', 'totalement': 'totalement conforme'} %}
+                    {% set conformityKey = aSurveyInfo.options.rgaa_conformity ?: 'totalement' %}
                     <li class="fr-footer__bottom-item">
-                        <button class="fr-footer__bottom-link" data-fr-opened="false" aria-controls="accessibility-modal" aria-haspopup="dialog" aria-expanded="false">
-                            Accessibilité : totalement conforme
-                        </button>
+                        {% if aSurveyInfo.options.accessibility_statement_url %}
+                            <a class="fr-footer__bottom-link" href="{{ aSurveyInfo.options.accessibility_statement_url }}">
+                                Accessibilité : {{ conformityLabels[conformityKey]|default('totalement conforme') }}
+                            </a>
+                        {% else %}
+                            <button class="fr-footer__bottom-link" data-fr-opened="false" aria-controls="accessibility-modal" aria-haspopup="dialog" aria-expanded="false">
+                                Accessibilité : {{ conformityLabels[conformityKey]|default('totalement conforme') }}
+                            </button>
+                        {% endif %}
                     </li>
                     <li class="fr-footer__bottom-item">
                         <button class="fr-footer__bottom-link" data-fr-opened="false" aria-controls="legal-modal" aria-haspopup="dialog" aria-expanded="false">

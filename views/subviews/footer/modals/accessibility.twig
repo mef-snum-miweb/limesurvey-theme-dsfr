@@ -60,7 +60,12 @@
                                 </li>
                             </ul>
 
-                            <p><strong>Date de publication :</strong> {{ "now"|date("d/m/Y") }}</p>
+                            {# Date RÉELLE de publication de la déclaration (option),
+                               pas la date du jour — une déclaration dont la date
+                               change à chaque affichage n'a pas de valeur légale. #}
+                            {% if aSurveyInfo.options.rgaa_declaration_date %}
+                                <p><strong>Date de publication :</strong> {{ aSurveyInfo.options.rgaa_declaration_date }}</p>
+                            {% endif %}
                         {% endif %}
                     </div>
                 </div>

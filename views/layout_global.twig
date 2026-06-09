@@ -265,7 +265,7 @@
 {% set t = _themeLang[_currentLang]|default(_themeLang.fr) %}
 
 <!DOCTYPE html>
-<html lang="{{ aSurveyInfo.languagecode }}" dir="{{ aSurveyInfo.dir }}" class="{{ aSurveyInfo.languagecode }} dir-{{ aSurveyInfo.dir }} {{ aSurveyInfo.class.html }}" {{ aSurveyInfo.attr.html }} data-fr-theme="{{ aSurveyInfo.options.dsfr_theme ? aSurveyInfo.options.dsfr_theme : 'light' }}">
+<html lang="{{ aSurveyInfo.languagecode }}" dir="{{ aSurveyInfo.dir }}" class="{{ aSurveyInfo.languagecode }} dir-{{ aSurveyInfo.dir }} {{ aSurveyInfo.class.html }}" {{ aSurveyInfo.attr.html }} data-fr-scheme="{{ aSurveyInfo.options.dsfr_theme ? aSurveyInfo.options.dsfr_theme : 'light' }}">
     {% block head %}
     {# Headers, metadata, etc #}
     {{ include('./subviews/header/head.twig') }}
