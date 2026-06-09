@@ -2472,6 +2472,81 @@
     updateAddButtonVisibility();
   }
 
+  // modules/theme-dsfr/src/inputs/slider-native.js
+  var EMPTY_DISPLAY = "–";
+  function notifyExpressionManager(answerField) {
+    if (typeof window.$ !== "undefined") {
+      window.$(answerField).trigger("keyup");
+    }
+    if (typeof window.checkconditions === "function") {
+      window.checkconditions(answerField.value, answerField.name, "text");
+    }
+  }
+  function initOneSlider(range) {
+    if (range.dataset.lsSliderInit) {
+      return;
+    }
+    range.dataset.lsSliderInit = "1";
+    const myfname = range.dataset.lsSlider;
+    const answerField = document.getElementById("answer" + myfname);
+    const output = document.getElementById("output-" + myfname);
+    if (!answerField) {
+      return;
+    }
+    const separator = range.dataset.separator || ".";
+    const prefix = range.dataset.prefix || "";
+    const suffix = range.dataset.suffix || "";
+    const updateOutput = () => {
+      if (!output) {
+        return;
+      }
+      output.textContent = answerField.value === "" ? EMPTY_DISPLAY : prefix + answerField.value + suffix;
+    };
+    if (answerField.value !== "") {
+      const numeric = answerField.value.replace(separator, ".");
+      if (numeric !== "" && !isNaN(Number(numeric))) {
+        range.value = numeric;
+      }
+      range.classList.remove("slider-untouched");
+      answerField.classList.remove("slider-untouched");
+    }
+    updateOutput();
+    range.addEventListener("input", () => {
+      answerField.value = String(range.value).replace(".", separator);
+      range.classList.remove("slider-untouched");
+      answerField.classList.remove("slider-untouched");
+      updateOutput();
+    });
+    range.addEventListener("change", () => {
+      notifyExpressionManager(answerField);
+    });
+    answerField.addEventListener("change", () => {
+      const numeric = answerField.value.replace(separator, ".");
+      if (numeric !== "" && !isNaN(Number(numeric))) {
+        range.value = numeric;
+        range.classList.remove("slider-untouched");
+      }
+      updateOutput();
+    });
+    const resetBtn = document.getElementById("answer" + myfname + "_resetslider");
+    if (resetBtn) {
+      resetBtn.addEventListener("click", () => {
+        answerField.value = "";
+        range.classList.add("slider-untouched");
+        answerField.classList.add("slider-untouched");
+        const resetPosition = range.dataset.resetPosition;
+        if (resetPosition !== void 0 && resetPosition !== "") {
+          range.value = resetPosition;
+        }
+        updateOutput();
+        notifyExpressionManager(answerField);
+      });
+    }
+  }
+  function initNativeSliders() {
+    document.querySelectorAll('input[type="range"][data-ls-slider]').forEach(initOneSlider);
+  }
+
   // modules/theme-dsfr/src/inputs/radio-buttons.js
   function initBootstrapButtonsRadio() {
     const radioGroups = document.querySelectorAll('.radio-list[data-bs-toggle="buttons"]');
@@ -3083,6 +3158,7 @@
     safeInit(initMultipleShortText);
     safeInit(initBootstrapButtonsRadio);
     safeInit(initRadioOtherField);
+    safeInit(initNativeSliders);
     safeInit(initCaptchaReload);
     safeInit(initCaptchaValidation);
     safeInit(initAllRankingQuestions);
@@ -3119,6 +3195,7 @@
     safeInit(initMultipleShortText);
     safeInit(initBootstrapButtonsRadio);
     safeInit(initRadioOtherField);
+    safeInit(initNativeSliders);
     safeInit(initCaptchaReload);
     safeInit(initCaptchaValidation);
     setTimeout(() => safeInit(initAllRankingQuestions), 300);
@@ -3130,6 +3207,7 @@
     safeInit(initRelevanceHandlers);
     safeInit(initSearchableDropdowns);
     safeInit(initStepperProgress);
+    safeInit(initNativeSliders);
     setTimeout(() => safeInit(createErrorSummary), 200);
   });
   var dropdownResizeTimer;
