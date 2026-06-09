@@ -24,7 +24,7 @@
 #}
 
 <!-- answer_td - select-item requis pour em_javascript.js quand dropdown -->
-<td class="answer_cell_{{ ld }} answer-item select-item {{ answertypeclass }} {{ extraclass }}" title="{{ processString(dataTitle)|striptags }}">
+<td class="answer_cell_{{ ld }} answer-item select-item {{ answertypeclass }} {{ extraclass }}{% if error %} has-error{% endif %}" title="{{ processString(dataTitle)|striptags }}">
     {# Hidden field for expression manager javascript #}
     {{ C.Html.hiddenField("java"~myfname2, value, ({
         'id' : "java"~myfname2,

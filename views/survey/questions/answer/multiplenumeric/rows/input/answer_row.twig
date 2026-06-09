@@ -21,11 +21,11 @@
 
 <li id='javatbd{{ myfname }}' class="question-item answer-item numeric-item text-item fr-mb-3w{{ extraclass }}{% if alert %} ls-error-mandatory has-error{% endif %}" {{ sDisplayStyle }}>
     <div class="fr-grid-row fr-grid-row--gutters">
-        <label class="fr-label fr-col-12 fr-col-md-6" for="answer{{myfname}}">
+        <label class="fr-label fr-col-12 fr-col-md-{{ sLabelWidth }}{% if sLabelWidth == 0 %} fr-hidden{% endif %}" for="answer{{myfname}}">
             {{ processString(labelText) }}
         </label>
 
-        <div class="fr-col-12 fr-col-md-6">
+        <div class="fr-col-12 fr-col-md-{{ sInputContainerWidth }}">
             {% if prefix or suffix %}
                 <div class="ls-input-group">
             {% endif %}
