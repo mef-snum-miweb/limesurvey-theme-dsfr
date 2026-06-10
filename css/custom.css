@@ -1941,6 +1941,7 @@ table td > input[type="radio"],
 table th > input[type="radio"],
 td.answer-item input[type="radio"],
 td.radio-item input[type="radio"],
+.dualscale-noanswer input[type="radio"],
 .dsfr-radio-table {
     appearance: none !important;
     -webkit-appearance: none !important;
@@ -1967,6 +1968,7 @@ table td > input[type="radio"]:hover,
 table th > input[type="radio"]:hover,
 td.answer-item input[type="radio"]:hover,
 td.radio-item input[type="radio"]:hover,
+.dualscale-noanswer input[type="radio"]:hover,
 .dsfr-radio-table:hover {
     border-color: var(--border-action-high-blue-france) !important;
     background-color: var(--background-alt-grey) !important;
@@ -1976,11 +1978,13 @@ table td > input[type="radio"]:focus,
 table th > input[type="radio"]:focus,
 td.answer-item input[type="radio"]:focus,
 td.radio-item input[type="radio"]:focus,
+.dualscale-noanswer input[type="radio"]:focus,
 .dsfr-radio-table:focus,
 table td > input[type="radio"]:focus-visible,
 table th > input[type="radio"]:focus-visible,
 td.answer-item input[type="radio"]:focus-visible,
 td.radio-item input[type="radio"]:focus-visible,
+.dualscale-noanswer input[type="radio"]:focus-visible,
 .dsfr-radio-table:focus-visible {
     /* La variable --focus n'est pas définie côté DSFR — on utilise la
        couleur d'action principale (cohérence avec le reste du fichier)
@@ -1998,6 +2002,7 @@ table td > input[type="radio"]:checked,
 table th > input[type="radio"]:checked,
 td.answer-item input[type="radio"]:checked,
 td.radio-item input[type="radio"]:checked,
+.dualscale-noanswer input[type="radio"]:checked,
 .dsfr-radio-table:checked {
     border-color: var(--border-action-high-blue-france) !important;
     background-color: var(--background-action-high-blue-france) !important;
@@ -2024,6 +2029,7 @@ td.answer-item.radio-item {
 .ls-error-mandatory table th > input[type="radio"],
 .ls-error-mandatory td.answer-item input[type="radio"],
 .ls-error-mandatory td.radio-item input[type="radio"],
+.ls-error-mandatory .dualscale-noanswer input[type="radio"],
 .ls-error-mandatory .dsfr-radio-table {
     border-color: var(--border-plain-error) !important;
 }
@@ -2032,6 +2038,7 @@ td.answer-item.radio-item {
 .ls-error-mandatory table th > input[type="radio"]:checked,
 .ls-error-mandatory td.answer-item input[type="radio"]:checked,
 .ls-error-mandatory td.radio-item input[type="radio"]:checked,
+.ls-error-mandatory .dualscale-noanswer input[type="radio"]:checked,
 .ls-error-mandatory .dsfr-radio-table:checked {
     background-color: var(--border-plain-error) !important;
 }
@@ -4479,5 +4486,18 @@ dialog.fr-modal[open] {
     .questions-list.text-list .fr-label,
     .questions-list.number-list .fr-label {
         margin-left: 0 !important;
+    }
+
+    /* Cellules mobile-only (.ls-xs-only : en-têtes « Scale A/B » des lignes
+       dual-scale) : theme.css restaure display:table-cell !important sur les
+       cellules à ≥768px (sortie de linéarisation) avec une spécificité qui
+       battait déjà le masquage de custom.css — les cellules restaient donc
+       VISIBLES sur desktop (préexistant, #43) : 13 cellules pour 11 <col>,
+       dernières colonnes écrasées, pastilles « Sans réponse » débordantes.
+       Seul overrides bat l'important de la couche theme. */
+    @media (min-width: 768px) {
+        table .ls-xs-only {
+            display: none !important;
+        }
     }
 }
