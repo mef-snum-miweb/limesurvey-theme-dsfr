@@ -272,7 +272,20 @@ export function updateErrorSummary() {
         // Une question devenue non pertinente (masquée par relevance) sort
         // également du résumé : `isListableError` couvre les deux cas.
         const stillInError = isListableError(question);
-        if (stillInError) return;
+        if (stillInError) {
+            // Rafraîchir le libellé en place : le message d'erreur courant de
+            // la question peut avoir changé depuis la construction de l'item
+            // (ex. tip EM passé en erreur transitoirement pendant la frappe,
+            // cf. validation-messages.js — le texte figé serait périmé).
+            const link = item.querySelector('a');
+            if (link) {
+                const fresh = describeErrorQuestion(question).label;
+                if (fresh && link.textContent !== fresh) {
+                    link.textContent = fresh;
+                }
+            }
+            return;
+        }
 
         const link = item.querySelector('a');
         const label = link ? link.textContent.trim() : '';

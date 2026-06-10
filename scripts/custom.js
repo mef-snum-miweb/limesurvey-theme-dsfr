@@ -800,7 +800,16 @@
       const question = document.getElementById(id);
       if (!question) return;
       const stillInError = isListableError(question);
-      if (stillInError) return;
+      if (stillInError) {
+        const link2 = item.querySelector("a");
+        if (link2) {
+          const fresh = describeErrorQuestion(question).label;
+          if (fresh && link2.textContent !== fresh) {
+            link2.textContent = fresh;
+          }
+        }
+        return;
+      }
       const link = item.querySelector("a");
       const label = link ? link.textContent.trim() : "";
       if (label) correctedLabels.push(label.split(" : ")[0]);
@@ -1902,24 +1911,87 @@
 
   // modules/theme-dsfr/src/validation/validation-messages.js
   function transformValidationMessages() {
-    const emMessages = document.querySelectorAll(".ls-question-message");
+    const emMessages = document.querySelectorAll(".ls-question-message, .dsfr-vmsg-core");
     emMessages.forEach((message) => {
       if (message.classList.contains("fr-message")) {
         return;
       }
-      let messageType = "info";
-      if (message.classList.contains("ls-em-error")) {
-        messageType = "error";
-      } else if (message.classList.contains("ls-em-warning")) {
-        messageType = "warning";
-      } else if (message.classList.contains("ls-em-success") || message.classList.contains("ls-em-tip")) {
-        messageType = "info";
+      if (message.dataset.dsfrMirrored !== "1") {
+        mirrorMessage(message);
       }
-      const dsfrMessage = document.createElement("p");
-      dsfrMessage.className = `fr-message fr-message--${messageType}`;
+      wireEmClassSync(message);
+    });
+  }
+  function mirrorMessage(message) {
+    let messageType = "info";
+    if (message.classList.contains("ls-em-error")) {
+      messageType = "error";
+    } else if (message.classList.contains("ls-em-warning")) {
+      messageType = "warning";
+    } else if (message.classList.contains("ls-em-success") || message.classList.contains("ls-em-tip")) {
+      messageType = "info";
+    }
+    const dsfrMessage = document.createElement("p");
+    dsfrMessage.className = `fr-message fr-message--${messageType}`;
+    dsfrMessage.textContent = message.textContent.trim();
+    dsfrMessage.id = message.id ? `${message.id}-dsfr` : "";
+    message.insertAdjacentElement("afterend", dsfrMessage);
+    message.className = "dsfr-vmsg-core";
+    message.style.display = "none";
+    message.dataset.dsfrMirrored = "1";
+    const observer = new MutationObserver(() => {
       dsfrMessage.textContent = message.textContent.trim();
-      dsfrMessage.id = message.id ? `${message.id}-dsfr` : "";
-      message.replaceWith(dsfrMessage);
+    });
+    observer.observe(message, { childList: true, characterData: true, subtree: true });
+  }
+  function wireEmClassSync(message) {
+    if (message.dataset.dsfrEmWired === "1" || !message.id) {
+      return;
+    }
+    const $2 = window.jQuery || window.$;
+    if (!$2) {
+      return;
+    }
+    const mirror = document.getElementById(`${message.id}-dsfr`);
+    if (!mirror) {
+      return;
+    }
+    message.dataset.dsfrEmWired = "1";
+    $2(message).off("classChangeError classChangeGood");
+    let interacted = false;
+    let state = null;
+    const apply = () => {
+      if (!interacted || state === null) {
+        return;
+      }
+      const wasError = mirror.classList.contains("fr-message--error");
+      mirror.classList.toggle("fr-message--error", state === "error");
+      mirror.classList.toggle("fr-message--info", state !== "error");
+      if (wasError !== (state === "error")) {
+        setTimeout(updateErrorSummary, 50);
+      }
+    };
+    const question = message.closest(".question-container");
+    if (question) {
+      const markInteracted = (event) => {
+        if (!event.isTrusted) {
+          return;
+        }
+        interacted = true;
+        apply();
+        question.removeEventListener("input", markInteracted, true);
+        question.removeEventListener("change", markInteracted, true);
+      };
+      question.addEventListener("input", markInteracted, true);
+      question.addEventListener("change", markInteracted, true);
+    }
+    $2(message).on("classChangeError", () => {
+      state = "error";
+      apply();
+    });
+    $2(message).on("classChangeGood", () => {
+      state = "good";
+      apply();
     });
   }
 
