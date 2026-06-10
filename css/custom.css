@@ -2877,10 +2877,13 @@ table.fr-table--bordered {
 }
 
 /* Avant @layer, .answer-item.numeric-item/.text-item (theme.css, 2 classes)
-   battait la règle flex ci-dessus par spécificité. La couche theme étant
-   désormais sous custom, on restaure ce comportement ici (#41). */
-.selector--inputondemand-list-item.numeric-item,
-.selector--inputondemand-list-item.text-item {
+   battait par spécificité les display:flex concurrents (.selector--inputondemand-
+   list-item ci-dessus, mais aussi .fr-grid-row du DSFR sur les lignes texte de
+   527199 — un wrapper sans fr-col s'écrase alors au contenu, textarea à 218px).
+   La couche theme étant désormais sous dsfr et custom, on restaure ce
+   comportement ici, avec le sélecteur d'origine de theme.css (#41). */
+.answer-item.numeric-item,
+.answer-item.text-item {
     display: block;
 }
 
