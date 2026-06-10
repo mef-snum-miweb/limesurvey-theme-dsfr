@@ -339,6 +339,20 @@ table.array-flexible-dual-scale td.dual_scale_separator {
 
 
 /* ============================================
+   MATRICES — EN-TÊTES MULTILIGNES (#43)
+   ============================================
+   Le DSFR pose `white-space: nowrap` sur les cellules de fr-table et prévoit
+   le modificateur fr-table--multiline pour autoriser le retour à la ligne.
+   Nos matrices sont en table-layout:fixed : avec nowrap, les libellés longs
+   d'en-têtes (lignes ET colonnes) débordent sur les cellules voisines et se
+   chevauchent (visible dès ~1280px, signalé à 1920px). On applique la
+   sémantique multiline à toutes les matrices LimeSurvey. */
+.fr-table__content table.ls-answers th,
+.fr-table__content table.ls-answers td {
+    white-space: normal;
+}
+
+/* ============================================
    MATRICES — ARRAY TABLES (déplacé de theme.css, #41)
    Doit battre fr-table (couche dsfr) : vivait dans theme.css du temps
    de la guerre de spécificité, la couche theme est désormais SOUS dsfr.
