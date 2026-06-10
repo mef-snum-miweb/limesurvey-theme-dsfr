@@ -15,6 +15,17 @@
  * stylé dans custom.css.
 */
 
+/* Couche de cascade (issue #41) — ordre déclaré dans dsfr.min.css :
+   overrides, theme, dsfr, custom. Tout le fichier vit dans `theme`. */
+/* Déclaration d'ordre des couches AVANT toute création implicite : la
+   première occurrence d'un nom de couche fige sa position. Ce fichier
+   charge avant dsfr.min.css — sans cette ligne, `theme` serait déclarée
+   première et l'ordre voulu serait perdu. */
+@layer overrides, theme, dsfr, custom;
+
+@layer theme {
+
+
 /* ============================================
    IMPORTS DSFR NATIF
    ============================================ */
@@ -1130,141 +1141,11 @@ li.ls-group-dynamic {
     }
 }
 
-/* ============================================
-   ARRAY TABLES - DSFR STYLE
-   ============================================ */
+/* La section « ARRAY TABLES - DSFR STYLE » a été déplacée en tête de
+   custom.css (#41) : ses règles doivent battre fr-table du DSFR, ce que
+   la spécificité assurait avant @layer mais que la couche `theme`
+   (sous `dsfr`) ne permet plus. */
 
-/* Styles DSFR pour les tableaux type Array (Question 26) */
-.ls-table-wrapper table.table-array-radio,
-.ls-table-wrapper table.radio-array {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: transparent;
-}
-
-/* Bordures DSFR pour le tableau */
-.ls-table-wrapper table.table-array-radio,
-.ls-table-wrapper table.radio-array {
-    border: 1px solid var(--border-default-grey, #ddd);
-}
-
-.ls-table-wrapper table.table-array-radio th,
-.ls-table-wrapper table.table-array-radio td,
-.ls-table-wrapper table.radio-array th,
-.ls-table-wrapper table.radio-array td {
-    /* Pas de bordure par cellule : le thead a déjà son trait 2px via
-       background-image: linear-gradient (cf. règle .fr-table thead th plus
-       bas), et un border 1px ici se cumulait pour donner un « double trait »
-       sous l'en-tête. De plus, les bordures verticales entre th créaient des
-       coupures dans le soulignement gradient à chaque colonne. Séparation
-       visuelle des rows assurée par les fonds alternés DSFR et le border
-       du <table>. */
-    padding: 0.75rem;
-    text-align: left;
-}
-
-/* En-têtes de colonnes */
-.ls-table-wrapper table.table-array-radio thead th,
-.ls-table-wrapper table.radio-array thead th {
-    /* DISABLED - Let DSFR thead background-image show through */
-    /* background-color: var(--background-contrast-grey); */
-    font-weight: 700;
-    color: var(--text-title-grey);
-    text-align: center;
-}
-
-/* RÈGLE GLOBALE : Forcer le style DSFR complet sur TOUS les thead
-   Cette règle utilise !important pour surcharger toutes les règles spécifiques
-   DSFR utilise DEUX propriétés background:
-   1. background-color pour le fond gris
-   2. background-image (gradient) pour la bordure bottom
-   Note: Le background ne s'hérite pas, il faut l'appliquer sur les th/td
-*/
-.fr-table thead th,
-.fr-table thead td,
-.fr-table--bordered thead th,
-.fr-table--bordered thead td,
-.ls-table-wrapper .fr-table thead th,
-.ls-table-wrapper .fr-table thead td,
-.ls-table-wrapper table thead th,
-.ls-table-wrapper table thead td {
-    background-color: var(--background-contrast-grey) !important;
-    background-image: linear-gradient(0deg, var(--border-plain-grey), var(--border-plain-grey)) !important;
-    background-position: bottom !important;
-    background-repeat: no-repeat !important;
-    background-size: 100% 2px !important;
-    color: var(--text-title-grey) !important;
-    font-weight: 700 !important;
-}
-
-/* Surcharge de la bordure Bootstrap pour utiliser la couleur DSFR */
-.ls-table-wrapper table.table-array-radio > :not(:first-child),
-.ls-table-wrapper table.radio-array > :not(:first-child) {
-    border-top-color: var(--border-default-grey);
-}
-
-/* Bordures renforcées en haut de la ligne d'en-tête */
-.ls-table-wrapper table.table-array-radio thead tr.ls-heading th,
-.ls-table-wrapper table.table-array-radio thead tr.ls-heading td,
-.ls-table-wrapper table.radio-array thead tr.ls-heading th,
-.ls-table-wrapper table.radio-array thead tr.ls-heading td {
-    border-top-color: var(--border-default-grey);
-}
-
-/* Bordure bottom uniforme sur TOUS les éléments du thead
-   Fix pour surcharger le border:0 du DSFR natif qui ne met pas de vraies bordures
-   (DSFR utilise background-image:linear-gradient au lieu de border)
-   On utilise border-bottom shorthand avec !important et spécificité maximale */
-/*
-.ls-table-wrapper table.radio-array.fr-table thead tr > th,
-.ls-table-wrapper table.radio-array.fr-table thead tr > td,
-.ls-table-wrapper table.radio-array.fr-table--bordered thead tr > th,
-.ls-table-wrapper table.radio-array.fr-table--bordered thead tr > td,
-.ls-table-wrapper table.fr-table.fr-table--bordered thead tr > th,
-.ls-table-wrapper table.fr-table.fr-table--bordered thead tr > td,
-.ls-table-wrapper table.fr-table thead tr > th,
-.ls-table-wrapper table.fr-table thead tr > td,
-table.radio-array.fr-table.fr-table--bordered thead tr > th,
-table.radio-array.fr-table.fr-table--bordered thead tr > td,
-table.radio-array.fr-table thead tr > th,
-table.radio-array.fr-table thead tr > td,
-table.fr-table.fr-table--bordered thead tr > th,
-table.fr-table.fr-table--bordered thead tr > td,
-table.fr-table--bordered thead tr > th,
-table.fr-table--bordered thead tr > td,
-table.fr-table thead tr > th,
-table.fr-table thead tr > td {
-    border-bottom: 2px solid var(--border-default-grey) !important;
-}
-*/
-
-/* En-têtes de lignes (première colonne) */
-.ls-table-wrapper table.table-array-radio tbody th.answertext,
-.ls-table-wrapper table.radio-array tbody th.answertext {
-    font-weight: 700;
-    color: var(--text-title-grey);
-}
-
-/* Cellules avec radio buttons - centrage */
-.ls-table-wrapper table.table-array-radio td.answer_cell,
-.ls-table-wrapper table.table-array-radio td[class*="answer_cell_"],
-.ls-table-wrapper table.radio-array td.answer_cell,
-.ls-table-wrapper table.radio-array td[class*="answer_cell_"] {
-    text-align: center;
-    vertical-align: middle;
-}
-
-/* Fond blanc uniforme pour toutes les lignes */
-.ls-table-wrapper table.table-array-radio tbody tr,
-.ls-table-wrapper table.radio-array tbody tr {
-    background-color: var(--background-default-grey);
-}
-
-/* Hover sur les lignes */
-.ls-table-wrapper table.table-array-radio tbody tr:hover,
-.ls-table-wrapper table.radio-array tbody tr:hover {
-    background-color: var(--background-contrast-blue-france);
-}
 
 /* Responsive - scroll horizontal sur mobile */
 @media (max-width: 48em) {
@@ -1274,125 +1155,8 @@ table.fr-table thead tr > td {
     }
 }
 
-/* ============================================
-   ARRAY COLUMN TABLES - DSFR STYLE (Question 27)
-   ============================================ */
-
-/* Styles DSFR pour les tableaux type Array Column */
-.ls-table-wrapper table.array-radio {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: transparent;
-    border: 1px solid var(--border-default-grey);
-}
-
-.ls-table-wrapper table.array-radio th,
-.ls-table-wrapper table.array-radio td {
-    border: 1px solid var(--border-default-grey);
-    padding: 0.75rem;
-    text-align: left;
-}
-
-/* En-têtes de colonnes */
-.ls-table-wrapper table.array-radio thead th {
-    /* DISABLED - Let DSFR thead background-image show through */
-    /*     background-color: var(--background-contrast-grey); */
-    font-weight: 700;
-    color: var(--text-title-grey);
-    text-align: center;
-}
-
-/* Surcharge de la bordure Bootstrap pour utiliser la couleur DSFR */
-.ls-table-wrapper table.array-radio > :not(:first-child) {
-    border-top-color: var(--border-default-grey);
-}
-
-/* Bordures renforcées en haut de la ligne d'en-tête */
-.ls-table-wrapper table.array-radio thead tr.ls-heading th,
-.ls-table-wrapper table.array-radio thead tr.ls-heading td {
-    border-top-color: var(--border-default-grey);
-}
-
-/* Bordures renforcées en bas de la ligne d'en-tête */
-/* DISABLED - Testing global rule (line 1680) - Can be restored if needed */
-/*
-.ls-table-wrapper table.array-radio thead tr.ls-heading th,
-.ls-table-wrapper table.array-radio thead tr.ls-heading td {
-    border-bottom: 2px solid var(--border-plain-grey);
-}
-*/
-
-/* En-têtes de lignes (première colonne) */
-.ls-table-wrapper table.array-radio tbody th.answertext {
-    font-weight: 700;
-    color: var(--text-title-grey);
-}
-
-/* Cellules avec radio buttons - centrage */
-.ls-table-wrapper table.array-radio td.answer_cell,
-.ls-table-wrapper table.array-radio td[class*="answer_cell_"] {
-    text-align: center;
-    vertical-align: middle;
-}
-
-/* Fond blanc uniforme pour toutes les lignes */
-.ls-table-wrapper table.array-radio tbody tr {
-    background-color: var(--background-default-grey);
-}
-
-/* Hover sur les lignes */
-.ls-table-wrapper table.array-radio tbody tr:hover {
-    background-color: var(--background-contrast-blue-france);
-}
-
-/* Radio buttons DSFR dans les tableaux array-radio */
-.ls-table-wrapper table.array-radio .fr-radio-group {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 0;
-}
-
-.ls-table-wrapper table.array-radio .fr-radio-input {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    width: 1.5rem;
-    height: 1.5rem;
-    border: 2px solid var(--border-plain-grey);
-    border-radius: 50%;
-    background-color: var(--background-default-grey);
-    cursor: pointer;
-    position: relative;
-    margin: 0;
-    flex-shrink: 0;
-}
-
-.ls-table-wrapper table.array-radio .fr-radio-input:checked {
-    border-color: var(--border-action-high-blue-france);
-    background-color: var(--background-default-grey);
-}
-
-.ls-table-wrapper table.array-radio .fr-radio-input:checked::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 0.75rem;
-    height: 0.75rem;
-    border-radius: 50%;
-    background-color: var(--background-action-high-blue-france);
-}
-
-.ls-table-wrapper table.array-radio .fr-radio-input:hover {
-    border-color: var(--border-action-high-blue-france);
-}
-
-.ls-table-wrapper table.array-radio .fr-radio-input:focus {
-    outline: 2px solid var(--border-action-high-blue-france);
-    outline-offset: 2px;
-}
+/* La section « ARRAY COLUMN TABLES » (table.array-radio) a été déplacée en
+   tête de custom.css (#41), comme ARRAY TABLES : doit battre fr-table. */
 
 /* ============================================
    INCREASE/SAME/DECREASE TABLES - DSFR STYLE (Question 30)
@@ -1649,130 +1413,10 @@ table.array-flexible-dual-scale td.dual_scale_separator {
     font-weight: 500;
 }
 
-/* ============================================
-   DUAL SCALE DROPDOWN TABLES - DSFR STYLE (Question 33)
-   ============================================ */
+/* La section « DUAL SCALE DROPDOWN TABLES » a été déplacée en tête de
+   custom.css (#41), comme les autres sections tableaux : doit battre
+   fr-table (couche dsfr). */
 
-/* Cibler les tableaux dual scale avec dropdown via leurs classes spécifiques */
-.ls-table-wrapper table:has(.left-header, .right-header),
-.ls-table-wrapper table:has(.ddarrayseparator) {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: transparent;
-}
-
-.ls-table-wrapper table:has(.left-header, .right-header) th,
-.ls-table-wrapper table:has(.left-header, .right-header) td,
-.ls-table-wrapper table:has(.ddarrayseparator) th,
-.ls-table-wrapper table:has(.ddarrayseparator) td {
-    padding: 0.75rem;
-    text-align: left;
-}
-
-/* En-têtes de colonnes Scale A / Scale B */
-.ls-table-wrapper table thead th.left-header,
-.ls-table-wrapper table thead th.right-header {
-    /* Copier exactement les propriétés DSFR de .fr-table thead */
-    /* DISABLED - Let DSFR thead background-image show through */
-    /*     background-color: var(--background-contrast-grey); */
-    background-image: linear-gradient(0deg, var(--border-plain-grey), var(--border-plain-grey));
-    background-position: bottom;
-    background-repeat: no-repeat;
-    background-size: 100% 2px;
-    font-weight: 700;
-    color: var(--text-title-grey);
-    text-align: center;
-}
-
-/* Surcharge de la bordure Bootstrap */
-.ls-table-wrapper table:has(.ddarrayseparator) > :not(:first-child) {
-    border-top-color: var(--border-default-grey, #ddd) !important;
-}
-
-/* Bordures renforcées en bas de la ligne d'en-tête */
-/* DISABLED - Testing global rule (line 1680) - Can be restored if needed */
-/*
-.ls-table-wrapper table thead tr.ls-heading th.left-header,
-.ls-table-wrapper table thead tr.ls-heading th.right-header,
-.ls-table-wrapper table thead tr.ls-heading td {
-    border-bottom: 2px solid var(--border-default-grey) !important;
-}
-*/
-
-/* Ajouter la bordure via background-image sur les TH spécifiquement */
-/* DISABLED - Testing global rule (line 1680) - Can be restored if needed */
-/*
-.ls-table-wrapper table thead tr.ls-heading th.left-header,
-.ls-table-wrapper table thead tr.ls-heading th.right-header {
-    background-color: var(--background-contrast-grey) !important;
-    background-image: linear-gradient(0deg, var(--border-plain-grey), var(--border-plain-grey)) !important;
-    background-position: bottom !important;
-    background-repeat: no-repeat !important;
-    background-size: 100% 2px !important;
-}
-*/
-
-/* En-têtes de lignes (première colonne) */
-.ls-table-wrapper table:has(.ddarrayseparator) tbody th.answertext {
-    font-weight: 700;
-    color: var(--text-label-grey) !important;
-}
-
-/* Cellules avec dropdown - centrage */
-.ls-table-wrapper table td.dropdown-item {
-    text-align: center;
-    vertical-align: middle;
-}
-
-/* Séparateur central : masqué uniquement si vide (classe `dsfr-separator-empty`
-   posée par le template Twig). Si interddSep est renseigné, on laisse le bloc
-   custom.css prendre le relais (padding + min-width pour affichage horizontal). */
-.ls-table-wrapper table td.ddarrayseparator.dsfr-separator-empty {
-    width: 0 !important;
-    padding: 0 !important;
-    border: none !important;
-    background-color: transparent !important;
-}
-
-/* Colonne séparatrice dans colgroup : masquée uniquement si vide. */
-.ls-table-wrapper table col.ddarrayseparator.dsfr-separator-empty {
-    width: 0 !important;
-}
-
-/* Fond transparent systématique sur le séparateur (tous cas). */
-.ls-table-wrapper table td.ddarrayseparator {
-    background-color: transparent !important;
-}
-
-/* Fond transparent pour toutes les lignes (pas de fond sur mobile) */
-.ls-table-wrapper table:has(.ddarrayseparator) tbody tr {
-    background-color: transparent !important;
-}
-
-/* Hover sur les lignes */
-.ls-table-wrapper table:has(.ddarrayseparator) tbody tr:hover {
-    background-color: var(--background-contrast-blue-france, #e3e3fd) !important;
-}
-
-/* Style DSFR pour les select */
-.ls-table-wrapper table td.dropdown-item select.form-select {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid var(--border-default-grey, #ddd);
-    border-radius: 0.25rem;
-    background-color: var(--background-default-grey);
-    font-size: 1rem;
-    line-height: 1.5;
-}
-
-.ls-table-wrapper table td.dropdown-item select.form-select:focus {
-    outline: 2px solid #0a76f6;
-    outline-offset: 2px;
-    border-color: var(--border-action-high-blue-france);
-}
-/* Full width for ranking items */
-/* Source items styling (same as ranked but clickable) */
-/* Button group in ranked items */
 /* ========================================
    Question Type: Multiple Short Text (Type Q)
    Input On Demand - Saisie à la demande
@@ -1879,7 +1523,7 @@ button.selector--inputondemand-addlinebutton:focus,
 /* Pour les templates DSFR */
 .multiple-short-txt .fr-label,
 .multiple-short-txt label.fr-label {
-    margin-left: 0.25rem !important;
+    margin-left: 0.25rem; /* !important déposé (#41) : custom.css remet 0 */
 }
 
 /* Pour les templates Bootstrap (input on demand) */
@@ -1998,7 +1642,7 @@ li.selector--inputondemand-list-item label.control-label {
     transition: background-color 0.2s, color 0.2s !important;
     text-decoration: none !important;
     box-sizing: border-box !important;
-    box-shadow: none !important;
+    box-shadow: none; /* !important déposé (#41) : custom.css pose le liseré */
     width: 100%;
     text-align: center;
 }
@@ -2278,4 +1922,5 @@ li.selector--inputondemand-list-item label.control-label {
         page-break-inside: avoid !important;
         margin-bottom: 0.4cm !important;
     }
+}
 }
