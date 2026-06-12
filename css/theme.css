@@ -1019,20 +1019,13 @@ footer.fr-footer,
    CORRECTIONS TABLEAUX DSFR
    ============================================ */
 
-/* Le DSFR avec --bordered applique un fond gris clair (--background-alt-grey)
-   par défaut à toutes les cellules tbody td.
-
-   Selon la doc DSFR, les tableaux doivent avoir un fond blanc par défaut,
-   avec possibilité d'alternance de couleurs pour les lignes.
-
-   On surcharge ici pour respecter le comportement attendu de LimeSurvey
-   avec alternance ls-odd/ls-even */
-
-/* Application du fond gris DSFR sur tous les tbody (compatible mode sombre) */
-.fr-table tbody,
-.fr-table--bordered tbody {
-    background-color: var(--background-alt-grey) !important;
-}
+/* Fond des tbody : la règle historique posait ici --background-alt-grey
+   !important — en @layer, l'important de la couche theme bat ceux de
+   custom, ce qui rendait IMPOSSIBLE toute correction aval et produisait
+   des tableaux gris (clair) / décalés du fond de page (sombre) selon que
+   la famille re-peignait ses lignes ou non (#41, revue 2026-06-12).
+   Le fond unifié (transparent, hérite de la carte question) est désormais
+   posé par custom.css — plus aucune déclaration de fond tbody ici. */
 
 /* Reset du fond gris par défaut du DSFR sur tous les td */
 .fr-table--bordered table tbody td {

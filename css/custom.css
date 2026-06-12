@@ -16,6 +16,24 @@
 @layer custom {
 
 /* ============================================
+   FOND DES TABLEAUX — UNIFIÉ (#41, revue 2026-06-12)
+   ============================================ */
+
+/* Tous les tableaux héritent du fond de la carte question (blanc en
+   clair, gris sombre en dark). Avant : theme.css posait alt-grey
+   !important sur les tbody (imbattable depuis custom — en importance,
+   l'ordre des couches s'inverse) et certaines familles re-peignaient
+   leurs lignes en default-grey → tableaux gris OU blancs en clair,
+   noir profond OU couleur de page en sombre, selon la famille.
+   Déclarations NORMALES : la couche custom bat dsfr (tbody default-grey)
+   sans !important. Les th d'en-têtes gardent leur gris DSFR. */
+.fr-table tbody,
+.fr-table--bordered tbody,
+.fr-table__content tbody {
+    background-color: transparent;
+}
+
+/* ============================================
    INCREASE/SAME/DECREASE TABLES - DSFR STYLE (Question 30)
    ============================================ */
 
@@ -88,12 +106,10 @@
     background-color: transparent !important;
 }
 
-/* Le fond gris du tableau ISD ne venait PAS des tr/td (transparents) mais du
-   TBODY : DSFR fr-table pose background-color sur tbody (sonde 2026-06-12).
-   Sans cette règle, le gris persistait malgré le transparent des lignes. */
-.array-increase-same-decrease table.radio-array tbody {
-    background-color: transparent !important;
-}
+/* Fond du tbody : géré par la règle globale « FOND DES TABLEAUX — UNIFIÉ »
+   en tête de fichier. (L'!important posé ici le 2026-06-12 était en réalité
+   inopérant : l'alt-grey venait d'un !important de la couche theme, qui bat
+   ceux de custom — supprimé à la racine dans theme.css.) */
 
 /* Matrices dont AUCUNE sous-question n'a de libellé (classe posée par
    answer.twig, qui n'émet alors pas le <col> de la colonne d'en-têtes) :
@@ -498,10 +514,12 @@ table.fr-table thead tr > td {
     vertical-align: middle;
 }
 
-/* Fond blanc uniforme pour toutes les lignes */
+/* Fond des lignes : transparent — hérite de la carte question (cf. « FOND
+   DES TABLEAUX — UNIFIÉ »). L'ancien default-grey forçait un blanc en
+   clair mais un noir profond (#161616) décalé de la carte en sombre. */
 .ls-table-wrapper table.table-array-radio tbody tr,
 .ls-table-wrapper table.radio-array tbody tr {
-    background-color: var(--background-default-grey);
+    background-color: transparent;
 }
 
 /* Hover sur les lignes */
@@ -571,9 +589,10 @@ table.fr-table thead tr > td {
     vertical-align: middle;
 }
 
-/* Fond blanc uniforme pour toutes les lignes */
+/* Fond des lignes : transparent — hérite de la carte question (cf. « FOND
+   DES TABLEAUX — UNIFIÉ »). */
 .ls-table-wrapper table.array-radio tbody tr {
-    background-color: var(--background-default-grey);
+    background-color: transparent;
 }
 
 /* Hover sur les lignes */
@@ -3407,8 +3426,11 @@ table.fr-table--bordered {
     height: 1px;
 }
 
-/* Hide DSFR radio button pseudo-element in emoji mode */
-.fr-fieldset[data-display-mode="2"] .fr-radio-group input[type="radio"] + label::before {
+/* Hide DSFR radio button pseudo-element in emoji mode.
+   Scopé au label emoji : le « Sans réponse » du même fieldset est un radio
+   DSFR standard qui doit garder son rond (sinon aucun indicateur visible
+   alors qu'il est coché par défaut). */
+.fr-fieldset[data-display-mode="2"] .fr-radio-group input[type="radio"] + label.fr-label--emoji-rating::before {
     display: none !important;
 }
 
@@ -3416,7 +3438,7 @@ table.fr-table--bordered {
    (SVG externalisé, position 0 50%) — pas seulement en ::before. Sans ce
    masquage, un cercle bleu dépasse derrière chaque emoji/étoile (#43). */
 .fr-fieldset[data-display-mode="1"] .fr-radio-group input[type="radio"] + label,
-.fr-fieldset[data-display-mode="2"] .fr-radio-group input[type="radio"] + label {
+.fr-fieldset[data-display-mode="2"] .fr-radio-group input[type="radio"] + label.fr-label--emoji-rating {
     background-image: none;
 }
 
@@ -3450,29 +3472,97 @@ table.fr-table--bordered {
     width: 100%;
 }
 
-/* Responsive adjustments for 5-point choice */
+/* Feedback de sélection en mode emoji (revue 2026-06-12).
+   Le rond radio DSFR (::before + background-image) est masqué ci-dessus :
+   sans ces règles, aucun retour visuel au survol ni à la sélection. On
+   matérialise la boîte : cadre gris par défaut, fond léger au survol,
+   fond bleu clair + anneau bleu quand l'option est cochée. */
+.fr-fieldset[data-display-mode="2"] .fr-radio-group input[type="radio"] + label.fr-label--emoji-rating {
+    border-radius: 0.5rem;
+    box-shadow: inset 0 0 0 1px var(--border-default-grey, #ddd);
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.fr-fieldset[data-display-mode="2"] .fr-radio-group input[type="radio"]:not(:checked) + label.fr-label--emoji-rating:hover {
+    background-color: var(--background-default-grey-hover, #f6f6f6);
+}
+
+.fr-fieldset[data-display-mode="2"] .fr-radio-group input[type="radio"]:checked + label.fr-label--emoji-rating {
+    background-color: var(--background-action-low-blue-france, #e3e3fd);
+    box-shadow: inset 0 0 0 2px var(--border-active-blue-france, #000091);
+}
+
+.fr-fieldset[data-display-mode="2"] .fr-radio-group input[type="radio"]:focus-visible + label.fr-label--emoji-rating {
+    outline: 2px solid var(--border-action-high-blue-france, #000091);
+    outline-offset: 2px;
+}
+
+/* Responsive adjustments for 5-point choice (revue 2026-06-12) :
+   les 5 options restent sur UNE ligne compacte (boîtes égales) au lieu
+   d'un empilement pleine largeur ; seul le « Sans réponse » passe en
+   pleine largeur dessous. Modes 0 (numéros) et 2 (emoji) — le mode 1
+   (étoiles) a sa propre ligne compacte plus haut. */
 @media (max-width: 767.98px) {
-    /* Stack radio buttons vertically on mobile */
-    .fr-fieldset[data-display-mode] .fr-grid-row {
-        flex-direction: column;
+    .fr-fieldset[data-display-mode="0"] .fr-grid-row,
+    .fr-fieldset[data-display-mode="2"] .fr-grid-row {
+        flex-wrap: wrap;
+        gap: 0.25rem;
     }
 
-    .fr-fieldset[data-display-mode] .fr-col-auto {
-        width: 100%;
+    .fr-fieldset[data-display-mode="0"] .fr-col-auto,
+    .fr-fieldset[data-display-mode="2"] .fr-col-auto {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 0;
+    }
+
+    /* Le « Sans réponse » occupe sa propre ligne, pleine largeur. */
+    .fr-fieldset[data-display-mode="0"] .fr-col-auto:has(.noanswer-item),
+    .fr-fieldset[data-display-mode="2"] .fr-col-auto:has(.noanswer-item) {
+        flex: 1 1 100%;
+        margin-top: 0.5rem;
     }
 
     .fr-fieldset[data-display-mode] .fr-radio-group.fr-radio-rich {
         width: 100%;
     }
 
-    /* Larger touch targets for mobile */
-    .fr-label--star-rating,
+    /* Boîtes compactes : 5 tiennent dans 320 px utiles. */
     .fr-label--emoji-rating {
-        min-height: 3.5rem;
+        min-width: 0;
+        min-height: 3rem;
+        padding: 0.5rem !important;
+    }
+
+    /* Hauteur unifiée (~3 rem) avec les options riches : le label rich
+       DSFR (chiffres 1-5, « Sans réponse ») fait 5.5 rem par défaut. On ne
+       réduit que le padding vertical — l'horizontal loge le rond radio. */
+    .fr-fieldset[data-display-mode="0"] .fr-radio-group.fr-radio-rich .fr-label,
+    .fr-fieldset[data-display-mode="2"] .fr-radio-group.fr-radio-rich .fr-label {
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+        min-height: 3rem;
     }
 
     .fr-label--emoji-rating .emoji-icon {
-        font-size: 3rem;
+        font-size: 1.75rem;
+    }
+
+    /* Options « riches » hors notation (Genre, Oui/Non…) : largeur
+       uniforme pleine ligne, libellé étiré pour aligner les pictos à
+       droite — sinon chaque boîte s'arrête à son contenu (rendu en
+       escalier constaté en mobile). */
+    .question-container .fr-fieldset:not([data-display-mode]) .fr-fieldset__element--inline:has(> .fr-radio-group.fr-radio-rich) {
+        width: 100%;
+        margin-right: 0;
+    }
+
+    .question-container .fr-fieldset:not([data-display-mode]) .fr-fieldset__element--inline > .fr-radio-group.fr-radio-rich {
+        width: 100%;
+    }
+
+    .question-container .fr-fieldset:not([data-display-mode]) .fr-fieldset__element--inline > .fr-radio-group.fr-radio-rich > label.fr-label {
+        flex: 1;
     }
 }
 
