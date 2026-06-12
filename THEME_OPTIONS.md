@@ -25,7 +25,7 @@ Les valeurs par défaut et la définition sont dans [`config.xml`](config.xml).
 
 | Option | Type | Défaut | Rôle |
 |---|---|---|---|
-| `brandlogo` | on / off | on | Activer le logo opérateur dans le header |
+| `brandlogo` | on / off | **off** | Activer le logo opérateur dans le header (réservé aux opérateurs autorisés, certification SIRCOM requise via `brandlogo_sircom_certified`) |
 | `brandlogofile` | dropdown | `./files/logo.png` | Sélectionner le fichier logo (PNG, JPG, GIF, ICO, SVG) |
 
 > ⚠️ **DSFR — utilisation du logo** : seuls les opérateurs et directions recevant du public sont autorisés à afficher leur logo dans l'en-tête. Si un logo est présent, le texte Marianne doit afficher "République\<br\>Française".
@@ -40,7 +40,17 @@ Taille recommandée : 6rem (96 px) de hauteur dans le header.
 |---|---|---|---|
 | `dsfr_theme` | dropdown | `light` | Variante par défaut du thème (clair / sombre) |
 | `show_marianne` | on / off | on | Afficher le logo Marianne |
-| `show_footer_links` | on / off | on | Afficher les liens de pied de page (accessibilité, mentions, etc.) |
+| `show_footer_links` | on / off | on | Afficher la barre de liens du pied de page (accessibilité, mentions légales, données personnelles, cookies) |
+| `showpopups` | 1 / 0 / -1 | 0 | Messages (sauvegarde, soft mandatory) : popup, sur la page, ou masqués |
+| `container` | on / off | off | Conteneur centré (`fr-container`) ou pleine largeur (`fr-container--fluid`) |
+| `questionhelptextposition` | top / bottom | top | Position de l'aide de question |
+| `showquestioncode` | on / off | on | Afficher le numéro/code des questions (selon réglages du sondage) |
+| `sanitize_rte_content` | on / off | on | Nettoyer les styles inline des titres/aides de questions (conformité DSFR) |
+| `show_pdf_export` | on / off | on | Récapitulatif des réponses : bouton « Exporter en PDF » |
+| `dsfr_theme` | light / dark / system | light | Schéma de couleurs (`data-fr-scheme`) |
+| `rgaa_conformity` | non / partiellement / totalement | totalement | Mention de conformité affichée dans le pied de page |
+| `rgaa_declaration_date` | texte | — | Date réelle de publication de la déclaration d'accessibilité |
+| `accessibility_statement_url` | URL | — | Page dédiée de la déclaration (remplace la modale) |
 | `marianne_text` | textarea 2 lignes | `République<br>Française` | Texte sous la Marianne |
 | `header_title` | textarea 2 lignes | — | Titre du service dans l'en-tête |
 | `baseline_text` | textarea 2 lignes | — | Baseline (tagline DSFR sous le titre du service, dans l'en-tête) |
@@ -130,6 +140,6 @@ Quel animal miaule ?|chat
 
 ## Traductions
 
-Les libellés d'options affichés dans l'admin sont traduits en français et anglais dans [`config.xml`](config.xml) via les nœuds `<name>` et `<labels>`.
+Les libellés d'options affichés dans l'admin sont définis en français dans les attributs `title="…"` de [`config.xml`](config.xml) (pas de mécanisme de traduction des titres d'options dans LimeSurvey 6 pour les pages d'options core).
 
 Les messages front (validation, ranking) sont dans [`src/core/i18n.js`](src/core/i18n.js).

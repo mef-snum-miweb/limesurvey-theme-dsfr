@@ -76,7 +76,6 @@ export function sanitizeRTEContent() {
         return;
     }
 
-    console.log('[DSFR] Nettoyage du contenu RTE...');
 
     RTE_CONTENT_SELECTORS.forEach((selector) => {
         try {
@@ -89,5 +88,4 @@ export function sanitizeRTEContent() {
         }
     });
 
-    console.log('[DSFR] Contenu RTE nettoyé');
 }

@@ -5,6 +5,256 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/). L'historique antérieur à
 `1.4.0` est consultable via les tags Git (`git tag`) et les *releases* GitHub.
 
+## [1.11.0] — 2026-06-13
+
+Release **cascade `@layer` (étape A) + régressions visuelles de la revue**
+(#41, #43) : le CSS du thème est désormais organisé en couches de cascade,
+et l'ensemble des régressions visuelles signalées sur les questionnaires
+de référence est corrigé.
+
+### Ajouté
+
+- **Cascade `@layer`** (étape A, ADR-037) : `custom.css`, `theme.css` et les
+  feuilles DSFR sont enveloppés dans l'ordre `overrides, theme, dsfr, custom`
+  — iso-rendu vérifié par le filet visuel (88 captures). Socle de la dépose
+  progressive des `!important`. _Refs #41._
+- Questions « à la demande » (InputOnDemand) : message d'erreur dédié quand
+  des lignes masquées restent à remplir — « cliquez sur “Ajouter une ligne” » —
+  avec comptage des lignes restantes (clé i18n `iod_add_lines`) et suivi du
+  dévoilement par MutationObserver. _Closes #43._
+- Mode emoji : retour visuel complet — cadre au repos, fond léger au survol,
+  fond bleu et anneau à la sélection, outline au focus clavier.
+- Compatibilité **LimeSurvey 7.0** déclarée dans les question themes.
+
+### Corrigé
+
+- Les 8 régressions visuelles de la revue 2026-06 (_closes #43_) :
+  dual-scale avec **une colonne « Sans réponse » par échelle** (structure
+  Twig revue), centrage des champs en matrice, checkboxes DSFR dans les
+  tableaux, double liseré d'erreur (liseré natif `fr-fieldset--error`
+  neutralisé), étoiles sur une seule ligne en mobile, fond gris des
+  tableaux ISD, colonnes d'en-têtes vides (`array-no-row-labels`),
+  gestion d'erreur InputOnDemand.
+- Matrices : en-têtes multilignes ; dual-scale : cellules mobile-only
+  masquées sur desktop, radios « Sans réponse » au composant DSFR.
+- **Fonds de tableaux unifiés** : dépose de la règle
+  `.fr-table tbody { alt-grey !important }` (couche theme, imbattable
+  depuis custom) — toutes les matrices héritent de la carte question, en
+  thème clair comme en sombre.
+- Le radio « Sans réponse » des questions emoji — coché par défaut —
+  était invisible (masquage du rond DSFR scopé aux seuls labels emoji).
+- Signaux ExpressionManager relayés vers les messages DSFR sans marquage
+  d'erreur « à froid » sur les pages vierges.
+- Régression `@layer` : `display: block` des answer-items texte/numérique
+  restauré.
+
+### Modifié
+
+- Boutons Bootstrap → DSFR : trois définitions concurrentes fusionnées en
+  une section canonique, survol unifié sur la teinte claire DSFR,
+  −28 `!important`. _Refs #41 (étapes 3a + 5)._
+- Mobile (<768 px) : les 5 options (chiffres ou emoji) tiennent sur une
+  seule ligne en boîtes égales, « Sans réponse » en pleine largeur
+  dessous ; options riches (Genre, Oui/Non…) en largeur uniforme avec
+  pictogrammes alignés ; hauteurs unifiées à 3 rem.
+
+## [1.10.0] — 2026-06-10
+
+Release de l'**épic P2 — options, backoffice & documentation** (#40),
+qui clôt le plan d'action de la [revue du 2026-06-09](docs/REVUE-2026-06-09.md).
+
+### Ajouté
+
+- Options `showpopups`, `container`, `questionhelptextposition` re-déclarées
+  (consommées mais commentées → comportement figé invisible dans l'admin) ;
+  défauts = comportement effectif actuel. `compatibility` 7.0. _Closes #32._
+
+### Corrigé
+
+- `show_footer_links` enfin consommée (masque la barre de liens du footer) ;
+  `showclearall` gate réellement le bouton « Tout effacer » (défaut off) ;
+  `brandlogofile` dépend de `brandlogo`. _Closes #32._
+- `main.twig` : commentaire Twig mal fermé. _Closes #34._
+
+### Modifié
+
+- `css/icons-system.min.css` supprimé (jamais chargé, sous-ensemble redondant
+  de `icons.min.css`). _Closes #32._
+- Derniers fichiers Twig morts purgés (`date/answer.twig`,
+  `upload/answer.twig`, `listradio_with_comment/`,
+  `multiplenumeric/rows/answer_row.twig`, `arrays/increase_same_decrease/`).
+  _Closes #34._
+
+### Annulé
+
+- La transformation « sur place » des messages EM (1.8.0, #29) est revenue au
+  remplacement avec id suffixé `-dsfr` : conserver l'id `vmsg_*` réactivait le
+  marquage `input-error` du core sur les multi-textes obligatoires dès la page
+  vierge (diagnostic par bisect E2E). Le sujet de fond est retracé dans #42.
+
+### Documentation
+
+- Politiques RGPD token/register, attributs DD/DP, opt-out POST : vérifiés
+  **absents du vanilla 6.16.16 déployé** (features master-only) — le thème est
+  iso-fonctionnel avec sa version cible ; portage tracé dans la check-list de
+  montée de version du README. `hideMultipleColumn` documenté sans objet
+  (grille CSS unique). _Closes #33._
+- THEME_COVERAGE honnête sur les fallbacks core assumés ; THEME_OPTIONS :
+  11 options manquantes documentées, défaut `brandlogo` corrigé, section
+  Traductions rectifiée. _Closes #34._
+
+## [1.9.0] — 2026-06-10
+
+Release de l'**épic P2 — dette CSS** (#39).
+
+### Modifié
+
+- **~420 lignes de CSS mort supprimées** (vérifiées sans usage) : modales
+  Bootstrap, ranking legacy, .survey-footer*, .skip-link, .progress*,
+  .question-yesno, checkbox-array… ; `dsfr-grid-helpers.css` vidé (classes
+  natives DSFR dupliquées, gutters en conflit avec le système natif).
+  Règle de propriété theme.css/custom.css documentée. _Closes #30._
+- **Dark mode réparé localement** : hex en dur tokenisés (radios de
+  matrices, en-têtes dual-scale, selects, hovers blancs). _Closes #31._
+- **Breakpoints cohérents** : plus de chevauchement à 768px exactement ni
+  de trou 576↔577 ; `html{font-size:100%}` respecte le réglage de police
+  du navigateur (RGAA). _Closes #31._
+
+### Notes
+
+- La migration `@layer` + dépose des 777 `!important` restants est
+  planifiée dans #41 (exige des snapshots visuels par type de question).
+
+## [1.8.0] — 2026-06-10
+
+Release de l'**épic P2 — dette JavaScript** (#38).
+
+### Modifié
+
+- **theme.js dégraissé** (1446 → 870 lignes) : suppression du handler qui
+  avalait toute erreur « bootstrap », des stubs dupliqués, des fonctions
+  enhance* legacy, de la double validation captcha et des ~320 lignes de
+  validation morte. Chargement du JS DSFR robuste (mode debug, installation
+  en sous-répertoire) ; combobox découplé de theme.js. _Closes #27._
+- **i18n centralisée** : dictionnaire UI fr/en + `tUI()` pour toutes les
+  chaînes de validation et annonces lecteur d'écran ; légendes des questions
+  via `gT()` (traduites dans toutes les langues LS) ; warnings via `gT()` ;
+  fichier mort `translations.twig` supprimé. _Closes #28._
+
+### Corrigé
+
+- **Cycle de vie** : `limesurvey:questionsLoaded` n'est émis par aucun code
+  du core 6.16 — la ré-initialisation complète tourne désormais réellement
+  (déclenchée sur pjax) ; `onPjax` attend jQuery au lieu d'abandonner ;
+  messages EM transformés **sur place** (mises à jour dynamiques et
+  aria-describedby préservés) ; correction du `{ once: true }` qui empêchait
+  une question retombée en erreur de se re-nettoyer ; bornes de somme
+  tolérantes aux décimaux/négatifs ; sélecteur de question conditionnelle
+  exact (Q1 ne matche plus Q12). _Closes #29._
+
+## [1.7.0] — 2026-06-10
+
+Release de l'**épic P2 — conformité DSFR des composants** (#37).
+
+### Modifié
+
+- **Pattern d'erreur normatif** : `fr-fieldset--error` posé sur les fieldsets
+  des questions radios/cases en erreur, `fr-input-group--error` cantonné au
+  groupe du champ (plus jamais sur le conteneur de question), message
+  obligatoire en `fr-error-text` + `gT()` (fini FontAwesome/`text-danger`/
+  `role=alert` statique). _Closes #22._
+- **Tableaux** : les 11 templates de matrices passent au markup fr-table
+  1.12+ (`__wrapper`/`__container`/`__content`), caption sr-only généralisée,
+  `data-fr-js-table*` et `role=radiogroup` sur `<tr>`/`<col>` retirés.
+  _Closes #23._
+- **Schéma de thème** : `data-fr-scheme` (light/dark/**system**, nouvelle
+  option) au lieu de `data-fr-theme` calculé ; appliqué aussi aux 3 layouts
+  autonomes (liste publique, erreurs, maintenance) qui n'avaient aucune
+  variante sombre. _Closes #24._
+- **Footer accessibilité** : mention de conformité paramétrable
+  (`rgaa_conformity`), date de déclaration réelle (`rgaa_declaration_date`),
+  lien vers une page dédiée possible (`accessibility_statement_url`).
+  _Closes #24._
+- **Purge Bootstrap/icônes-fontes** : gender/radio en fieldset DSFR,
+  sélecteur de langue en `fr-select-group`, case « tout effacer » en
+  `fr-checkbox-group`, évaluations en `fr-callout`, `fa-*`/`ri-*` →
+  `fr-icon-*`, classes `fr-*` inventées renommées `lsd-*`, 6 fichiers
+  morts supprimés. _Closes #25._
+- **Landmark `<main>`** : déplacé dans mainrow.twig — le lien d'évitement
+  fonctionne sur toutes les pages (welcome, submit, register…), plus
+  seulement sur les pages de questions. _Closes #26._
+
+## [1.6.0] — 2026-06-10
+
+Release de l'**épic P1 — iso-fonctionnalité avec le thème vanilla** (#36).
+Référence : core de la version réellement déployée (**LimeSurvey 6.16.16**,
+extrait du conteneur — et non le master, dont les conventions divergent).
+
+### Corrigé
+
+- **Dual-scale (type 1)** : ids en `myfid` (le « # » de `myfname` cassait les
+  sélecteurs de l'Expression Manager → relevance/validation/équations), hidden
+  fields déplacés hors du `<tbody>` (HTML invalide), radios « Sans réponse »
+  restaurées (un par échelle, visibles). _Closes #12._
+- **Sliders (type K)** : sémantique « non répondu » restaurée (champ réponse
+  séparé du range, vide tant que non touché), `slider_step` honoré (au lieu
+  d'une variable inexistante → pas toujours 1), valeur par défaut, reset →
+  état vide, prefix/suffix/séparateur. Logique extraite dans
+  `src/inputs/slider-native.js` (fini les scripts inline dupliqués). _Closes #13._
+- **Date (type D, selector)** : soumission au format du sondage
+  (`dateformatdetails`) au lieu d'ISO brut, `datetime-local` quand le format
+  contient l'heure, pré-remplissage générique par tokens (15 tests unitaires),
+  min/max évalués par `processString` (expressions EM). _Closes #14._
+- **Tableau (type F)** : `repeat_headings` réparé (`include aRow.template`
+  comme le core), message « no answers » et colgroup `aColumns` restaurés.
+  _Closes #15._
+- **Boilerplate (type X)** : `sTimer` + input caché restaurés (`time_limit*`
+  fonctionne), suppression du double rendu du texte de question. _Closes #16._
+- **Listradio (type L)** : `display_columns` honoré (grille `ls-columns`),
+  hooks EM de ligne (`javatbd`, `sDisplayStyle`) restaurés, choisir une autre
+  option vide le champ « autre ». _Closes #18._
+- **Compteur d'erreurs** (multi-textes + tableaux texte) : ré-inséré quand un
+  champ est re-vidé après correction ; le récapitulatif sait ré-ajouter une
+  erreur réactivée (annonce SR groupée). Reprend le chantier array-validation
+  du 2026-04-16. _Closes #20._
+- **Attributs backoffice** : `placeholder` (T/U), `label_input_columns` (K),
+  `answerwidth`/`columnswidth` (array dropdown), classes d'erreur serveur
+  `ls-error-mandatory`/`has-error` (multiflexi/texts). _Closes #21._
+
+### Documentation
+
+- Section README « Compatibilité LimeSurvey » : version testée 6.16.16,
+  avertissement breaking change `_C*`/`_S*` du master, recommandation de pin
+  du tag Docker. Le ranking (#17) est vérifié conforme au core 6.16.16 — les
+  ids `_S{sqid}` n'existent que dans master. _Closes #17, #19._
+
+## [1.5.0] — 2026-06-10
+
+Release de l'**épic P0** de la [revue complète du 2026-06-09](docs/REVUE-2026-06-09.md)
+(#35) : corrections critiques à fort impact.
+
+### Corrigé
+
+- **CSS** : les 10 variables DSFR fantômes (`--error-425`, `--warning-425`,
+  `--blue-france`…) sont remplacées par des tokens 1.14 réels — les messages
+  d'erreur et d'avertissement EM retrouvent leur couleur (RGAA). _Closes #6._
+- **CSS** : `.ls-js-hidden` redéfinie (elle était fournie par
+  `template-core.css`, retiré dans `config.xml`) — l'alerte RGPD
+  `#datasecurity_error` n'est plus visible en permanence. _Closes #7._
+- **Twig** : `fr-col-offset-2--lg` (classe inexistante) → `fr-col-offset-lg-2` ;
+  les formulaires inscription / code d'accès / sauvegarde / chargement sont à
+  nouveau centrés. _Closes #8._
+- **JS** : suppression du handler legacy de `theme.js` qui retirait
+  `fr-input-group--error` dès la première frappe même sur saisie invalide,
+  en contradiction avec la validation de `src/`. Retrait des 8 `console.log`
+  de debug du bundle. _Closes #9._
+- **JS** : `:has()` éliminé de `required-fields.js` (SyntaxError sur
+  Firefox ESR 115 / Safari < 15.4 qui interrompait toute l'initialisation) ;
+  chaque init de `index.js` est isolée par `safeInit()` (try/catch). _Closes #10._
+- **Twig** : `justsaved.twig` réécrit en alerte DSFR fermable
+  (`fr-alert--success/error/info`) au lieu de Bootstrap (`alert fade in`)
+  et d'API inventées (`data-fr-dismiss`). _Closes #11._
+
 ## [1.4.0] — 2026-06-01
 
 Version centrée sur la **configurabilité** du thème et la **fiabilité des mises

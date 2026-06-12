@@ -1,2 +1,4 @@
-<small class="{{ aSurveyInfo.class.required  }} fr-text--error asterisk fa fa-asterisk fr-float-left small" {{ aSurveyInfo.attr.required  }} >&nbsp;</small>
-<span class="{{ aSurveyInfo.class.requiredspan  }} fr-sr-only fr-text--error asterisk" {{ aSurveyInfo.attr.requiredspan  }} > ({{ gT("Mandatory") }})</span>
+{# Marqueur de champ obligatoire : astérisque texte (pas d'icône-fonte,
+   rendue vide sans FontAwesome) + alternative sr-only. #}
+<span class="{{ aSurveyInfo.class.required }} asterisk required-asterisk" {{ aSurveyInfo.attr.required }} aria-hidden="true">*</span>
+<span class="{{ aSurveyInfo.class.requiredspan }} fr-sr-only" {{ aSurveyInfo.attr.requiredspan }}> ({{ gT("Mandatory") }})</span>

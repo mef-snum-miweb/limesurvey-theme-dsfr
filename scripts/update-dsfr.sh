@@ -152,6 +152,17 @@ else
     echo "  ⚠ node introuvable — lance \`node externalize-data-uris.mjs\` à la main avant de commiter."
 fi
 
+# --- Enveloppe @layer des CSS vendorés (cascade layers, issue #41) ----------
+# Les CSS fraîchement téléchargés sont « plats » : on les ré-enveloppe dans
+# `@layer dsfr { … }` pour préserver l'ordre de cascade du thème.
+echo ""
+echo "▶ Enveloppe @layer des CSS vendorés..."
+if command -v node >/dev/null 2>&1; then
+    node "${THEME_DIR}/wrap-css-layers.mjs"
+else
+    echo "  ⚠ node introuvable — lance \`node wrap-css-layers.mjs\` à la main avant de commiter."
+fi
+
 # --- Résumé ---------------------------------------------------------------
 echo ""
 echo "═══════════════════════════════════════════════════════════════"

@@ -6,7 +6,13 @@ Liste exhaustive de ce que le thème DSFR prend en charge : types de questions, 
 
 ## Types de questions LimeSurvey
 
-Les **36 types** du noyau LimeSurvey ont un template Twig DSFR dédié dans [`views/survey/questions/answer/`](views/survey/questions/answer/).
+Les types du noyau LimeSurvey sont rendus en DSFR via les surcharges de
+[`views/survey/questions/answer/`](views/survey/questions/answer/), avec quelques
+**fallbacks core assumés** (rendu fonctionnel mais non stylé DSFR) : équation `*`
+(affichage de résultat), liste avec commentaire en mode `use_dropdown`, multi-flexi
+en layout checkbox, texte court en mode carte (`location_mapservice`), selects
+heure/minute du mode date dropdown. L'index des questions est volontairement
+masqué en format « tout sur une page » (all-in-one).
 
 ### Questions simples
 
@@ -116,7 +122,7 @@ Détail des critères et audit : [`DECLARATION_RGAA.md`](DECLARATION_RGAA.md).
 ### Navigation
 - **Boutons** `fr-btn` (primary, secondary, tertiary)
 - **Skip links** `fr-skiplinks`
-- **Icônes** Remix Icon via `icons.min.css` + `icons-system.min.css` (1000+ SVG répartis en 18 catégories, pas de data-URI)
+- **Icônes** Remix Icon via `icons.min.css` (1000+ SVG répartis en 18 catégories, pas de data-URI)
 
 ### Grille
 - `fr-grid-row` + `fr-col-*`

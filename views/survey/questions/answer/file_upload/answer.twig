@@ -87,8 +87,8 @@
 
     {# Upload progress #}
     <div id="upload-progress-{{ fileid }}" class="fr-mt-2w" style="display: none;">
-        <div class="fr-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-            <div class="fr-progress__bar" style="width: 0%"></div>
+        <div class="lsd-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+            <div class="lsd-progress__bar" style="width: 0%"></div>
         </div>
         <p class="fr-text--sm fr-mt-1w" id="upload-status-{{ fileid }}">{{ gT('Uploading file') }}...</p>
     </div>
@@ -118,7 +118,7 @@
     var fileInput = document.getElementById('file-input-' + fieldname);
     var uploadZone = document.getElementById('upload-zone-' + fieldname);
     var progressDiv = document.getElementById('upload-progress-' + fieldname);
-    var progressBar = progressDiv ? progressDiv.querySelector('.fr-progress__bar') : null;
+    var progressBar = progressDiv ? progressDiv.querySelector('.lsd-progress__bar') : null;
     var statusText = document.getElementById('upload-status-' + fieldname);
     var messagesDiv = document.getElementById('upload-messages-' + fieldname);
     var filesListUl = document.getElementById('files-list-' + fieldname);
@@ -537,14 +537,14 @@
     border-color: var(--border-action-high-blue-france);
 }
 
-.dsfr-upload-container .fr-progress {
+.dsfr-upload-container .lsd-progress {
     height: 8px;
     background: var(--background-alt-grey);
     border-radius: 4px;
     overflow: hidden;
 }
 
-.dsfr-upload-container .fr-progress__bar {
+.dsfr-upload-container .lsd-progress__bar {
     height: 100%;
     background: var(--background-action-high-blue-france);
     transition: width 0.3s ease;

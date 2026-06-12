@@ -26,7 +26,7 @@
         {% if prefix != '' or suffix != '' %}
         <div class="fr-input-wrap{% if prefix != '' %} fr-input-wrap--prefix{% endif %}{% if suffix != '' %} fr-input-wrap--suffix{% endif %}">
             {% if prefix != '' %}
-                <span class="fr-input-wrap__prefix">{{ processString(prefix) }}</span>
+                <span class="lsd-input-prefix">{{ processString(prefix) }}</span>
             {% endif %}
         {% endif %}
 
@@ -45,7 +45,7 @@
 
         {% if prefix != '' or suffix != '' %}
             {% if suffix != '' %}
-                <span class="fr-input-wrap__suffix">{{ processString(suffix) }}</span>
+                <span class="lsd-input-suffix">{{ processString(suffix) }}</span>
             {% endif %}
         </div>
         {% endif %}

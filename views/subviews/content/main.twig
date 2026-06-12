@@ -18,12 +18,12 @@
 
     NOTE: This content is included inside mainrow.twig
     NOTE: see layout_global.twig for more infos
-}
+#}
 
 {# Include the form opening tag #}
 {{ include('./subviews/header/start_form.twig') }} <!-- main form -->
 
-    <main id="main-content">
+    <div class="ls-main-content">
         {# This will display the script and the hidden inputs needed for ExpressionScript Engine #}
         {{ aSurveyInfo.EM.ScriptsAndHiddenInputs  }}
 
@@ -48,6 +48,6 @@
         {% if aSurveyInfo.aNavigator.show %}
             {{ include('./subviews/navigation/navigator.twig') }}
         {% endif %}
-    </main>
+    </div>
 
 </form> <!-- main form -->

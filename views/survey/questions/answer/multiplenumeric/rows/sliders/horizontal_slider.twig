@@ -1,22 +1,35 @@
-<!-- Curseur DSFR horizontal -->
+{# Curseur horizontal — range HTML5 natif piloté par src/inputs/slider-native.js.
+   Le champ réponse est #answer{myfname} (name={myfname}) : il reste vide tant
+   que le curseur n'est pas touché (sémantique « non répondu » du LSSlider core).
+   Le range (#answer{myfname}slid, sans name) n'est que l'UI. #}
+{% set sliderHasValue = (dispVal is defined and dispVal != '') %}
+{% set sliderDefaultApplies = (not sliderHasValue and slider_default_set) %}
+{% set sliderAnswerValue = sliderHasValue ? dispVal : (sliderDefaultApplies ? slider_value : '') %}
+{% set sliderUiPosition = sliderAnswerValue != ''
+    ? sliderAnswerValue|replace({',': '.'})
+    : (slider_position != '' ? slider_position : (slider_min + slider_max) / 2) %}
 <div class="fr-range-group" id="range-group-{{ myfname }}">
     <div class="fr-range">
-        <!-- Affichage de la valeur courante -->
-        <span class="fr-range__output" id="output-{{ myfname }}">{{ dispVal|default(slider_value) }}</span>
+        <!-- Affichage de la valeur courante (– si pas encore de réponse) -->
+        <span class="fr-range__output" id="output-{{ myfname }}">{{ sliderAnswerValue != '' ? sliderAnswerValue : '–' }}</span>
 
-        <!-- Input range HTML5 natif -->
+        <!-- Input range HTML5 natif (UI seule, jamais soumis) -->
         <input
-            id="answer{{ myfname }}"
-            name="{{ myfname }}"
+            id="answer{{ myfname }}slid"
             type="range"
             aria-labelledby="label-{{ myfname }}"
             min="{{ slider_min }}"
             max="{{ slider_max }}"
-            step="{{ slider_accuracy|default('1') }}"
-            value="{{ dispVal|default(slider_value) }}"
+            step="{{ slider_step|default(1) }}"
+            value="{{ sliderUiPosition }}"
             {% if slider_reversed == 'true' %}dir="rtl"{% endif %}
-            class="answer-item numeric-item slider-item"
+            class="slider-item{% if sliderAnswerValue == '' %} slider-untouched{% endif %}"
             data-slider-orientation="{{ slider_orientation }}"
+            data-ls-slider="{{ myfname }}"
+            data-separator="{{ sSeparator }}"
+            data-prefix="{{ processString(prefix,1) }}"
+            data-suffix="{{ processString(suffix,1) }}"
+            data-reset-position="{{ slider_position != '' ? slider_position : (slider_min + slider_max) / 2 }}"
         />
 
         {% if slider_showminmax %}
@@ -39,7 +52,7 @@
                 </div>
             {% endif %}
             {% if sliderright is not empty %}
-                <div class="fr-col-6 fr-text--sm fr-text-right">
+                <div class="fr-col-6 fr-text--sm lsd-text-right">
                     {{ processString(sliderright) }}
                 </div>
             {% endif %}
@@ -47,71 +60,25 @@
     {% endif %}
 
     {% if slider_reset %}
-        <!-- Bouton reset DSFR -->
+        <!-- Bouton reset DSFR : revient à l'état « non répondu » -->
         <div class="fr-mt-2w ls-no-js-hidden">
             <button
                 id="answer{{ myfname }}_resetslider"
                 class="fr-btn fr-btn--secondary fr-btn--sm fr-icon-refresh-line"
                 type="button"
                 title="{{ gT('Reset') }}"
-                aria-label="{{ gT('Reset slider') }}"
+                aria-label="{{ gT('Reset') }}"
             >
                 {{ gT('Reset') }}
             </button>
         </div>
     {% endif %}
 
-    <!-- Hidden field pour compatibilité LimeSurvey -->
-    <input type="hidden" id="answer{{ myfname }}slid" name="{{ myfname }}slid" value="{{ dispVal|default(slider_value) }}" class="d-none" />
+    {# Champ RÉPONSE (name={myfname}) : masqué quand JS actif, saisissable
+       sans JS (fallback core). Vide = non répondu. #}
+    {{ C.Html.textField(myfname, sliderAnswerValue, {
+        'class': 'answer-item numeric-item ls-js-hidden' ~ (sliderAnswerValue == '' ? ' slider-untouched' : ''),
+        'id': "answer" ~ myfname,
+        'aria-labelledby': 'label-' ~ myfname
+    }) }}
 </div>
-
-<script>
-// Mise à jour de la valeur affichée quand le curseur change
-(function() {
-    var slider = document.getElementById('answer{{ myfname }}');
-    var output = document.getElementById('output-{{ myfname }}');
-    var hiddenField = document.getElementById('answer{{ myfname }}slid');
-
-    if (slider && output) {
-        // Mise à jour en temps réel (pendant le glissement)
-        slider.addEventListener('input', function() {
-            output.textContent = this.value;
-            if (hiddenField) {
-                hiddenField.value = this.value;
-            }
-        });
-
-        // Déclencher les événements LimeSurvey quand la valeur change
-        slider.addEventListener('change', function() {
-            output.textContent = this.value;
-            if (hiddenField) {
-                hiddenField.value = this.value;
-            }
-            // Déclencher les événements pour LimeSurvey (validation, conditions)
-            if (typeof $ !== 'undefined') {
-                $(this).trigger('change');
-                $(hiddenField).trigger('change');
-            }
-            // Trigger checkconditions si disponible
-            if (typeof checkconditions === 'function') {
-                checkconditions(this.value, this.name, 'text');
-            }
-        });
-
-        {% if slider_reset %}
-        // Bouton reset
-        var resetBtn = document.getElementById('answer{{ myfname }}_resetslider');
-        if (resetBtn) {
-            resetBtn.addEventListener('click', function() {
-                slider.value = '{{ slider_value|default((slider_min + slider_max) / 2) }}';
-                output.textContent = slider.value;
-                if (hiddenField) {
-                    hiddenField.value = slider.value;
-                }
-                slider.dispatchEvent(new Event('change', { bubbles: true }));
-            });
-        }
-        {% endif %}
-    }
-})();
-</script>

@@ -15,7 +15,10 @@
  * `setAttribute` + `textContent`. Pas de `innerHTML` avec données DOM (ADR-006).
  */
 
-const ACTIVE_SELECTOR = 'select.list-question-select, select.dsfr-input[data-width]';
+// data-width est posé par le core (bootstrap-select) sur les selects de
+// questions : marqueur stable, indépendant des classes ajoutées par le
+// code legacy de theme.js (purgé) qui posait `dsfr-input`.
+const ACTIVE_SELECTOR = 'select.list-question-select, select[data-width]';
 const UPGRADED_FLAG = 'data-dsfr-combobox';
 
 let comboboxCounter = 0;

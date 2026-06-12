@@ -28,8 +28,12 @@
 
 <!-- Array Texts (Type ;) - DSFR -->
 <div role="group" aria-labelledby="ls-question-text-{{ basename }}">
-    <div class="fr-table fr-table--bordered" data-fr-js-table="true">
-        <table {{ q_table_id_HTML }} class="{{ coreClass }} {{ extraclass }} {{ totals_class }}" aria-label="{{ t.response_matrix|default('Matrice de réponses') }}">
+    <div class="fr-table fr-table--bordered">
+    <div class="fr-table__wrapper">
+        <div class="fr-table__container">
+            <div class="fr-table__content">
+        <table {{ q_table_id_HTML }} class="{{ coreClass }} {{ extraclass }} {{ totals_class }}">
+                    <caption class="fr-sr-only">{{ t.response_matrix|default('Matrice de réponses') }}</caption>
             <colgroup class="col-responses">
                 <!-- Column for answer label -->
                 <col class="answertext" style="width: {{ answerwidth }}%;" />
@@ -80,6 +84,9 @@
                 {% endif %}
             </tbody>
         </table>
+            </div>
+        </div>
+    </div>
     </div>
 </div>
 <!-- end of Array Texts -->

@@ -152,6 +152,12 @@ export function handleArrayValidation() {
                     setTimeout(updateErrorSummary, 50);
                 }
             } else {
+                // Ré-insérer le compteur s'il avait été retiré (champ re-vidé
+                // après que tout était rempli) — même pattern que
+                // handleChoiceArray plus bas.
+                if (!counterContainer.isConnected && tableWrapper) {
+                    tableWrapper.parentNode.insertBefore(counterContainer, tableWrapper.nextSibling);
+                }
                 question.classList.add('input-error');
                 question.classList.remove('input-valid');
 

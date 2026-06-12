@@ -4,7 +4,7 @@ Survey List Layout - Liste des questionnaires publics
 #}
 
 <!DOCTYPE html>
-<html lang="{{ aSurveyInfo.languagecode }}" dir="{{ aSurveyInfo.dir }}"
+<html lang="{{ aSurveyInfo.languagecode }}" dir="{{ aSurveyInfo.dir }}" data-fr-scheme="{{ aSurveyInfo.options.dsfr_theme ? aSurveyInfo.options.dsfr_theme : 'light' }}"
       class="{{ aSurveyInfo.languagecode }} dir-{{ aSurveyInfo.dir }} {{ aSurveyInfo.class.html }}" {{ aSurveyInfo.attr.html }}>
 
 {{ include('./subviews/header/head.twig') }}
@@ -34,9 +34,9 @@ Survey List Layout - Liste des questionnaires publics
                     <div class="fr-grid-row fr-grid-row--center fr-mb-4w">
                         <div class="fr-col-12 fr-col-md-8 fr-col-lg-6">
                             {% if aSurveyInfo.options.brandlogo == "on" %}
-                                {{ image('./files/survey_list_header.png', aSurveyInfo.name, {"class": "fr-responsive-img fr-mx-auto fr-mb-2w", "style": "display: block; max-height: 120px;"}) }}
+                                {{ image('./files/survey_list_header.png', aSurveyInfo.name, {"class": "fr-responsive-img lsd-mx-auto fr-mb-2w", "style": "display: block; max-height: 120px;"}) }}
                             {% endif %}
-                            <h1 class="fr-h3 fr-text--center">{{ aSurveyInfo.sSiteName }}</h1>
+                            <h1 class="fr-h3 lsd-text-center">{{ aSurveyInfo.sSiteName }}</h1>
                         </div>
                     </div>
 
@@ -79,7 +79,7 @@ Survey List Layout - Liste des questionnaires publics
                     {# Contact #}
                     <div class="fr-grid-row fr-grid-row--center fr-mt-4w">
                         <div class="fr-col-12 fr-col-md-8 fr-col-lg-6">
-                            <p class="fr-text--sm fr-text--muted">
+                            <p class="fr-text--sm lsd-text-muted">
                                 {{ sprintf(gT("Please contact %s ( %s ) for further assistance."), aSurveyInfo.sSiteAdminName, aSurveyInfo.sSiteAdminEmail) }}
                             </p>
                         </div>
@@ -87,11 +87,11 @@ Survey List Layout - Liste des questionnaires publics
 
                     {# Footer LimeSurvey #}
                     <div class="fr-grid-row fr-grid-row--center fr-mt-6w">
-                        <div class="fr-col-12 fr-text--center">
+                        <div class="fr-col-12 lsd-text-center">
                             <a href="https://www.limesurvey.org" target="_blank" rel="noopener" class="fr-link fr-text--sm">
                                 The Online Survey Tool
                             </a>
-                            <span class="fr-text--sm fr-text--muted"> - Free & Open Source</span>
+                            <span class="fr-text--sm lsd-text-muted"> - Free & Open Source</span>
                         </div>
                     </div>
                 </div>

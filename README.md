@@ -76,6 +76,30 @@ Le repo [`bmatge/limesurvey-dsfr-suite`](https://github.com/bmatge/limesurvey-ds
 
 ---
 
+## Compatibilité LimeSurvey
+
+**Version testée et supportée : LimeSurvey 6.16.16** (image `martialblog/limesurvey:6-apache`).
+
+Le thème étant autonome (sans `<extends>`), il duplique les conventions de nommage des
+champs du core (noms POST, ids `javatbd*`, `data-value` du ranking). Vérifié sur 6.16.16 :
+le thème est strictement aligné (`{name}other`, `{fileid}_filecount`, `javatbd{name}Y/N`,
+`javatbd{rankingName}{code}`).
+
+> ⚠️ **Breaking change à venir** : le master LimeSurvey (futures 6.x/7.x) renomme ces
+> champs avec un infixe `_C`/`_S` (`{name}_Cother`, `{fileid}_Cfilecount`,
+> `javatbd{name}_CY`, `javatbd{rankingName}_S{sqid}`…). Avant toute montée de version,
+> vérifier ces conventions dans `application/views/survey/questions/answer/` de la
+> version cible — sans adaptation du thème, **le texte « autre » et le compteur
+> d'upload ne seraient plus enregistrés**. Recommandation : épingler le tag Docker sur
+> une version vérifiée (ex. `martialblog/limesurvey:6.16-apache`) plutôt que `6-apache`.
+>
+> À la montée de version, porter aussi les fonctionnalités **introduites après 6.16.16**
+> (absentes du thème comme du vanilla 6.16.16, vérifié dans le conteneur) :
+> politique de confidentialité sur les pages code d'accès et inscription
+> (`showtokenpolicy`/`showregisterpolicy` + partials `token_privacy`/`register_privacy`),
+> attributs d'inscription typés liste/date (`DD`/`DP`), confirmation d'opt-out en POST
+> (`optin_post_link`).
+
 ## Mise à jour
 
 > **Mettre à jour = remplacer les fichiers sur disque. Ne jamais désinstaller / réinstaller

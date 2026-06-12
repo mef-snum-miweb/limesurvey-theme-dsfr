@@ -7,6 +7,24 @@
   );
 
   // modules/theme-dsfr/src/core/runtime.js
+  var JQUERY_RETRY_INTERVAL_MS = 100;
+  var JQUERY_RETRY_MAX = 100;
+  function whenJQueryReady(cb) {
+    if (typeof window.$ !== "undefined") {
+      cb(window.$);
+      return;
+    }
+    let attempts = 0;
+    const timer = setInterval(() => {
+      attempts++;
+      if (typeof window.$ !== "undefined") {
+        clearInterval(timer);
+        cb(window.$);
+      } else if (attempts >= JQUERY_RETRY_MAX) {
+        clearInterval(timer);
+      }
+    }, JQUERY_RETRY_INTERVAL_MS);
+  }
   function onReady(cb) {
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", cb);
@@ -16,11 +34,14 @@
   }
   function onQuestionsLoaded(cb) {
     document.addEventListener("limesurvey:questionsLoaded", cb);
+    whenJQueryReady(($2) => {
+      $2(document).on("pjax:complete.dsfrQuestionsLoaded", cb);
+    });
   }
   function onPjax(cb) {
-    if (typeof window.$ !== "undefined") {
-      window.$(document).on("pjax:complete", cb);
-    }
+    whenJQueryReady(($2) => {
+      $2(document).on("pjax:complete.dsfrPjax", cb);
+    });
   }
 
   // modules/theme-dsfr/src/rte/sanitize-constants.js
@@ -91,7 +112,6 @@
     if (typeof window.LSThemeOptions === "undefined" || window.LSThemeOptions.sanitize_rte_content !== "on") {
       return;
     }
-    console.log("[DSFR] Nettoyage du contenu RTE...");
     RTE_CONTENT_SELECTORS.forEach((selector) => {
       try {
         const elements = document.querySelectorAll(selector);
@@ -101,7 +121,6 @@
       } catch (e) {
       }
     });
-    console.log("[DSFR] Contenu RTE nettoyé");
   }
 
   // modules/theme-dsfr/src/a11y/lazy-images.js
@@ -363,9 +382,17 @@
   // modules/theme-dsfr/src/validation/required-fields.js
   function handleRequiredFields() {
     const requiredFields = document.querySelectorAll('input[required], textarea[required], select[required], input[aria-required="true"], textarea[aria-required="true"], select[aria-required="true"]');
-    const mandatoryQuestions = document.querySelectorAll('.mandatory.question-container, .mandatory[id^="question"], .question-container:has(.mandatory-question)');
+    const mandatoryQuestions = new Set(
+      document.querySelectorAll('.mandatory.question-container, .mandatory[id^="question"]')
+    );
+    document.querySelectorAll(".mandatory-question").forEach((el) => {
+      const container = el.closest(".question-container");
+      if (container) {
+        mandatoryQuestions.add(container);
+      }
+    });
     const mandatoryBadges = document.querySelectorAll('.fr-badge[aria-label*="Mandatory"], .fr-badge[aria-label*="Obligatoire"]');
-    if (requiredFields.length === 0 && mandatoryQuestions.length === 0 && mandatoryBadges.length === 0) {
+    if (requiredFields.length === 0 && mandatoryQuestions.size === 0 && mandatoryBadges.length === 0) {
       return;
     }
     requiredFields.forEach((field) => {
@@ -518,6 +545,9 @@
     rows_remaining_plural: "Veuillez répondre aux %remaining% lignes restantes sur %total%.",
     rows_remaining_singular: "Veuillez répondre à la dernière ligne.",
     rows_all_required: "Veuillez répondre à toutes les lignes (%total% lignes).",
+    // Saisie à la demande (InputOnDemand) : des lignes obligatoires sont encore
+    // masquées — il faut les ajouter via le bouton pour pouvoir y répondre.
+    iod_add_lines: "Cette question attend une réponse pour chacune des %total% lignes : cliquez sur « Ajouter une ligne » puis complétez les %remaining% lignes manquantes.",
     field_valid: "Saisie valide",
     numeric_only: "Ce champ n'accepte que des valeurs numériques."
   };
@@ -528,6 +558,7 @@
     rows_remaining_plural: "Please answer the remaining %remaining% of %total% rows.",
     rows_remaining_singular: "Please answer the last row.",
     rows_all_required: "Please answer all rows (%total% rows).",
+    iod_add_lines: 'This question expects an answer for each of its %total% lines: click "Add a line" and complete the %remaining% missing lines.',
     field_valid: "Valid input",
     numeric_only: "This field only accepts numeric values."
   };
@@ -574,6 +605,68 @@
     }
     return str;
   }
+  var UI_I18N_FR = {
+    field_mandatory: "Ce champ est obligatoire",
+    thanks_answered: "Merci d'avoir répondu",
+    numeric_chars_only: "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.",
+    captcha_enter_answer: "Veuillez saisir votre réponse",
+    summary_all_fixed_title: "Toutes les erreurs ont été corrigées",
+    summary_all_fixed_desc: "Vous pouvez maintenant soumettre le formulaire.",
+    summary_one_error: "Une erreur à corriger",
+    summary_n_errors: "%n% erreurs à corriger",
+    summary_fix_following: "Veuillez corriger les erreurs suivantes :",
+    summary_untitled_question: "Question sans titre",
+    summary_fixed_one: "%s corrigée.",
+    summary_fixed_n: "%n% erreurs corrigées.",
+    summary_new_error: "Nouvelle erreur : %s.",
+    summary_new_errors: "%n% nouvelles erreurs.",
+    summary_all_fixed_announce: "Toutes les erreurs ont été corrigées. Vous pouvez soumettre le formulaire.",
+    summary_remaining_one: "Il reste 1 erreur.",
+    summary_remaining_n: "Il reste %n% erreurs.",
+    conditional_question: "Cette question est conditionnelle.",
+    conditional_a_question: "Une question",
+    conditional_revealed: "Nouvelle question affichée : %s",
+    ranking_max_reached: "Nombre maximum de réponses atteint",
+    ranking_added_at: "%s ajouté au classement en position %n%",
+    ranking_moved_to: "%s déplacé en position %n%"
+  };
+  var UI_I18N_EN = {
+    field_mandatory: "This field is mandatory",
+    thanks_answered: "Thank you for answering",
+    numeric_chars_only: "This field only accepts digits. Non-numeric characters are removed automatically.",
+    captcha_enter_answer: "Please enter your answer",
+    summary_all_fixed_title: "All errors have been fixed",
+    summary_all_fixed_desc: "You can now submit the form.",
+    summary_one_error: "One error to fix",
+    summary_n_errors: "%n% errors to fix",
+    summary_fix_following: "Please fix the following errors:",
+    summary_untitled_question: "Untitled question",
+    summary_fixed_one: "%s fixed.",
+    summary_fixed_n: "%n% errors fixed.",
+    summary_new_error: "New error: %s.",
+    summary_new_errors: "%n% new errors.",
+    summary_all_fixed_announce: "All errors have been fixed. You can submit the form.",
+    summary_remaining_one: "There is 1 error left.",
+    summary_remaining_n: "There are %n% errors left.",
+    conditional_question: "This question is conditional.",
+    conditional_a_question: "A question",
+    conditional_revealed: "New question displayed: %s",
+    ranking_max_reached: "Maximum number of answers reached",
+    ranking_added_at: "%s added to ranking at position %n%",
+    ranking_moved_to: "%s moved to position %n%"
+  };
+  function tUI(key, label, n) {
+    const lang = (document.documentElement.lang || "fr").toLowerCase().substring(0, 2);
+    const dict = lang === "en" ? UI_I18N_EN : UI_I18N_FR;
+    let str = dict[key] || UI_I18N_FR[key] || key;
+    if (typeof label !== "undefined" && label !== null) {
+      str = str.replace("%s", label);
+    }
+    if (typeof n !== "undefined") {
+      str = str.replace("%n%", n);
+    }
+    return str;
+  }
 
   // modules/theme-dsfr/src/core/dom-utils.js
   function isValidNumber(value) {
@@ -617,7 +710,7 @@
   function describeErrorQuestion(question) {
     const id = question.id;
     const textEl = question.querySelector(".ls-label-question, .question-text");
-    const text = textEl ? textEl.textContent.trim() : "Question sans titre";
+    const text = textEl ? textEl.textContent.trim() : tUI("summary_untitled_question");
     const msgEl = question.querySelector(".fr-message--error");
     const msg = msgEl ? msgEl.textContent.trim() : "";
     let label = text;
@@ -653,15 +746,15 @@
     const description = summary.querySelector(".dsfr-error-summary-desc");
     if (remaining === 0) {
       summary.className = "fr-alert fr-alert--success fr-mb-4w";
-      if (title) title.textContent = "Toutes les erreurs ont été corrigées";
-      if (description) description.textContent = "Vous pouvez maintenant soumettre le formulaire.";
+      if (title) title.textContent = tUI("summary_all_fixed_title");
+      if (description) description.textContent = tUI("summary_all_fixed_desc");
       return;
     }
     summary.className = "fr-alert fr-alert--error fr-mb-4w";
     if (title) {
-      title.textContent = remaining === 1 ? "Une erreur à corriger" : remaining + " erreurs à corriger";
+      title.textContent = remaining === 1 ? tUI("summary_one_error") : tUI("summary_n_errors", null, remaining);
     }
-    if (description) description.textContent = "Veuillez corriger les erreurs suivantes :";
+    if (description) description.textContent = tUI("summary_fix_following");
   }
   function createErrorSummary() {
     const existing = document.getElementById(SUMMARY_ID);
@@ -711,25 +804,57 @@
       const question = document.getElementById(id);
       if (!question) return;
       const stillInError = isListableError(question);
-      if (stillInError) return;
+      if (stillInError) {
+        const link2 = item.querySelector("a");
+        if (link2) {
+          const fresh = describeErrorQuestion(question).label;
+          if (fresh && link2.textContent !== fresh) {
+            link2.textContent = fresh;
+          }
+        }
+        return;
+      }
       const link = item.querySelector("a");
       const label = link ? link.textContent.trim() : "";
       if (label) correctedLabels.push(label.split(" : ")[0]);
       item.remove();
       removed++;
     });
+    let added = 0;
+    const addedLabels = [];
+    const list = summary.querySelector("ul");
+    if (list) {
+      const presentIds = new Set(
+        Array.from(summary.querySelectorAll(".error-item")).map((item) => item.getAttribute("data-question-id"))
+      );
+      Array.from(document.querySelectorAll(ERROR_QUESTION_SELECTOR)).filter(isListableError).forEach((question) => {
+        if (!question.id || presentIds.has(question.id)) return;
+        const error = describeErrorQuestion(question);
+        list.appendChild(buildErrorItem(error));
+        addedLabels.push(error.label.split(" : ")[0]);
+        added++;
+      });
+    }
     const remaining = summary.querySelectorAll(".error-item").length;
     updateHeader(summary, remaining);
-    if (removed > 0) {
-      let msg;
-      if (remaining === 0) {
-        msg = "Toutes les erreurs ont été corrigées. Vous pouvez soumettre le formulaire.";
-      } else if (removed === 1) {
-        msg = correctedLabels[0] + " corrigée. " + (remaining === 1 ? "Il reste 1 erreur." : "Il reste " + remaining + " erreurs.");
-      } else {
-        msg = removed + " erreurs corrigées. " + (remaining === 1 ? "Il reste 1 erreur." : "Il reste " + remaining + " erreurs.");
+    if (removed > 0 || added > 0) {
+      const parts = [];
+      if (removed === 1) {
+        parts.push(tUI("summary_fixed_one", correctedLabels[0]));
+      } else if (removed > 1) {
+        parts.push(tUI("summary_fixed_n", null, removed));
       }
-      announceStatus(msg);
+      if (added === 1) {
+        parts.push(tUI("summary_new_error", addedLabels[0]));
+      } else if (added > 1) {
+        parts.push(tUI("summary_new_errors", null, added));
+      }
+      if (remaining === 0) {
+        parts.push(tUI("summary_all_fixed_announce"));
+      } else {
+        parts.push(remaining === 1 ? tUI("summary_remaining_one") : tUI("summary_remaining_n", null, remaining));
+      }
+      announceStatus(parts.join(" "));
     }
   }
 
@@ -754,7 +879,7 @@
       if (validContainer) {
         validContainer.style.display = "none";
       }
-      var allItems = question.querySelectorAll(".answer-item:not(.d-none)");
+      var allItems = question.querySelectorAll(".answer-item");
       allItems.forEach(function(item) {
         var inputGroup = item.querySelector(".fr-input-group");
         var messagesGroup = item.querySelector(".fr-messages-group");
@@ -782,13 +907,21 @@
         question.appendChild(counterContainer);
       }
       function updateCounter() {
-        var visibleItems = question.querySelectorAll(".answer-item:not(.d-none)");
-        var totalFields = visibleItems.length;
+        var allRows = question.querySelectorAll(".answer-item");
+        var totalFields = allRows.length;
         var emptyCount = 0;
-        visibleItems.forEach(function(item) {
+        var hiddenEmptyCount = 0;
+        allRows.forEach(function(item) {
           var input = item.querySelector("input, textarea");
           if (!input) return;
           var value = input.value ? input.value.trim() : "";
+          if (item.classList.contains("d-none")) {
+            if (value === "") {
+              emptyCount++;
+              hiddenEmptyCount++;
+            }
+            return;
+          }
           var inputGroup = item.querySelector(".fr-input-group");
           var messagesGroup = item.querySelector(".fr-messages-group");
           if (value === "") {
@@ -842,9 +975,18 @@
             setTimeout(updateErrorSummary, 50);
           }
         } else {
+          if (!counterContainer.isConnected) {
+            if (answersList) {
+              answersList.parentNode.insertBefore(counterContainer, answersList.nextSibling);
+            } else {
+              question.appendChild(counterContainer);
+            }
+          }
           question.classList.add("input-error");
           question.classList.remove("input-valid");
-          if (emptyCount === totalFields) {
+          if (hiddenEmptyCount > 0) {
+            counterMessage.textContent = tMandatory("iod_add_lines", emptyCount, totalFields);
+          } else if (emptyCount === totalFields) {
             counterMessage.textContent = tMandatory("fields_all_required", null, totalFields);
           } else if (emptyCount === 1) {
             counterMessage.textContent = tMandatory("fields_remaining_singular");
@@ -863,6 +1005,22 @@
         input.dataset.errorListenerAdded = "true";
         input.addEventListener("input", updateCounter);
       });
+      var iodList = question.querySelector(".selector--inputondemand-list");
+      if (iodList) {
+        new MutationObserver(function(mutations) {
+          var revealed = mutations.some(function(m) {
+            return typeof m.oldValue === "string" && m.oldValue.indexOf("d-none") !== -1 && m.target.classList && !m.target.classList.contains("d-none");
+          });
+          if (revealed) {
+            updateCounter();
+          }
+        }).observe(iodList, {
+          attributes: true,
+          attributeFilter: ["class"],
+          attributeOldValue: true,
+          subtree: true
+        });
+      }
     });
   }
 
@@ -963,6 +1121,9 @@
             setTimeout(updateErrorSummary, 50);
           }
         } else {
+          if (!counterContainer.isConnected && tableWrapper) {
+            tableWrapper.parentNode.insertBefore(counterContainer, tableWrapper.nextSibling);
+          }
           question.classList.add("input-error");
           question.classList.remove("input-valid");
           if (emptyCount === totalFields) {
@@ -1124,6 +1285,10 @@
       question.querySelectorAll('input:not([type="hidden"]), textarea, select').forEach(function(field) {
         field.setAttribute("aria-invalid", "true");
       });
+      const fieldset = question.querySelector("fieldset.fr-fieldset");
+      if (fieldset) {
+        fieldset.classList.add("fr-fieldset--error");
+      }
     });
     errorQuestions.forEach(function(question) {
       if (question.classList.contains("multiple-short-txt")) {
@@ -1210,7 +1375,7 @@
           const newErrorMessage = document.createElement("p");
           newErrorMessage.className = "fr-message fr-message--error";
           newErrorMessage.id = messagesGroup.id + "-error";
-          newErrorMessage.textContent = "Ce champ est obligatoire";
+          newErrorMessage.textContent = tUI("field_mandatory");
           newErrorMessage.setAttribute("role", "alert");
           messagesGroup.appendChild(newErrorMessage);
         }
@@ -1238,13 +1403,17 @@
             errorMsg2.setAttribute("role", "alert");
             messagesGroup.appendChild(errorMsg2);
           }
-          errorMsg2.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
+          errorMsg2.textContent = tUI("numeric_chars_only");
           setTimeout(updateErrorSummary, 50);
           return;
         }
       }
       inputGroup.classList.remove("fr-input-group--error");
       question.classList.remove("input-error");
+      const okFieldset = question.querySelector("fieldset.fr-fieldset--error");
+      if (okFieldset) {
+        okFieldset.classList.remove("fr-fieldset--error");
+      }
       input.classList.remove("fr-input--error");
       input.removeAttribute("aria-invalid");
       const errorMsg = messagesGroup.querySelector(".fr-message--error");
@@ -1263,7 +1432,7 @@
           validMessage.id = messagesGroup.id + "-valid";
           messagesGroup.appendChild(validMessage);
         }
-        validMessage.textContent = "Merci d'avoir répondu";
+        validMessage.textContent = tUI("thanks_answered");
       }
       setTimeout(updateErrorSummary, 50);
     }
@@ -1281,6 +1450,10 @@
       input.addEventListener("change", function() {
         inputGroup.classList.remove("fr-input-group--error");
         question.classList.remove("input-error");
+        const okFieldset = question.querySelector("fieldset.fr-fieldset--error");
+        if (okFieldset) {
+          okFieldset.classList.remove("fr-fieldset--error");
+        }
         question.querySelectorAll("[aria-invalid]").forEach(function(f) {
           f.removeAttribute("aria-invalid");
         });
@@ -1299,10 +1472,10 @@
             validMessage.id = messagesGroup.id + "-valid";
             messagesGroup.appendChild(validMessage);
           }
-          validMessage.textContent = "Merci d'avoir répondu";
+          validMessage.textContent = tUI("thanks_answered");
         }
         setTimeout(updateErrorSummary, 50);
-      }, { once: true });
+      });
     });
   }
   function observeErrorChanges() {
@@ -1440,7 +1613,7 @@
             errorMessage.setAttribute("role", "alert");
             messagesGroup.appendChild(errorMessage);
           }
-          errorMessage.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
+          errorMessage.textContent = tUI("numeric_chars_only");
         } else {
           question.classList.remove("input-error");
           inputGroup.classList.remove("fr-input-group--error");
@@ -1461,7 +1634,7 @@
               validMessage.id = messagesGroup.id + "-valid";
               messagesGroup.appendChild(validMessage);
             }
-            validMessage.textContent = "Merci d'avoir répondu";
+            validMessage.textContent = tUI("thanks_answered");
           }
           setTimeout(updateErrorSummary, 50);
         }
@@ -1520,7 +1693,7 @@
               errorMsg.setAttribute("role", "alert");
               messagesGroup.appendChild(errorMsg);
             }
-            errorMsg.textContent = "Ce champ est obligatoire";
+            errorMsg.textContent = tUI("field_mandatory");
           }
           const lsEmError = listItem.querySelector(".ls-em-error");
           if (lsEmError) {
@@ -1564,7 +1737,7 @@
               errorMsg.setAttribute("role", "alert");
               messagesGroup.appendChild(errorMsg);
             }
-            errorMsg.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
+            errorMsg.textContent = tUI("numeric_chars_only");
             question.dataset.hadError = "true";
           } else {
             this.classList.remove("fr-input--error");
@@ -1584,7 +1757,7 @@
                 validMsg.className = "fr-message fr-message--valid";
                 messagesGroup.appendChild(validMsg);
               }
-              validMsg.textContent = "Merci d'avoir répondu";
+              validMsg.textContent = tUI("thanks_answered");
             }
           }
           setTimeout(function() {
@@ -1609,10 +1782,10 @@
               var sumRangeMsg = qId ? document.getElementById("vmsg_" + qId + "_sum_range-dsfr") : null;
               if (sumRangeMsg) {
                 hasSumConstraint2 = true;
-                var rangeMatch = sumRangeMsg.textContent.match(/(\d+)\s+.+\s+(\d+)/);
-                if (rangeMatch) {
-                  var minSum = parseFloat(rangeMatch[1]);
-                  var maxSum = parseFloat(rangeMatch[2]);
+                var rangeNumbers = sumRangeMsg.textContent.match(/-?\d+(?:[.,]\d+)?/g);
+                if (rangeNumbers && rangeNumbers.length >= 2) {
+                  var minSum = parseFloat(rangeNumbers[0].replace(",", "."));
+                  var maxSum = parseFloat(rangeNumbers[rangeNumbers.length - 1].replace(",", "."));
                   var currentSum = 0;
                   allInputs.forEach(function(inp) {
                     var val = inp.value ? inp.value.trim().replace(",", ".") : "";
@@ -1643,7 +1816,7 @@
                         vMsg.className = "fr-message fr-message--valid";
                         msgs.appendChild(vMsg);
                       }
-                      vMsg.textContent = "Merci d'avoir répondu";
+                      vMsg.textContent = tUI("thanks_answered");
                     }
                   }
                 });
@@ -1682,29 +1855,23 @@
   }
   function observeNumericMultiSumValidation() {
     var numericMultiQuestions = document.querySelectorAll(".question-container.numeric-multi");
-    console.log("[DSFR SumValidation] Questions numeric-multi trouvées:", numericMultiQuestions.length);
     numericMultiQuestions.forEach(function(question) {
       var totalEl = question.querySelector(".dynamic-total");
-      console.log("[DSFR SumValidation] totalEl:", totalEl ? totalEl.id : "NON TROUVÉ");
       if (!totalEl) return;
       var qId = totalEl.id ? totalEl.id.replace("totalvalue_", "") : null;
-      console.log("[DSFR SumValidation] qId:", qId);
       if (!qId) return;
       var sumRangeMsgId = "vmsg_" + qId + "_sum_range-dsfr";
       var sumRangeMsg = document.getElementById(sumRangeMsgId);
-      console.log("[DSFR SumValidation] sumRangeMsg (" + sumRangeMsgId + "):", sumRangeMsg ? sumRangeMsg.textContent : "NON TROUVÉ");
       if (!sumRangeMsg) {
         sumRangeMsg = document.getElementById("vmsg_" + qId + "_sum_range");
-        console.log("[DSFR SumValidation] fallback vmsg_" + qId + "_sum_range:", sumRangeMsg ? sumRangeMsg.textContent : "NON TROUVÉ");
       }
       if (!sumRangeMsg) return;
       if (totalEl.dataset.dsfrSumObserver) return;
       totalEl.dataset.dsfrSumObserver = "true";
-      var rangeMatch = sumRangeMsg.textContent.match(/(\d+)\s+.+\s+(\d+)/);
-      console.log("[DSFR SumValidation] rangeMatch:", rangeMatch);
-      if (!rangeMatch) return;
-      var minSum = parseFloat(rangeMatch[1]);
-      var maxSum = parseFloat(rangeMatch[2]);
+      var rangeNumbers = sumRangeMsg.textContent.match(/-?\d+(?:[.,]\d+)?/g);
+      if (!rangeNumbers || rangeNumbers.length < 2) return;
+      var minSum = parseFloat(rangeNumbers[0].replace(",", "."));
+      var maxSum = parseFloat(rangeNumbers[rangeNumbers.length - 1].replace(",", "."));
       var totalRow = totalEl.closest(".ls-group-total");
       function checkSumAndUpdate() {
         var allInputs2 = question.querySelectorAll('input.numeric[data-number="1"]');
@@ -1774,24 +1941,87 @@
 
   // modules/theme-dsfr/src/validation/validation-messages.js
   function transformValidationMessages() {
-    const emMessages = document.querySelectorAll(".ls-question-message");
+    const emMessages = document.querySelectorAll(".ls-question-message, .dsfr-vmsg-core");
     emMessages.forEach((message) => {
       if (message.classList.contains("fr-message")) {
         return;
       }
-      let messageType = "info";
-      if (message.classList.contains("ls-em-error")) {
-        messageType = "error";
-      } else if (message.classList.contains("ls-em-warning")) {
-        messageType = "warning";
-      } else if (message.classList.contains("ls-em-success") || message.classList.contains("ls-em-tip")) {
-        messageType = "info";
+      if (message.dataset.dsfrMirrored !== "1") {
+        mirrorMessage(message);
       }
-      const dsfrMessage = document.createElement("p");
-      dsfrMessage.className = `fr-message fr-message--${messageType}`;
+      wireEmClassSync(message);
+    });
+  }
+  function mirrorMessage(message) {
+    let messageType = "info";
+    if (message.classList.contains("ls-em-error")) {
+      messageType = "error";
+    } else if (message.classList.contains("ls-em-warning")) {
+      messageType = "warning";
+    } else if (message.classList.contains("ls-em-success") || message.classList.contains("ls-em-tip")) {
+      messageType = "info";
+    }
+    const dsfrMessage = document.createElement("p");
+    dsfrMessage.className = `fr-message fr-message--${messageType}`;
+    dsfrMessage.textContent = message.textContent.trim();
+    dsfrMessage.id = message.id ? `${message.id}-dsfr` : "";
+    message.insertAdjacentElement("afterend", dsfrMessage);
+    message.className = "dsfr-vmsg-core";
+    message.style.display = "none";
+    message.dataset.dsfrMirrored = "1";
+    const observer = new MutationObserver(() => {
       dsfrMessage.textContent = message.textContent.trim();
-      dsfrMessage.id = message.id ? `${message.id}-dsfr` : "";
-      message.replaceWith(dsfrMessage);
+    });
+    observer.observe(message, { childList: true, characterData: true, subtree: true });
+  }
+  function wireEmClassSync(message) {
+    if (message.dataset.dsfrEmWired === "1" || !message.id) {
+      return;
+    }
+    const $2 = window.jQuery || window.$;
+    if (!$2) {
+      return;
+    }
+    const mirror = document.getElementById(`${message.id}-dsfr`);
+    if (!mirror) {
+      return;
+    }
+    message.dataset.dsfrEmWired = "1";
+    $2(message).off("classChangeError classChangeGood");
+    let interacted = false;
+    let state = null;
+    const apply = () => {
+      if (!interacted || state === null) {
+        return;
+      }
+      const wasError = mirror.classList.contains("fr-message--error");
+      mirror.classList.toggle("fr-message--error", state === "error");
+      mirror.classList.toggle("fr-message--info", state !== "error");
+      if (wasError !== (state === "error")) {
+        setTimeout(updateErrorSummary, 50);
+      }
+    };
+    const question = message.closest(".question-container");
+    if (question) {
+      const markInteracted = (event) => {
+        if (!event.isTrusted) {
+          return;
+        }
+        interacted = true;
+        apply();
+        question.removeEventListener("input", markInteracted, true);
+        question.removeEventListener("change", markInteracted, true);
+      };
+      question.addEventListener("input", markInteracted, true);
+      question.addEventListener("change", markInteracted, true);
+    }
+    $2(message).on("classChangeError", () => {
+      state = "error";
+      apply();
+    });
+    $2(message).on("classChangeGood", () => {
+      state = "good";
+      apply();
     });
   }
 
@@ -1841,7 +2071,7 @@
   }
 
   // modules/theme-dsfr/src/dropdowns/combobox.js
-  var ACTIVE_SELECTOR = "select.list-question-select, select.dsfr-input[data-width]";
+  var ACTIVE_SELECTOR = "select.list-question-select, select[data-width]";
   var UPGRADED_FLAG = "data-dsfr-combobox";
   var comboboxCounter = 0;
   var globalClickHandler = null;
@@ -2210,7 +2440,7 @@
   function findQuestionByCode(questionCode) {
     let question = document.querySelector(`[data-qcode="${questionCode}"]`);
     if (!question) {
-      question = document.querySelector(`[id*="${questionCode}"]`);
+      question = document.getElementById("question" + questionCode) || document.getElementById("javatbd" + questionCode);
     }
     return question;
   }
@@ -2244,7 +2474,7 @@
       const lastQuestion = pq.pop();
       descText = `Cette question dépend de vos réponses à ${pq.join(", ")} et ${lastQuestion}.`;
     } else {
-      descText = "Cette question est conditionnelle.";
+      descText = tUI("conditional_question");
     }
     descElement.textContent = descText;
     return descElement;
@@ -2357,7 +2587,7 @@
         var text = titleEl.textContent.trim();
         return text.length > 80 ? text.substring(0, 80) + "…" : text;
       }
-      return "Une question";
+      return tUI("conditional_a_question");
     }
     function clearRevealedErrorState(questionEl) {
       questionEl.classList.remove("input-error");
@@ -2397,7 +2627,7 @@
             el.dataset.conditionalWasHidden = "false";
             clearRevealedErrorState(el);
             var label = getQuestionLabel(el);
-            scheduleAnnouncement("Nouvelle question affichée : " + label);
+            scheduleAnnouncement(tUI("conditional_revealed", label));
           }
         }
       });
@@ -2472,6 +2702,187 @@
     updateAddButtonVisibility();
   }
 
+  // modules/theme-dsfr/src/inputs/slider-native.js
+  var EMPTY_DISPLAY = "–";
+  function notifyExpressionManager(answerField) {
+    if (typeof window.$ !== "undefined") {
+      window.$(answerField).trigger("keyup");
+    }
+    if (typeof window.checkconditions === "function") {
+      window.checkconditions(answerField.value, answerField.name, "text");
+    }
+  }
+  function initOneSlider(range) {
+    if (range.dataset.lsSliderInit) {
+      return;
+    }
+    range.dataset.lsSliderInit = "1";
+    const myfname = range.dataset.lsSlider;
+    const answerField = document.getElementById("answer" + myfname);
+    const output = document.getElementById("output-" + myfname);
+    if (!answerField) {
+      return;
+    }
+    const separator = range.dataset.separator || ".";
+    const prefix = range.dataset.prefix || "";
+    const suffix = range.dataset.suffix || "";
+    const updateOutput = () => {
+      if (!output) {
+        return;
+      }
+      output.textContent = answerField.value === "" ? EMPTY_DISPLAY : prefix + answerField.value + suffix;
+    };
+    if (answerField.value !== "") {
+      const numeric = answerField.value.replace(separator, ".");
+      if (numeric !== "" && !isNaN(Number(numeric))) {
+        range.value = numeric;
+      }
+      range.classList.remove("slider-untouched");
+      answerField.classList.remove("slider-untouched");
+    }
+    updateOutput();
+    range.addEventListener("input", () => {
+      answerField.value = String(range.value).replace(".", separator);
+      range.classList.remove("slider-untouched");
+      answerField.classList.remove("slider-untouched");
+      updateOutput();
+    });
+    range.addEventListener("change", () => {
+      notifyExpressionManager(answerField);
+    });
+    answerField.addEventListener("change", () => {
+      const numeric = answerField.value.replace(separator, ".");
+      if (numeric !== "" && !isNaN(Number(numeric))) {
+        range.value = numeric;
+        range.classList.remove("slider-untouched");
+      }
+      updateOutput();
+    });
+    const resetBtn = document.getElementById("answer" + myfname + "_resetslider");
+    if (resetBtn) {
+      resetBtn.addEventListener("click", () => {
+        answerField.value = "";
+        range.classList.add("slider-untouched");
+        answerField.classList.add("slider-untouched");
+        const resetPosition = range.dataset.resetPosition;
+        if (resetPosition !== void 0 && resetPosition !== "") {
+          range.value = resetPosition;
+        }
+        updateOutput();
+        notifyExpressionManager(answerField);
+      });
+    }
+  }
+  function initNativeSliders() {
+    document.querySelectorAll('input[type="range"][data-ls-slider]').forEach(initOneSlider);
+  }
+
+  // modules/theme-dsfr/src/inputs/date-native.js
+  var TOKENS = ["YYYY", "MM", "DD", "HH", "mm", "ss"];
+  var TOKEN_PATTERN = "(\\d{1,4})";
+  function tokenizeFormat(fmt) {
+    const parts = [];
+    for (let i = 0; i < fmt.length; ) {
+      const token = TOKENS.find((t) => fmt.startsWith(t, i));
+      if (token) {
+        parts.push({ token });
+        i += token.length;
+      } else {
+        parts.push({ literal: fmt[i] });
+        i += 1;
+      }
+    }
+    return parts;
+  }
+  function parseDisplayValue(value, fmt) {
+    const parts = tokenizeFormat(fmt);
+    const order = [];
+    let re = "^\\s*";
+    parts.forEach((p) => {
+      if (p.token) {
+        order.push(p.token);
+        re += TOKEN_PATTERN;
+      } else {
+        re += "\\" + p.literal;
+      }
+    });
+    re += "\\s*$";
+    const m = value.match(new RegExp(re));
+    if (!m) {
+      return null;
+    }
+    const comp = { YYYY: "", MM: "01", DD: "01", HH: "00", mm: "00", ss: "00" };
+    order.forEach((token, idx) => {
+      comp[token] = m[idx + 1].padStart(token === "YYYY" ? 4 : 2, "0");
+    });
+    return comp.YYYY ? comp : null;
+  }
+  function formatDisplayValue(comp, fmt) {
+    return tokenizeFormat(fmt).map((p) => p.token ? comp[p.token] : p.literal).join("");
+  }
+  function parseNativeValue(value) {
+    const m = value.match(/^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+    if (!m) {
+      return null;
+    }
+    return { YYYY: m[1], MM: m[2], DD: m[3], HH: m[4] || "00", mm: m[5] || "00", ss: m[6] || "00" };
+  }
+  function formatNativeValue(comp, withTime) {
+    const date = comp.YYYY + "-" + comp.MM + "-" + comp.DD;
+    return withTime ? date + "T" + comp.HH + ":" + comp.mm : date;
+  }
+  function notifyExpressionManager2(answerField) {
+    if (typeof window.$ !== "undefined") {
+      window.$(answerField).trigger("change");
+    }
+    if (typeof window.checkconditions === "function") {
+      window.checkconditions(answerField.value, answerField.name, "text");
+    }
+  }
+  function initOneDateInput(native) {
+    if (native.dataset.lsDateInit) {
+      return;
+    }
+    native.dataset.lsDateInit = "1";
+    const name = native.dataset.lsDate;
+    const fmt = native.dataset.format || "YYYY-MM-DD";
+    const withTime = native.type === "datetime-local";
+    const answerField = document.getElementById("answer" + name);
+    if (!answerField) {
+      return;
+    }
+    if (answerField.value) {
+      const comp = parseDisplayValue(answerField.value, fmt);
+      if (comp) {
+        native.value = formatNativeValue(comp, withTime);
+      }
+    }
+    native.addEventListener("change", () => {
+      if (native.value === "") {
+        answerField.value = "";
+      } else {
+        const comp = parseNativeValue(native.value);
+        if (comp) {
+          answerField.value = formatDisplayValue(comp, fmt);
+        }
+      }
+      notifyExpressionManager2(answerField);
+    });
+    answerField.addEventListener("change", () => {
+      if (answerField.value === "") {
+        native.value = "";
+        return;
+      }
+      const comp = parseDisplayValue(answerField.value, fmt);
+      if (comp) {
+        native.value = formatNativeValue(comp, withTime);
+      }
+    });
+  }
+  function initNativeDateInputs() {
+    document.querySelectorAll("input[data-ls-date]").forEach(initOneDateInput);
+  }
+
   // modules/theme-dsfr/src/inputs/radio-buttons.js
   function initBootstrapButtonsRadio() {
     const radioGroups = document.querySelectorAll('.radio-list[data-bs-toggle="buttons"]');
@@ -2513,6 +2924,20 @@
           otherInput.value = hiddenInput.value;
         }
       }
+      document.querySelectorAll('input[type="radio"][name="' + name + '"]').forEach(function(sibling) {
+        if (sibling.dataset.dsfrOtherClear) {
+          return;
+        }
+        sibling.dataset.dsfrOtherClear = "1";
+        sibling.addEventListener("change", function() {
+          if (this.checked && this.value !== "-oth-") {
+            otherInput.value = "";
+            if (hiddenInput) {
+              hiddenInput.value = "";
+            }
+          }
+        });
+      });
     });
   }
 
@@ -2577,7 +3002,7 @@
         inputGroup.classList.add("fr-input-group--error");
         const errorMessage = document.createElement("p");
         errorMessage.className = "fr-message fr-message--error";
-        errorMessage.textContent = "Veuillez saisir votre réponse";
+        errorMessage.textContent = tUI("captcha_enter_answer");
         messagesGroup.appendChild(errorMessage);
         captchaInput.focus();
         return false;
@@ -2765,13 +3190,13 @@
     var rankList = document.getElementById("sortable-rank-" + qId);
     var currentCount = rankList.querySelectorAll("li:not(.ls-remove):not(.d-none)").length;
     if (maxAnswers > 0 && currentCount >= maxAnswers) {
-      announce(qId, "Nombre maximum de réponses atteint");
+      announce(qId, tUI("ranking_max_reached"));
       return;
     }
     rankList.appendChild(item);
     var label = getItemLabel(item);
     var newPos = rankList.querySelectorAll("li:not(.ls-remove):not(.d-none)").length;
-    announce(qId, label + " ajouté au classement en position " + newPos);
+    announce(qId, tUI("ranking_added_at", label, newPos));
     syncHiddenSelects(qId);
     refreshAllItems(qId);
     var choiceList = document.getElementById("sortable-choice-" + qId);
@@ -2809,7 +3234,7 @@
     var label = getItemLabel(item);
     var items = item.parentNode.querySelectorAll("li:not(.ls-remove):not(.d-none)");
     var newPos = Array.from(items).indexOf(item) + 1;
-    announce(qId, label + " déplacé en position " + newPos);
+    announce(qId, tUI("ranking_moved_to", label, newPos));
     syncHiddenSelects(qId);
     refreshAllItems(qId);
     item.focus();
@@ -2824,7 +3249,7 @@
     var label = getItemLabel(item);
     var items = item.parentNode.querySelectorAll("li:not(.ls-remove):not(.d-none)");
     var newPos = Array.from(items).indexOf(item) + 1;
-    announce(qId, label + " déplacé en position " + newPos);
+    announce(qId, tUI("ranking_moved_to", label, newPos));
     syncHiddenSelects(qId);
     refreshAllItems(qId);
     item.focus();
@@ -3041,94 +3466,113 @@
   }
 
   // modules/theme-dsfr/src/index.js
+  function safeInit(fn) {
+    try {
+      fn();
+    } catch (e) {
+      if (typeof console !== "undefined" && console.warn) {
+        console.warn('[DSFR] init "' + (fn.name || "anonyme") + '" en échec :', e);
+      }
+    }
+  }
   registerRelevanceGlobals(window);
   window.DSFRSanitizeRTEContent = sanitizeRTEContent;
+  var DELAY_EM_MESSAGES = 100;
+  var DELAY_DOM_STABLE = 200;
+  var DELAY_RANKING = 300;
+  var DELAY_AFTER_SUBMIT = 500;
   onReady(() => {
-    sanitizeRTEContent();
-    enableImageLazyLoading();
-    extendDescribedByForValidationTips();
-    addInputmodeNumericToNumericFields();
-    reorderListRadioNoAnswer();
-    fixTableAccessibility();
-    handleRequiredFields();
-    transformErrorsToDsfr();
-    handleMultipleShortTextErrors();
-    observeErrorChanges();
-    initAriaInvalidSync();
-    initNumericValidation();
-    handleArrayValidation();
-    handleNumericMultiValidation();
-    handleSimpleQuestionValidation();
-    transformValidationMessages();
-    setTimeout(transformValidationMessages, 100);
-    setTimeout(observeNumericMultiSumValidation, 200);
-    setTimeout(createErrorSummary, 100);
-    fixDropdownArrayInlineStyles();
-    setupStyleObserver();
-    initSearchableDropdowns();
-    initStepperProgress();
-    initConditionalQuestionsAria();
-    setupConditionalQuestionsObserver();
-    initConditionalVisibilityNotifier();
-    excludeIrrelevantInputsFromTabOrder();
-    initMultipleShortText();
-    initBootstrapButtonsRadio();
-    initRadioOtherField();
-    initCaptchaReload();
-    initCaptchaValidation();
-    initAllRankingQuestions();
-    setTimeout(initRelevanceHandlers, 100);
+    safeInit(sanitizeRTEContent);
+    safeInit(enableImageLazyLoading);
+    safeInit(extendDescribedByForValidationTips);
+    safeInit(addInputmodeNumericToNumericFields);
+    safeInit(reorderListRadioNoAnswer);
+    safeInit(fixTableAccessibility);
+    safeInit(handleRequiredFields);
+    safeInit(transformErrorsToDsfr);
+    safeInit(handleMultipleShortTextErrors);
+    safeInit(observeErrorChanges);
+    safeInit(initAriaInvalidSync);
+    safeInit(initNumericValidation);
+    safeInit(handleArrayValidation);
+    safeInit(handleNumericMultiValidation);
+    safeInit(handleSimpleQuestionValidation);
+    safeInit(transformValidationMessages);
+    setTimeout(() => safeInit(transformValidationMessages), 100);
+    setTimeout(() => safeInit(observeNumericMultiSumValidation), DELAY_DOM_STABLE);
+    setTimeout(() => safeInit(createErrorSummary), DELAY_EM_MESSAGES);
+    safeInit(fixDropdownArrayInlineStyles);
+    safeInit(setupStyleObserver);
+    safeInit(initSearchableDropdowns);
+    safeInit(initStepperProgress);
+    safeInit(initConditionalQuestionsAria);
+    safeInit(setupConditionalQuestionsObserver);
+    safeInit(initConditionalVisibilityNotifier);
+    safeInit(excludeIrrelevantInputsFromTabOrder);
+    safeInit(initMultipleShortText);
+    safeInit(initBootstrapButtonsRadio);
+    safeInit(initRadioOtherField);
+    safeInit(initNativeSliders);
+    safeInit(initNativeDateInputs);
+    safeInit(initCaptchaReload);
+    safeInit(initCaptchaValidation);
+    safeInit(initAllRankingQuestions);
+    setTimeout(() => safeInit(initRelevanceHandlers), DELAY_EM_MESSAGES);
     const forms = document.querySelectorAll('form#limesurvey, form[name="limesurvey"]');
     forms.forEach((form) => {
       form.addEventListener("submit", () => {
         setTimeout(() => {
-          transformErrorsToDsfr();
-          createErrorSummary();
-        }, 500);
+          safeInit(transformErrorsToDsfr);
+          safeInit(createErrorSummary);
+        }, DELAY_AFTER_SUBMIT);
       });
     });
   });
   onQuestionsLoaded(() => {
-    enableImageLazyLoading();
-    extendDescribedByForValidationTips();
-    addInputmodeNumericToNumericFields();
-    reorderListRadioNoAnswer();
-    handleRequiredFields();
-    transformErrorsToDsfr();
-    handleMultipleShortTextErrors();
-    initNumericValidation();
-    handleArrayValidation();
-    handleNumericMultiValidation();
-    handleSimpleQuestionValidation();
-    transformValidationMessages();
-    fixDropdownArrayInlineStyles();
-    setupStyleObserver();
-    initSearchableDropdowns();
-    setTimeout(fixTableAccessibility, 200);
-    setTimeout(observeNumericMultiSumValidation, 200);
-    setTimeout(createErrorSummary, 100);
-    initMultipleShortText();
-    initBootstrapButtonsRadio();
-    initRadioOtherField();
-    initCaptchaReload();
-    initCaptchaValidation();
-    setTimeout(initAllRankingQuestions, 300);
-    initRelevanceHandlers();
+    safeInit(enableImageLazyLoading);
+    safeInit(extendDescribedByForValidationTips);
+    safeInit(addInputmodeNumericToNumericFields);
+    safeInit(reorderListRadioNoAnswer);
+    safeInit(handleRequiredFields);
+    safeInit(transformErrorsToDsfr);
+    safeInit(handleMultipleShortTextErrors);
+    safeInit(initNumericValidation);
+    safeInit(handleArrayValidation);
+    safeInit(handleNumericMultiValidation);
+    safeInit(handleSimpleQuestionValidation);
+    safeInit(transformValidationMessages);
+    safeInit(fixDropdownArrayInlineStyles);
+    safeInit(setupStyleObserver);
+    safeInit(initSearchableDropdowns);
+    setTimeout(() => safeInit(fixTableAccessibility), DELAY_DOM_STABLE);
+    setTimeout(() => safeInit(observeNumericMultiSumValidation), DELAY_DOM_STABLE);
+    setTimeout(() => safeInit(createErrorSummary), DELAY_EM_MESSAGES);
+    safeInit(initMultipleShortText);
+    safeInit(initBootstrapButtonsRadio);
+    safeInit(initRadioOtherField);
+    safeInit(initNativeSliders);
+    safeInit(initNativeDateInputs);
+    safeInit(initCaptchaReload);
+    safeInit(initCaptchaValidation);
+    setTimeout(() => safeInit(initAllRankingQuestions), DELAY_RANKING);
+    safeInit(initRelevanceHandlers);
   });
   onPjax(() => {
-    setTimeout(sanitizeRTEContent, 100);
-    setTimeout(initAllRankingQuestions, 300);
-    initRelevanceHandlers();
-    initSearchableDropdowns();
-    initStepperProgress();
-    setTimeout(createErrorSummary, 200);
+    setTimeout(() => safeInit(sanitizeRTEContent), DELAY_EM_MESSAGES);
+    setTimeout(() => safeInit(initAllRankingQuestions), DELAY_RANKING);
+    safeInit(initRelevanceHandlers);
+    safeInit(initSearchableDropdowns);
+    safeInit(initStepperProgress);
+    safeInit(initNativeSliders);
+    safeInit(initNativeDateInputs);
+    setTimeout(() => safeInit(createErrorSummary), DELAY_DOM_STABLE);
   });
   var dropdownResizeTimer;
   window.addEventListener("resize", () => {
     clearTimeout(dropdownResizeTimer);
     dropdownResizeTimer = setTimeout(() => {
-      fixDropdownArrayInlineStyles();
-      setupStyleObserver();
+      safeInit(fixDropdownArrayInlineStyles);
+      safeInit(setupStyleObserver);
     }, 250);
   });
 })();

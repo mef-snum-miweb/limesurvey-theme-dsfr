@@ -18,7 +18,7 @@
 #}
 
 <!-- answer_row -->
-<tr id="javatbd{{ myfname }}" class="{{ coreRowClass }} {% if odd %}ls-odd{% else %}ls-even{% endif %}" role="group" aria-labelledby="answertext{{ myfname }}">
+<tr id="javatbd{{ myfname }}" class="{{ coreRowClass }} {% if odd %}ls-odd{% else %}ls-even{% endif %}{% if error %} ls-error-mandatory{% endif %}{% if error and layout == "checkbox" %} has-error{% endif %}" role="group" aria-labelledby="answertext{{ myfname }}">
     <th
         scope="row"
         id="answertext{{ myfname }}"

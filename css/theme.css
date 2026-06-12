@@ -5,7 +5,26 @@
  * Ce thème utilise DSFR-Connect Bootstrap pour adapter LimeSurvey au DSFR
  * Documentation DSFR : https://www.systeme-de-design.gouv.fr/
  * DSFR-Connect : https://dsfr-connect.rame.fr/
- */
+ 
+ *
+ * RÈGLE DE PROPRIÉTÉ (revue 2026-06, #30) : un composant = un seul
+ * fichier. theme.css possède : reset/neutralisation Bootstrap, layout
+ * général (header fixe, conteneurs), formulaires de base, tableaux
+ * (structure), print. Toute surcharge fine de composant DSFR vit dans
+ * custom.css (chargé après). Ne pas redéfinir ici un sélecteur déjà
+ * stylé dans custom.css.
+*/
+
+/* Couche de cascade (issue #41) — ordre déclaré dans dsfr.min.css :
+   overrides, theme, dsfr, custom. Tout le fichier vit dans `theme`. */
+/* Déclaration d'ordre des couches AVANT toute création implicite : la
+   première occurrence d'un nom de couche fige sa position. Ce fichier
+   charge avant dsfr.min.css — sans cette ligne, `theme` serait déclarée
+   première et l'ordre voulu serait perdu. */
+@layer overrides, theme, dsfr, custom;
+
+@layer theme {
+
 
 /* ============================================
    IMPORTS DSFR NATIF
@@ -141,7 +160,9 @@ textarea.form-control:focus,
 }
 
 html {
-    font-size: 16px;
+    /* 100% (= 16px par défaut) : respecte le réglage de taille de police
+       du navigateur (RGAA), contrairement à une valeur en px figée. */
+    font-size: 100%;
     background-color: var(--background-default-grey);
 }
 
@@ -159,15 +180,6 @@ body {
 body > article {
     background-color: var(--background-default-grey) !important;
 }
-
-/* Fond par défaut pour tous les containers principaux */
-#outerframeContainer,
-.outerframe,
-.ls-survey-container,
-.survey-question-container {
-    background-color: var(--background-default-grey) !important;
-}
-
 /* Assurer que les containers DSFR sont blancs */
 .fr-container {
     background-color: transparent;
@@ -272,7 +284,7 @@ body > article {
    ============================================ */
 
 #outerframeContainer {
-    background-color: var(--grey-light);
+    background-color: var(--background-alt-grey);
     min-height: 100vh;
     padding-top: 6rem; /* Espace pour le header fixed */
 }
@@ -282,16 +294,6 @@ body > article {
     margin: 0 auto;
     padding: 2rem 1rem;
 }
-
-/* ============================================
-   BARRE DE PROGRESSION
-   ============================================ */
-
-.progress-wrapper,
-.progress-container {
-    margin-bottom: 2rem;
-}
-
 .progress {
     height: 0.5rem;
     background-color: #E3E3E3;
@@ -299,17 +301,10 @@ body > article {
     overflow: hidden;
     box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
 }
-
-.progress-bar {
-    background-color: var(--blue-france) !important;
-    height: 100%;
-    transition: width 0.3s ease;
-}
-
 .progress-text {
     margin-top: 0.5rem;
     font-size: 0.875rem;
-    color: #666;
+    color: var(--text-mention-grey);
     text-align: center;
 }
 
@@ -642,7 +637,7 @@ select:disabled,
 
 /* Message succès (vert) */
 .fr-message--valid {
-    color: var(--success-425);
+    color: var(--success-425-625);
 }
 
 .fr-message--valid::before {
@@ -731,37 +726,6 @@ table input[type="radio"],
 table input[type="checkbox"] {
     margin: 0 auto;
 }
-
-/* Fin de la section radio/checkbox */
-
-/* ============================================
-   BOUTONS (DSFR)
-   ============================================ */
-
-/* Bouton primaire - NE PAS STYLER button[type="submit"] pour laisser DSFR gérer */
-.btn-primary,
-input[type="submit"],
-.ls-button-submit,
-.button-primary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    font-family: "Marianne", Arial, sans-serif;
-    font-size: 1rem;
-    font-weight: 500;
-    line-height: 1.5;
-    padding: 0.5rem 1rem;
-    background-color: var(--background-action-high-blue-france);
-    color: var(--text-inverted-grey) !important;
-    border: none;
-    border-radius: 0.25rem;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background-color 0.2s;
-    box-shadow: inset 0 0 0 1px var(--background-action-high-blue-france);
-}
-
 /* Laisser DSFR gérer les boutons avec classes DSFR */
 
 .btn-primary:hover,
@@ -785,28 +749,6 @@ input[type="submit"]:hover {
     cursor: not-allowed;
     box-shadow: inset 0 0 0 1px var(--background-disabled-grey);
 }
-
-/* Bouton secondaire */
-.btn-secondary,
-.btn-outline,
-.ls-button-secondary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    font-family: "Marianne", Arial, sans-serif;
-    font-size: 1rem;
-    font-weight: 500;
-    padding: 0.5rem 1rem;
-    background-color: transparent;
-    color: var(--text-action-high-blue-france) !important;
-    border: 1px solid var(--border-action-high-blue-france);
-    border-radius: 0.25rem;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.2s;
-}
-
 .btn-secondary:hover,
 .btn-outline:hover {
     background-color: var(--background-action-low-blue-france-hover);
@@ -820,41 +762,8 @@ input[type="submit"]:hover {
     outline: 2px solid var(--border-action-high-blue-france);
     outline-offset: 2px;
 }
-
-/* Bouton tertiaire (sans bordure) */
-.btn-link,
-.btn-tertiary {
-    background: transparent;
-    border: none;
-    color: var(--text-action-high-blue-france) !important;
-    text-decoration: underline;
-    padding: 0.5rem 1rem;
-    cursor: pointer;
-    font-size: 1rem;
-}
-
 .btn-link:hover,
-.btn-tertiary:hover {
-    background-color: var(--background-action-low-blue-france-hover);
-    text-decoration: underline;
-}
-
 /* ============================================
-   NAVIGATION (Previous/Next)
-   ============================================ */
-
-.survey-navigation,
-#ls-button-submit,
-.navigator-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    margin-top: 0;
-    padding-top: 0;
-    border-top: none;
-}
-
 /* Les boutons de navigation DSFR n'ont pas besoin de ces marges */
 .fr-container .fr-btn {
     margin-top: 0 !important;
@@ -888,7 +797,7 @@ input[type="submit"]:hover {
 }
 
 /* Sur mobile, empiler verticalement */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .ls-input-group {
         flex-direction: column;
         align-items: stretch;
@@ -900,7 +809,7 @@ input[type="submit"]:hover {
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
     .survey-navigation {
         flex-direction: column;
     }
@@ -910,23 +819,6 @@ input[type="submit"]:hover {
         width: 100%;
     }
 }
-
-/* ============================================
-   MESSAGES & ALERTES (DSFR)
-   ============================================ */
-
-.alert,
-.alert-box,
-.ls-alert {
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border-radius: 0.25rem;
-    border-left: 4px solid;
-    display: flex;
-    gap: 0.75rem;
-    align-items: flex-start;
-}
-
 .alert::before {
     content: '';
     flex-shrink: 0;
@@ -939,22 +831,22 @@ input[type="submit"]:hover {
 /* Info */
 .alert-info {
     background-color: var(--background-contrast-info);
-    border-left-color: var(--info-425);
-    color: var(--info-425);
+    border-left-color: var(--info-425-625);
+    color: var(--info-425-625);
 }
 
 /* Success */
 .alert-success {
     background-color: var(--background-contrast-success);
-    border-left-color: var(--success-425);
-    color: var(--success-425);
+    border-left-color: var(--success-425-625);
+    color: var(--success-425-625);
 }
 
 /* Warning */
 .alert-warning {
     background-color: var(--background-contrast-warning);
-    border-left-color: var(--warning-425);
-    color: var(--warning-425);
+    border-left-color: var(--warning-425-625);
+    color: var(--warning-425-625);
 }
 
 /* Error/Danger */
@@ -1005,111 +897,17 @@ textarea.error:focus,
 select.error:focus {
     box-shadow: inset 0 -2px 0 0 var(--error-425-625);
 }
-
-/* ============================================
-   FOOTER
-   ============================================ */
-
-.survey-footer {
-    background-color: var(--background-alt-grey);
-    border-top: 1px solid var(--border-default-grey);
-    padding: 2rem 1rem;
-    margin-top: 3rem;
-}
-
 /* Footer DSFR fond par défaut (override DSFR et custom) */
 footer.fr-footer,
 .fr-footer {
     background-color: var(--background-default-grey) !important;
 }
-
-.survey-footer .container-fluid {
-    max-width: 78rem;
-    margin: 0 auto;
-}
-
-.survey-footer-content {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 2rem;
-}
-
-.survey-footer-links {
-    display: flex;
-    gap: 1.5rem;
-    flex-wrap: wrap;
-}
-
-.survey-footer-links a {
-    color: var(--text-default-grey);
-    text-decoration: none;
-    font-size: 0.875rem;
-}
-
-.survey-footer-links a:hover {
-    text-decoration: underline;
-    color: var(--text-action-high-blue-france);
-}
-
-.survey-footer-bottom {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border-default-grey);
-    font-size: 0.75rem;
-    color: var(--text-mention-grey);
-    text-align: center;
-}
-
-/* ============================================
-   BOOTSTRAP MODALS → DSFR STYLE
-   ============================================ */
-
-/*
- * LimeSurvey utilise des modales Bootstrap (ex: erreur de validation).
- * On les adapte au style DSFR sans casser leur fonctionnement.
- */
-
-/* Overlay (backdrop) */
-.modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1040;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-}
-
 .modal-backdrop.show {
     opacity: 1;
 }
-
-/* Container de la modale */
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1050;
-    display: none;
-    width: 100%;
-    height: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
-    outline: 0;
-}
-
 .modal.show {
     display: block;
 }
-
-/* Centrage vertical */
-.modal {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-}
-
 .modal-dialog {
     position: relative;
     width: auto;
@@ -1117,35 +915,8 @@ footer.fr-footer,
     max-width: 500px;
     pointer-events: none;
 }
-
-.modal.show .modal-dialog {
-    pointer-events: auto;
-}
-
 /* Carte de la modale - style DSFR */
-.modal-content {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    pointer-events: auto;
-    background-color: var(--background-default-grey);
-    background-clip: padding-box;
-    border: 1px solid var(--border-default-grey);
-    border-radius: 0.5rem;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-    outline: 0;
-}
-
 /* Header DSFR */
-.modal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.5rem;
-    border-bottom: 1px solid var(--border-default-grey);
-}
-
 .modal-title {
     margin: 0;
     font-size: 1.25rem;
@@ -1153,54 +924,13 @@ footer.fr-footer,
     color: var(--text-title-grey);
     line-height: 1.5;
 }
-
-/* Bouton fermer DSFR */
-.modal-header .btn-close {
-    padding: 0.5rem;
-    margin: -0.5rem -0.5rem -0.5rem auto;
-    background: transparent url("../files/icons/inline/d3e4844b299e.svg") center/1rem auto no-repeat;
-    border: 0;
-    border-radius: 0.25rem;
-    opacity: 1;
-    width: 2rem;
-    height: 2rem;
-    cursor: pointer;
-}
-
 .modal-header .btn-close:hover {
     background-color: var(--background-alt-grey);
 }
-
-.modal-header .btn-close:focus {
-    outline: 2px solid var(--border-action-high-blue-france);
-    outline-offset: 2px;
-}
-
 /* Body */
-.modal-body {
-    position: relative;
-    flex: 1 1 auto;
-    padding: 1.5rem;
-    color: var(--text-default-grey);
-    font-size: 1rem;
-    line-height: 1.5;
-}
-
 .modal-body p {
     margin-bottom: 0;
 }
-
-/* Footer */
-.modal-footer {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: flex-end;
-    padding: 1rem 1.5rem;
-    border-top: 1px solid var(--border-default-grey);
-    gap: 0.5rem;
-}
-
 .modal-footer .btn {
     margin: 0;
 }
@@ -1212,13 +942,6 @@ footer.fr-footer,
         margin: 1.75rem auto;
     }
 }
-
-/* Animation fade */
-.modal.fade .modal-dialog {
-    transition: transform 0.3s ease-out;
-    transform: translate(0, -50px);
-}
-
 .modal.show .modal-dialog {
     transform: none;
 }
@@ -1227,7 +950,7 @@ footer.fr-footer,
    RESPONSIVE
    ============================================ */
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
     body {
         font-size: 0.875rem;
     }
@@ -1242,10 +965,6 @@ footer.fr-footer,
 
     .question-text {
         font-size: 1rem;
-    }
-
-    .survey-footer-content {
-        flex-direction: column;
     }
 }
 
@@ -1278,24 +997,8 @@ footer.fr-footer,
 
 /* Focus visible pour tous les éléments interactifs */
 *:focus-visible {
-    outline: 2px solid var(--blue-france);
+    outline: 2px solid #0a76f6;
     outline-offset: 2px;
-}
-
-/* Skip links pour accessibilité */
-.skip-link {
-    position: absolute;
-    top: -40px;
-    left: 0;
-    background: var(--blue-france);
-    color: white;
-    padding: 8px;
-    text-decoration: none;
-    z-index: 100;
-}
-
-.skip-link:focus {
-    top: 0;
 }
 
 /* ============================================
@@ -1316,20 +1019,13 @@ footer.fr-footer,
    CORRECTIONS TABLEAUX DSFR
    ============================================ */
 
-/* Le DSFR avec --bordered applique un fond gris clair (--background-alt-grey)
-   par défaut à toutes les cellules tbody td.
-
-   Selon la doc DSFR, les tableaux doivent avoir un fond blanc par défaut,
-   avec possibilité d'alternance de couleurs pour les lignes.
-
-   On surcharge ici pour respecter le comportement attendu de LimeSurvey
-   avec alternance ls-odd/ls-even */
-
-/* Application du fond gris DSFR sur tous les tbody (compatible mode sombre) */
-.fr-table tbody,
-.fr-table--bordered tbody {
-    background-color: var(--background-alt-grey) !important;
-}
+/* Fond des tbody : la règle historique posait ici --background-alt-grey
+   !important — en @layer, l'important de la couche theme bat ceux de
+   custom, ce qui rendait IMPOSSIBLE toute correction aval et produisait
+   des tableaux gris (clair) / décalés du fond de page (sombre) selon que
+   la famille re-peignait ses lignes ou non (#41, revue 2026-06-12).
+   Le fond unifié (transparent, hérite de la carte question) est désormais
+   posé par custom.css — plus aucune déclaration de fond tbody ici. */
 
 /* Reset du fond gris par défaut du DSFR sur tous les td */
 .fr-table--bordered table tbody td {
@@ -1423,7 +1119,7 @@ li.ls-group-dynamic {
 }
 
 /* Sur mobile, retirer la marge supplémentaire */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .ls-slider-item-horizontal .fr-range-group {
         margin-right: 0;
     }
@@ -1438,141 +1134,11 @@ li.ls-group-dynamic {
     }
 }
 
-/* ============================================
-   ARRAY TABLES - DSFR STYLE
-   ============================================ */
+/* La section « ARRAY TABLES - DSFR STYLE » a été déplacée en tête de
+   custom.css (#41) : ses règles doivent battre fr-table du DSFR, ce que
+   la spécificité assurait avant @layer mais que la couche `theme`
+   (sous `dsfr`) ne permet plus. */
 
-/* Styles DSFR pour les tableaux type Array (Question 26) */
-.ls-table-wrapper table.table-array-radio,
-.ls-table-wrapper table.radio-array {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: transparent;
-}
-
-/* Bordures DSFR pour le tableau */
-.ls-table-wrapper table.table-array-radio,
-.ls-table-wrapper table.radio-array {
-    border: 1px solid var(--border-default-grey, #ddd);
-}
-
-.ls-table-wrapper table.table-array-radio th,
-.ls-table-wrapper table.table-array-radio td,
-.ls-table-wrapper table.radio-array th,
-.ls-table-wrapper table.radio-array td {
-    /* Pas de bordure par cellule : le thead a déjà son trait 2px via
-       background-image: linear-gradient (cf. règle .fr-table thead th plus
-       bas), et un border 1px ici se cumulait pour donner un « double trait »
-       sous l'en-tête. De plus, les bordures verticales entre th créaient des
-       coupures dans le soulignement gradient à chaque colonne. Séparation
-       visuelle des rows assurée par les fonds alternés DSFR et le border
-       du <table>. */
-    padding: 0.75rem;
-    text-align: left;
-}
-
-/* En-têtes de colonnes */
-.ls-table-wrapper table.table-array-radio thead th,
-.ls-table-wrapper table.radio-array thead th {
-    /* DISABLED - Let DSFR thead background-image show through */
-    /* background-color: var(--background-contrast-grey); */
-    font-weight: 700;
-    color: var(--text-title-grey);
-    text-align: center;
-}
-
-/* RÈGLE GLOBALE : Forcer le style DSFR complet sur TOUS les thead
-   Cette règle utilise !important pour surcharger toutes les règles spécifiques
-   DSFR utilise DEUX propriétés background:
-   1. background-color pour le fond gris
-   2. background-image (gradient) pour la bordure bottom
-   Note: Le background ne s'hérite pas, il faut l'appliquer sur les th/td
-*/
-.fr-table thead th,
-.fr-table thead td,
-.fr-table--bordered thead th,
-.fr-table--bordered thead td,
-.ls-table-wrapper .fr-table thead th,
-.ls-table-wrapper .fr-table thead td,
-.ls-table-wrapper table thead th,
-.ls-table-wrapper table thead td {
-    background-color: var(--background-contrast-grey) !important;
-    background-image: linear-gradient(0deg, var(--border-plain-grey), var(--border-plain-grey)) !important;
-    background-position: bottom !important;
-    background-repeat: no-repeat !important;
-    background-size: 100% 2px !important;
-    color: var(--text-title-grey) !important;
-    font-weight: 700 !important;
-}
-
-/* Surcharge de la bordure Bootstrap pour utiliser la couleur DSFR */
-.ls-table-wrapper table.table-array-radio > :not(:first-child),
-.ls-table-wrapper table.radio-array > :not(:first-child) {
-    border-top-color: var(--border-default-grey);
-}
-
-/* Bordures renforcées en haut de la ligne d'en-tête */
-.ls-table-wrapper table.table-array-radio thead tr.ls-heading th,
-.ls-table-wrapper table.table-array-radio thead tr.ls-heading td,
-.ls-table-wrapper table.radio-array thead tr.ls-heading th,
-.ls-table-wrapper table.radio-array thead tr.ls-heading td {
-    border-top-color: var(--border-default-grey);
-}
-
-/* Bordure bottom uniforme sur TOUS les éléments du thead
-   Fix pour surcharger le border:0 du DSFR natif qui ne met pas de vraies bordures
-   (DSFR utilise background-image:linear-gradient au lieu de border)
-   On utilise border-bottom shorthand avec !important et spécificité maximale */
-/*
-.ls-table-wrapper table.radio-array.fr-table thead tr > th,
-.ls-table-wrapper table.radio-array.fr-table thead tr > td,
-.ls-table-wrapper table.radio-array.fr-table--bordered thead tr > th,
-.ls-table-wrapper table.radio-array.fr-table--bordered thead tr > td,
-.ls-table-wrapper table.fr-table.fr-table--bordered thead tr > th,
-.ls-table-wrapper table.fr-table.fr-table--bordered thead tr > td,
-.ls-table-wrapper table.fr-table thead tr > th,
-.ls-table-wrapper table.fr-table thead tr > td,
-table.radio-array.fr-table.fr-table--bordered thead tr > th,
-table.radio-array.fr-table.fr-table--bordered thead tr > td,
-table.radio-array.fr-table thead tr > th,
-table.radio-array.fr-table thead tr > td,
-table.fr-table.fr-table--bordered thead tr > th,
-table.fr-table.fr-table--bordered thead tr > td,
-table.fr-table--bordered thead tr > th,
-table.fr-table--bordered thead tr > td,
-table.fr-table thead tr > th,
-table.fr-table thead tr > td {
-    border-bottom: 2px solid var(--border-default-grey) !important;
-}
-*/
-
-/* En-têtes de lignes (première colonne) */
-.ls-table-wrapper table.table-array-radio tbody th.answertext,
-.ls-table-wrapper table.radio-array tbody th.answertext {
-    font-weight: 700;
-    color: var(--text-title-grey);
-}
-
-/* Cellules avec radio buttons - centrage */
-.ls-table-wrapper table.table-array-radio td.answer_cell,
-.ls-table-wrapper table.table-array-radio td[class*="answer_cell_"],
-.ls-table-wrapper table.radio-array td.answer_cell,
-.ls-table-wrapper table.radio-array td[class*="answer_cell_"] {
-    text-align: center;
-    vertical-align: middle;
-}
-
-/* Fond blanc uniforme pour toutes les lignes */
-.ls-table-wrapper table.table-array-radio tbody tr,
-.ls-table-wrapper table.radio-array tbody tr {
-    background-color: var(--background-default-grey);
-}
-
-/* Hover sur les lignes */
-.ls-table-wrapper table.table-array-radio tbody tr:hover,
-.ls-table-wrapper table.radio-array tbody tr:hover {
-    background-color: var(--background-contrast-blue-france);
-}
 
 /* Responsive - scroll horizontal sur mobile */
 @media (max-width: 48em) {
@@ -1582,551 +1148,14 @@ table.fr-table thead tr > td {
     }
 }
 
-/* ============================================
-   ARRAY COLUMN TABLES - DSFR STYLE (Question 27)
-   ============================================ */
+/* La section « ARRAY COLUMN TABLES » (table.array-radio) a été déplacée en
+   tête de custom.css (#41), comme ARRAY TABLES : doit battre fr-table. */
 
-/* Styles DSFR pour les tableaux type Array Column */
-.ls-table-wrapper table.array-radio {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: transparent;
-    border: 1px solid var(--border-default-grey);
-}
+/* Section « INCREASE/SAME/DECREASE TABLES » déplacée en tête de custom.css (#41) : doit battre fr-table (couche dsfr). */
 
-.ls-table-wrapper table.array-radio th,
-.ls-table-wrapper table.array-radio td {
-    border: 1px solid var(--border-default-grey);
-    padding: 0.75rem;
-    text-align: left;
-}
+/* Section « YES/NO/UNCERTAIN TABLES » déplacée en tête de custom.css (#41) : doit battre fr-table (couche dsfr). */
 
-/* En-têtes de colonnes */
-.ls-table-wrapper table.array-radio thead th {
-    /* DISABLED - Let DSFR thead background-image show through */
-    /*     background-color: var(--background-contrast-grey); */
-    font-weight: 700;
-    color: var(--text-title-grey);
-    text-align: center;
-}
-
-/* Surcharge de la bordure Bootstrap pour utiliser la couleur DSFR */
-.ls-table-wrapper table.array-radio > :not(:first-child) {
-    border-top-color: var(--border-default-grey);
-}
-
-/* Bordures renforcées en haut de la ligne d'en-tête */
-.ls-table-wrapper table.array-radio thead tr.ls-heading th,
-.ls-table-wrapper table.array-radio thead tr.ls-heading td {
-    border-top-color: var(--border-default-grey);
-}
-
-/* Bordures renforcées en bas de la ligne d'en-tête */
-/* DISABLED - Testing global rule (line 1680) - Can be restored if needed */
-/*
-.ls-table-wrapper table.array-radio thead tr.ls-heading th,
-.ls-table-wrapper table.array-radio thead tr.ls-heading td {
-    border-bottom: 2px solid var(--border-plain-grey);
-}
-*/
-
-/* En-têtes de lignes (première colonne) */
-.ls-table-wrapper table.array-radio tbody th.answertext {
-    font-weight: 700;
-    color: var(--text-title-grey);
-}
-
-/* Cellules avec radio buttons - centrage */
-.ls-table-wrapper table.array-radio td.answer_cell,
-.ls-table-wrapper table.array-radio td[class*="answer_cell_"] {
-    text-align: center;
-    vertical-align: middle;
-}
-
-/* Fond blanc uniforme pour toutes les lignes */
-.ls-table-wrapper table.array-radio tbody tr {
-    background-color: var(--background-default-grey);
-}
-
-/* Hover sur les lignes */
-.ls-table-wrapper table.array-radio tbody tr:hover {
-    background-color: var(--background-contrast-blue-france);
-}
-
-/* Radio buttons DSFR dans les tableaux array-radio */
-.ls-table-wrapper table.array-radio .fr-radio-group {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 0;
-}
-
-.ls-table-wrapper table.array-radio .fr-radio-input {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    width: 1.5rem;
-    height: 1.5rem;
-    border: 2px solid var(--border-plain-grey);
-    border-radius: 50%;
-    background-color: var(--background-default-grey);
-    cursor: pointer;
-    position: relative;
-    margin: 0;
-    flex-shrink: 0;
-}
-
-.ls-table-wrapper table.array-radio .fr-radio-input:checked {
-    border-color: var(--border-action-high-blue-france);
-    background-color: var(--background-default-grey);
-}
-
-.ls-table-wrapper table.array-radio .fr-radio-input:checked::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 0.75rem;
-    height: 0.75rem;
-    border-radius: 50%;
-    background-color: var(--background-action-high-blue-france);
-}
-
-.ls-table-wrapper table.array-radio .fr-radio-input:hover {
-    border-color: var(--border-action-high-blue-france);
-}
-
-.ls-table-wrapper table.array-radio .fr-radio-input:focus {
-    outline: 2px solid var(--border-action-high-blue-france);
-    outline-offset: 2px;
-}
-
-/* ============================================
-   INCREASE/SAME/DECREASE TABLES - DSFR STYLE (Question 30)
-   ============================================ */
-
-/* Styles DSFR pour les tableaux type Increase/Same/Decrease */
-.array-increase-same-decrease table.radio-array {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: transparent;
-}
-
-.array-increase-same-decrease table.radio-array th,
-.array-increase-same-decrease table.radio-array td {
-    border: 1px solid var(--border-default-grey, #ddd);
-    padding: 0.75rem;
-    text-align: left;
-}
-
-/* En-têtes de colonnes */
-.array-increase-same-decrease table.radio-array thead th,
-.array-increase-same-decrease table.radio-array thead td {
-    background-color: var(--background-contrast-grey) !important;
-    background-image: linear-gradient(0deg, var(--border-plain-grey), var(--border-plain-grey)) !important;
-    background-position: bottom !important;
-    background-repeat: no-repeat !important;
-    background-size: 100% 2px !important;
-    font-weight: 700;
-    color: var(--text-title-grey) !important;
-    text-align: center;
-}
-
-/* Surcharge de la bordure Bootstrap pour utiliser la couleur DSFR */
-.array-increase-same-decrease table.radio-array > :not(:first-child) {
-    border-top-color: var(--border-default-grey) !important;
-}
-
-/* Bordures renforcées en haut de la ligne d'en-tête */
-.array-increase-same-decrease table.radio-array thead tr.ls-heading th,
-.array-increase-same-decrease table.radio-array thead tr.ls-heading td,
-.array-increase-same-decrease table.radio-array thead tr.ls-header th,
-.array-increase-same-decrease table.radio-array thead tr.ls-header td {
-    border-top-color: var(--border-default-grey) !important;
-}
-
-/* Bordures renforcées en bas de la ligne d'en-tête */
-/* DISABLED - Testing global rule (line 1680) - Can be restored if needed */
-/*
-.array-increase-same-decrease table.radio-array thead tr.ls-heading th,
-.array-increase-same-decrease table.radio-array thead tr.ls-heading td,
-.array-increase-same-decrease table.radio-array thead tr.ls-header th,
-.array-increase-same-decrease table.radio-array thead tr.ls-header td {
-    border-bottom: 2px solid var(--border-default-grey) !important;
-}
-*/
-
-/* En-têtes de lignes (première colonne) */
-.array-increase-same-decrease table.radio-array tbody th.answertext {
-    font-weight: 700;
-    color: var(--text-label-grey) !important;
-}
-
-/* Cellules avec radio buttons - centrage */
-.array-increase-same-decrease table.radio-array td.answer_cell,
-.array-increase-same-decrease table.radio-array td[class*="answer_cell_"] {
-    text-align: center;
-    vertical-align: middle;
-}
-
-/* Fond transparent pour toutes les lignes (pas de fond sur mobile) */
-.array-increase-same-decrease table.radio-array tbody tr {
-    background-color: transparent !important;
-}
-
-/* Hover sur les lignes */
-.array-increase-same-decrease table.radio-array tbody tr:hover {
-    background-color: var(--background-contrast-blue-france, #e3e3fd) !important;
-}
-
-/* ============================================
-   YES/NO/UNCERTAIN TABLES - DSFR STYLE (Question 31)
-   ============================================ */
-
-/* Styles DSFR pour les tableaux type Yes/No/Uncertain */
-.array-yes-uncertain-no table.radio-array {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: transparent;
-}
-
-.array-yes-uncertain-no table.radio-array th,
-.array-yes-uncertain-no table.radio-array td {
-    border: 1px solid var(--border-default-grey, #ddd);
-    padding: 0.75rem;
-    text-align: left;
-}
-
-/* En-têtes de colonnes */
-.array-yes-uncertain-no table.radio-array thead th,
-.array-yes-uncertain-no table.radio-array thead td {
-    background-color: var(--background-contrast-grey) !important;
-    background-image: linear-gradient(0deg, var(--border-plain-grey), var(--border-plain-grey)) !important;
-    background-position: bottom !important;
-    background-repeat: no-repeat !important;
-    background-size: 100% 2px !important;
-    font-weight: 700;
-    color: var(--text-label-grey) !important;
-    text-align: center;
-}
-
-/* Surcharge de la bordure Bootstrap pour utiliser la couleur DSFR */
-.array-yes-uncertain-no table.radio-array > :not(:first-child) {
-    border-top-color: var(--border-default-grey, #ddd) !important;
-}
-
-/* Bordures renforcées en haut de la ligne d'en-tête */
-.array-yes-uncertain-no table.radio-array thead tr.ls-heading th,
-.array-yes-uncertain-no table.radio-array thead tr.ls-heading td {
-    border-top-color: var(--border-default-grey, #ddd) !important;
-}
-
-/* Bordures renforcées en bas de la ligne d'en-tête */
-/* DISABLED - Testing global rule (line 1680) - Can be restored if needed */
-/*
-.array-yes-uncertain-no table.radio-array thead tr.ls-heading th,
-.array-yes-uncertain-no table.radio-array thead tr.ls-heading td {
-    border-bottom: 2px solid var(--border-default-grey) !important;
-}
-*/
-
-/* En-têtes de lignes (première colonne) */
-.array-yes-uncertain-no table.radio-array tbody th.answertext {
-    font-weight: 700;
-    color: var(--text-label-grey) !important;
-}
-
-/* Cellules avec radio buttons - centrage */
-.array-yes-uncertain-no table.radio-array td.answer_cell,
-.array-yes-uncertain-no table.radio-array td[class*="answer_cell_"] {
-    text-align: center;
-    vertical-align: middle;
-}
-
-/* Fond transparent pour toutes les lignes (pas de fond sur mobile) */
-.array-yes-uncertain-no table.radio-array tbody tr {
-    background-color: transparent !important;
-}
-
-/* Hover sur les lignes */
-.array-yes-uncertain-no table.radio-array tbody tr:hover {
-    background-color: var(--background-contrast-blue-france, #e3e3fd) !important;
-}
-
-/* ============================================
-   DUAL SCALE TABLES - DSFR STYLE (Question 33)
-   ============================================ */
-
-/* Styles DSFR pour les tableaux type Dual Scale */
-.ls-table-wrapper table.array-flexible-dual-scale,
-table.array-flexible-dual-scale {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: transparent;
-}
-
-.ls-table-wrapper table.array-flexible-dual-scale th,
-.ls-table-wrapper table.array-flexible-dual-scale td,
-table.array-flexible-dual-scale th,
-table.array-flexible-dual-scale td {
-    padding: 0.75rem;
-    text-align: left;
-}
-
-/* En-têtes de colonnes */
-.ls-table-wrapper table.array-flexible-dual-scale thead th,
-table.array-flexible-dual-scale thead th {
-    /* DISABLED - Let DSFR thead background-image show through */
-    /*     background-color: var(--background-contrast-grey, #f6f6f6); */
-    font-weight: 700;
-    color: #161616;
-    text-align: center;
-}
-
-/* Surcharge de la bordure Bootstrap pour utiliser la couleur DSFR */
-.ls-table-wrapper table.array-flexible-dual-scale > :not(:first-child),
-table.array-flexible-dual-scale > :not(:first-child) {
-    border-top-color: var(--border-default-grey, #ddd);
-}
-
-/* Bordures renforcées en haut de la ligne d'en-tête */
-.ls-table-wrapper table.array-flexible-dual-scale thead tr.ls-heading th,
-.ls-table-wrapper table.array-flexible-dual-scale thead tr.ls-heading td,
-table.array-flexible-dual-scale thead tr.ls-heading th,
-table.array-flexible-dual-scale thead tr.ls-heading td {
-    border-top-color: var(--border-default-grey, #ddd);
-}
-
-/* Bordures renforcées en bas de la ligne d'en-tête */
-/* DISABLED - Testing global rule (line 1680) - Can be restored if needed */
-/*
-.ls-table-wrapper table.array-flexible-dual-scale thead tr.ls-heading th,
-.ls-table-wrapper table.array-flexible-dual-scale thead tr.ls-heading td,
-table.array-flexible-dual-scale thead tr.ls-heading th,
-table.array-flexible-dual-scale thead tr.ls-heading td {
-    border-bottom: 2px solid var(--border-default-grey);
-}
-*/
-
-/* En-têtes de lignes (première colonne) */
-.ls-table-wrapper table.array-flexible-dual-scale tbody th.answertext,
-table.array-flexible-dual-scale tbody th.answertext {
-    font-weight: 700;
-    color: #161616;
-}
-
-/* Cellules avec radio buttons - centrage */
-.ls-table-wrapper table.array-flexible-dual-scale td.answer_cell,
-.ls-table-wrapper table.array-flexible-dual-scale td[class*="answer_cell_"],
-table.array-flexible-dual-scale td.answer_cell,
-table.array-flexible-dual-scale td[class*="answer_cell_"] {
-    text-align: center;
-    vertical-align: middle;
-}
-
-/* Fond transparent pour toutes les lignes (pas de fond alterné sur mobile) */
-.ls-table-wrapper table.array-flexible-dual-scale tbody tr,
-table.array-flexible-dual-scale tbody tr {
-    background-color: transparent;
-}
-
-/* Hover sur les lignes */
-.ls-table-wrapper table.array-flexible-dual-scale tbody tr:hover,
-table.array-flexible-dual-scale tbody tr:hover {
-    background-color: var(--background-contrast-blue-france, #e3e3fd);
-}
-
-/* En-têtes de groupe pour dual scale (gauche/droite) */
-.ls-table-wrapper table.array-flexible-dual-scale thead tr.ls-heading.groups th.dsheader,
-table.array-flexible-dual-scale thead tr.ls-heading.groups th.dsheader {
-    /* DISABLED - Let DSFR thead background-image show through */
-    /*     background-color: var(--background-contrast-grey, #f6f6f6); */
-    font-weight: 700;
-    color: #161616;
-    /* DISABLED - Testing global rule (line 1680) - Can be restored if needed */
-    /* border-bottom: 2px solid var(--border-default-grey); */
-}
-
-/* Séparateurs dans les tableaux dual scale */
-.ls-table-wrapper table.array-flexible-dual-scale td.dual_scale_separator,
-table.array-flexible-dual-scale td.dual_scale_separator {
-    /* DISABLED - Let DSFR thead background-image show through */
-    /*     background-color: var(--background-contrast-grey, #f6f6f6); */
-    text-align: center;
-    font-weight: 500;
-}
-
-/* ============================================
-   DUAL SCALE DROPDOWN TABLES - DSFR STYLE (Question 33)
-   ============================================ */
-
-/* Cibler les tableaux dual scale avec dropdown via leurs classes spécifiques */
-.ls-table-wrapper table:has(.left-header, .right-header),
-.ls-table-wrapper table:has(.ddarrayseparator) {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: transparent;
-}
-
-.ls-table-wrapper table:has(.left-header, .right-header) th,
-.ls-table-wrapper table:has(.left-header, .right-header) td,
-.ls-table-wrapper table:has(.ddarrayseparator) th,
-.ls-table-wrapper table:has(.ddarrayseparator) td {
-    padding: 0.75rem;
-    text-align: left;
-}
-
-/* En-têtes de colonnes Scale A / Scale B */
-.ls-table-wrapper table thead th.left-header,
-.ls-table-wrapper table thead th.right-header {
-    /* Copier exactement les propriétés DSFR de .fr-table thead */
-    /* DISABLED - Let DSFR thead background-image show through */
-    /*     background-color: var(--background-contrast-grey); */
-    background-image: linear-gradient(0deg, var(--border-plain-grey), var(--border-plain-grey));
-    background-position: bottom;
-    background-repeat: no-repeat;
-    background-size: 100% 2px;
-    font-weight: 700;
-    color: var(--text-title-grey);
-    text-align: center;
-}
-
-/* Surcharge de la bordure Bootstrap */
-.ls-table-wrapper table:has(.ddarrayseparator) > :not(:first-child) {
-    border-top-color: var(--border-default-grey, #ddd) !important;
-}
-
-/* Bordures renforcées en bas de la ligne d'en-tête */
-/* DISABLED - Testing global rule (line 1680) - Can be restored if needed */
-/*
-.ls-table-wrapper table thead tr.ls-heading th.left-header,
-.ls-table-wrapper table thead tr.ls-heading th.right-header,
-.ls-table-wrapper table thead tr.ls-heading td {
-    border-bottom: 2px solid var(--border-default-grey) !important;
-}
-*/
-
-/* Ajouter la bordure via background-image sur les TH spécifiquement */
-/* DISABLED - Testing global rule (line 1680) - Can be restored if needed */
-/*
-.ls-table-wrapper table thead tr.ls-heading th.left-header,
-.ls-table-wrapper table thead tr.ls-heading th.right-header {
-    background-color: var(--background-contrast-grey) !important;
-    background-image: linear-gradient(0deg, var(--border-plain-grey), var(--border-plain-grey)) !important;
-    background-position: bottom !important;
-    background-repeat: no-repeat !important;
-    background-size: 100% 2px !important;
-}
-*/
-
-/* En-têtes de lignes (première colonne) */
-.ls-table-wrapper table:has(.ddarrayseparator) tbody th.answertext {
-    font-weight: 700;
-    color: var(--text-label-grey) !important;
-}
-
-/* Cellules avec dropdown - centrage */
-.ls-table-wrapper table td.dropdown-item {
-    text-align: center;
-    vertical-align: middle;
-}
-
-/* Séparateur central : masqué uniquement si vide (classe `dsfr-separator-empty`
-   posée par le template Twig). Si interddSep est renseigné, on laisse le bloc
-   custom.css prendre le relais (padding + min-width pour affichage horizontal). */
-.ls-table-wrapper table td.ddarrayseparator.dsfr-separator-empty {
-    width: 0 !important;
-    padding: 0 !important;
-    border: none !important;
-    background-color: transparent !important;
-}
-
-/* Colonne séparatrice dans colgroup : masquée uniquement si vide. */
-.ls-table-wrapper table col.ddarrayseparator.dsfr-separator-empty {
-    width: 0 !important;
-}
-
-/* Fond transparent systématique sur le séparateur (tous cas). */
-.ls-table-wrapper table td.ddarrayseparator {
-    background-color: transparent !important;
-}
-
-/* Fond transparent pour toutes les lignes (pas de fond sur mobile) */
-.ls-table-wrapper table:has(.ddarrayseparator) tbody tr {
-    background-color: transparent !important;
-}
-
-/* Hover sur les lignes */
-.ls-table-wrapper table:has(.ddarrayseparator) tbody tr:hover {
-    background-color: var(--background-contrast-blue-france, #e3e3fd) !important;
-}
-
-/* Style DSFR pour les select */
-.ls-table-wrapper table td.dropdown-item select.form-select {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid var(--border-default-grey, #ddd);
-    border-radius: 0.25rem;
-    background-color: #fff;
-    font-size: 1rem;
-    line-height: 1.5;
-}
-
-.ls-table-wrapper table td.dropdown-item select.form-select:focus {
-    outline: 2px solid #0a76f6;
-    outline-offset: 2px;
-    border-color: #000091;
-}
-
-/* ========================================
-   Question Type: Ranking (Type R)
-   ======================================== */
-
-/* Remove list bullets/numbers from ranking lists */
-.ranking-source-list,
-.ranking-target-list {
-    list-style: none !important;
-    padding-left: 0 !important;
-    margin-left: 0 !important;
-}
-
-/* Full width for ranking items */
-.ranking-item {
-    width: 100%;
-}
-
-/* Source items styling (same as ranked but clickable) */
-.ranking-source-list .ranking-item-content {
-    background-color: var(--background-alt-blue-france, #f5f5fe);
-    border: 1px solid var(--border-default-grey, #ddd);
-    border-radius: 0.25rem;
-    padding: 1rem 1rem;
-    width: 80%;
-    cursor: pointer;
-    display: block;
-    text-align: left;
-}
-
-.ranking-source-list .ranking-item-content:hover {
-    background-color: #e8edff;
-}
-
-/* Ranked items styling */
-.ranking-item.ranked {
-    background-color: var(--background-alt-blue-france, #f5f5fe);
-    border: 1px solid var(--border-default-grey, #ddd);
-    border-radius: 0.25rem;
-    padding: 0.5rem 1rem;
-}
-
-/* Button group in ranked items */
-.ranking-item.ranked .fr-col-4 {
-    display: flex;
-    gap: 0.25rem;
-    justify-content: flex-end;
-    align-items: center;
-}
+/* Section « DUAL SCALE TABLES » déplacée en tête de custom.css (#41). */
 
 /* ========================================
    Question Type: Multiple Short Text (Type Q)
@@ -2169,7 +1198,7 @@ button.selector--inputondemand-addlinebutton,
 button.selector--inputondemand-addlinebutton:hover,
 .btn.selector--inputondemand-addlinebutton:hover {
     background-color: var(--background-action-high-blue-france-hover, #1212ff) !important;
-    color: white !important;
+    color: var(--text-inverted-blue-france) !important;
     border-color: var(--background-action-high-blue-france-hover, #1212ff) !important;
     text-decoration: none !important;
 }
@@ -2178,7 +1207,7 @@ button.selector--inputondemand-addlinebutton:hover,
 button.selector--inputondemand-addlinebutton:active,
 .btn.selector--inputondemand-addlinebutton:active {
     background-color: var(--background-action-high-blue-france-active, #2323ff) !important;
-    color: white !important;
+    color: var(--text-inverted-blue-france) !important;
     border-color: var(--background-action-high-blue-france-active, #2323ff) !important;
 }
 
@@ -2234,7 +1263,7 @@ button.selector--inputondemand-addlinebutton:focus,
 /* Pour les templates DSFR */
 .multiple-short-txt .fr-label,
 .multiple-short-txt label.fr-label {
-    margin-left: 0.25rem !important;
+    margin-left: 0.25rem; /* !important déposé (#41) : custom.css remet 0 */
 }
 
 /* Pour les templates Bootstrap (input on demand) */
@@ -2251,74 +1280,15 @@ li.selector--inputondemand-list-item label.control-label {
 /* === Utility classes DSFR custom === */
 
 /* Text alignment utility - right */
-.fr-text--right {
+.lsd-text-right {
     text-align: right !important;
 }
 
 /* === Array Dropdown Tables (Question type F) === */
 
 /* Force normal table display for array dropdown tables - DESKTOP ONLY */
-@media (min-width: 768px) {
-    .fr-table table.dropdown-array,
-    .fr-table--bordered table.dropdown-array {
-        display: table !important;
-        width: 100%;
-    }
+/* Bloc @media dropdown-array (desktop) déplacé en tête de custom.css (#41). */
 
-    .fr-table table.dropdown-array tbody,
-    .fr-table--bordered table.dropdown-array tbody {
-        display: table-row-group !important;
-    }
-
-    .fr-table table.dropdown-array tr,
-    .fr-table--bordered table.dropdown-array tr {
-        display: table-row !important;
-    }
-
-    .fr-table table.dropdown-array th,
-    .fr-table table.dropdown-array td,
-    .fr-table--bordered table.dropdown-array th,
-    .fr-table--bordered table.dropdown-array td {
-        display: table-cell !important;
-        vertical-align: middle;
-        padding: 0.75rem 1rem;
-    }
-
-    /* Label column styling - uniquement pour tableaux SANS table-layout:fixed */
-    .fr-table table.dropdown-array:not([style*="table-layout"]) th.answertext,
-    .fr-table--bordered table.dropdown-array:not([style*="table-layout"]) th.answertext {
-        width: 60%;
-        font-weight: 400;
-        text-align: left;
-    }
-
-    /* Select column styling - uniquement pour tableaux SANS table-layout:fixed */
-    .fr-table table.dropdown-array:not([style*="table-layout"]) td,
-    .fr-table--bordered table.dropdown-array:not([style*="table-layout"]) td {
-        width: 40%;
-    }
-
-    /* Pour les tableaux multi-flexi avec table-layout:fixed, respecter les <col> widths */
-    .fr-table table.dropdown-array[style*="table-layout: fixed"] th.answertext,
-    .fr-table--bordered table.dropdown-array[style*="table-layout: fixed"] th.answertext {
-        font-weight: 400;
-        text-align: left;
-        /* width héritée du <col> element */
-    }
-
-    .fr-table table.dropdown-array[style*="table-layout: fixed"] td,
-    .fr-table--bordered table.dropdown-array[style*="table-layout: fixed"] td {
-        /* width héritée du <col> element */
-    }
-
-    /* Remove label styles that conflict with DSFR */
-    .fr-table table.dropdown-array th.answertext label.fr-label,
-    .fr-table--bordered table.dropdown-array th.answertext label.fr-label {
-        margin-bottom: 0;
-        font-size: 1rem;
-        font-weight: 400;
-    }
-}
 
 /* === Bootstrap Buttons Radio (List Radio avec affichage boutons) === */
 
@@ -2353,7 +1323,7 @@ li.selector--inputondemand-list-item label.control-label {
     transition: background-color 0.2s, color 0.2s !important;
     text-decoration: none !important;
     box-sizing: border-box !important;
-    box-shadow: none !important;
+    box-shadow: none; /* !important déposé (#41) : custom.css pose le liseré */
     width: 100%;
     text-align: center;
 }
@@ -2366,7 +1336,7 @@ li.selector--inputondemand-list-item label.control-label {
 
 /* Focus visible */
 .bootstrap-buttons-div .btn-check:focus-visible + label.btn {
-    outline: 2px solid #000091;
+    outline: 2px solid #0a76f6;
     outline-offset: 2px;
 }
 
@@ -2385,7 +1355,7 @@ li.selector--inputondemand-list-item label.control-label {
 }
 
 /* Responsive: Ajuster la disposition sur mobile */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .bootstrap-buttons-div {
         margin-bottom: 0.75rem;
     }
@@ -2569,7 +1539,7 @@ li.selector--inputondemand-list-item label.control-label {
         overflow: visible !important;
         resize: none !important;
         padding: 0.1cm !important;
-        border: 1px solid #666 !important;
+        border: 1px solid var(--border-plain-grey) !important;
     }
 
     /* Textarea vide : hauteur d'une ligne */
@@ -2586,7 +1556,7 @@ li.selector--inputondemand-list-item label.control-label {
     .form-control.print-control {
         height: auto !important;
         padding: 0.05cm 0.1cm !important;
-        border: 1px solid #666 !important;
+        border: 1px solid var(--border-plain-grey) !important;
     }
 
     /* Labels et textes de questions */
@@ -2633,4 +1603,5 @@ li.selector--inputondemand-list-item label.control-label {
         page-break-inside: avoid !important;
         margin-bottom: 0.4cm !important;
     }
+}
 }

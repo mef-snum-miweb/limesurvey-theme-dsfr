@@ -10,6 +10,8 @@
  *   est vide.
  */
 
+import { tUI } from '../core/i18n.js';
+
 export function initCaptchaReload() {
     const reloadButton = document.getElementById('reloadCaptcha');
 
@@ -105,7 +107,7 @@ export function initCaptchaValidation() {
             // Ajouter le message d'erreur DSFR
             const errorMessage = document.createElement('p');
             errorMessage.className = 'fr-message fr-message--error';
-            errorMessage.textContent = 'Veuillez saisir votre réponse';
+            errorMessage.textContent = tUI('captcha_enter_answer');
             messagesGroup.appendChild(errorMessage);
 
             // Focus sur le champ pour l'accessibilité

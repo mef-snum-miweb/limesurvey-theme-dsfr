@@ -29,8 +29,12 @@
 
 <!-- answer - DSFR -->
 <div class="ls-table-wrapper" role="group" aria-labelledby="ls-question-text-{{ basename }}">
-    <div class="fr-table fr-table--bordered" data-fr-js-table="true">
-        <table class="{{ coreClass }}{% if hasDDFix %} dsfr-has-ddfix-table{% endif %}" aria-label="{{ t.dual_scale_matrix|default('Matrice de réponses à double échelle') }}">
+    <div class="fr-table fr-table--bordered">
+    <div class="fr-table__wrapper">
+        <div class="fr-table__container">
+            <div class="fr-table__content">
+        <table class="{{ coreClass }}{% if hasDDFix %} dsfr-has-ddfix-table{% endif %}">
+                    <caption class="fr-sr-only">{{ t.dual_scale_matrix|default('Matrice de réponses à double échelle') }}</caption>
             <!-- Column groups -->
             <colgroup>
                 <col class="answertext" style='width:{{ answerwidth }}%;' />
@@ -169,6 +173,9 @@
                 {% endfor %}
             </tbody>
         </table>
+            </div>
+        </div>
+    </div>
     </div>
 </div>
 <!-- end of answer -->

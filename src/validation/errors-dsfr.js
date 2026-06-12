@@ -20,6 +20,7 @@
  *   apparaît (validation LS côté client déclenche cette classe).
  */
 
+import { tUI } from '../core/i18n.js';
 import { handleMultipleShortTextErrors } from './mst-errors.js';
 import { handleArrayValidation } from './array-validation.js';
 import { updateErrorSummary } from './error-summary.js';
@@ -38,10 +39,17 @@ export function transformErrorsToDsfr() {
 
     // Passe systématique : poser aria-invalid sur TOUS les champs en erreur,
     // indépendamment du handler spécialisé qui gère le message d'erreur.
+    // Pour les questions à fieldset (radios/cases), l'état d'erreur DSFR
+    // normatif est fr-fieldset--error sur le <fieldset> (pas une classe
+    // input-group sur le conteneur de question).
     errorQuestions.forEach(function(question) {
         question.querySelectorAll('input:not([type="hidden"]), textarea, select').forEach(function(field) {
             field.setAttribute('aria-invalid', 'true');
         });
+        const fieldset = question.querySelector('fieldset.fr-fieldset');
+        if (fieldset) {
+            fieldset.classList.add('fr-fieldset--error');
+        }
     });
 
     errorQuestions.forEach(function(question) {
@@ -179,7 +187,7 @@ function attachErrorRemovalListeners(question, inputGroup, messagesGroup) {
                 const newErrorMessage = document.createElement('p');
                 newErrorMessage.className = 'fr-message fr-message--error';
                 newErrorMessage.id = messagesGroup.id + '-error';
-                newErrorMessage.textContent = 'Ce champ est obligatoire';
+                newErrorMessage.textContent = tUI('field_mandatory');
                 newErrorMessage.setAttribute('role', 'alert');
                 messagesGroup.appendChild(newErrorMessage);
             }
@@ -217,7 +225,7 @@ function attachErrorRemovalListeners(question, inputGroup, messagesGroup) {
                     errorMsg.setAttribute('role', 'alert');
                     messagesGroup.appendChild(errorMsg);
                 }
-                errorMsg.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
+                errorMsg.textContent = tUI('numeric_chars_only');
 
                 setTimeout(updateErrorSummary, 50);
                 return;
@@ -227,6 +235,10 @@ function attachErrorRemovalListeners(question, inputGroup, messagesGroup) {
         // Champ valide → succès
         inputGroup.classList.remove('fr-input-group--error');
         question.classList.remove('input-error');
+        const okFieldset = question.querySelector('fieldset.fr-fieldset--error');
+        if (okFieldset) {
+            okFieldset.classList.remove('fr-fieldset--error');
+        }
 
         // Retirer la classe d'erreur de l'input
         input.classList.remove('fr-input--error');
@@ -253,7 +265,7 @@ function attachErrorRemovalListeners(question, inputGroup, messagesGroup) {
                 validMessage.id = messagesGroup.id + '-valid';
                 messagesGroup.appendChild(validMessage);
             }
-            validMessage.textContent = 'Merci d\'avoir répondu';
+            validMessage.textContent = tUI('thanks_answered');
         }
 
         // Mettre à jour le récapitulatif d'erreurs
@@ -280,6 +292,10 @@ function attachErrorRemovalListeners(question, inputGroup, messagesGroup) {
             // Pour radio/checkbox, retirer les erreurs
             inputGroup.classList.remove('fr-input-group--error');
             question.classList.remove('input-error');
+            const okFieldset = question.querySelector('fieldset.fr-fieldset--error');
+            if (okFieldset) {
+                okFieldset.classList.remove('fr-fieldset--error');
+            }
 
             // Retirer aria-invalid de tous les champs de la question
             question.querySelectorAll('[aria-invalid]').forEach(function(f) {
@@ -306,11 +322,13 @@ function attachErrorRemovalListeners(question, inputGroup, messagesGroup) {
                     validMessage.id = messagesGroup.id + '-valid';
                     messagesGroup.appendChild(validMessage);
                 }
-                validMessage.textContent = 'Merci d\'avoir répondu';
+                validMessage.textContent = tUI('thanks_answered');
             }
 
             setTimeout(updateErrorSummary, 50);
-        }, { once: true });
+        }); // pas de { once: true } : une question qui retombe en erreur
+            // après une première correction doit pouvoir se re-nettoyer
+            // (le handler est idempotent).
     });
 }
 

@@ -3,17 +3,20 @@
  * Boilerplate Question - DSFR Theme
  * Type: X (Boilerplate/Text Display)
  *
- * This template displays text/HTML content without asking a question
- * Used for instructions, explanations, or visual separators
+ * Le texte de la question est rendu par le conteneur de question
+ * (question_text_content.twig) — ne PAS re-rendre {{ question }} ici
+ * (double affichage). Comme le core :
+ * - {{ sTimer }} : compte à rebours des attributs time_limit* ;
+ * - l'input caché answer{name} : cible du JS timer et de l'EM.
  *
- * @var $question       The text/HTML content to display
- * @var $basename       Base name for aria labels
+ * @var $name
+ * @var $coreClass
+ * @var $sTimer
  */
 #}
 
 <!-- Boilerplate (Type X) - DSFR -->
-<div class="boilerplate-content" role="region" aria-labelledby="ls-question-text-{{ basename }}">
-    {{ question|raw }}
-</div>
+{{ sTimer }}
 
+<input class="{{ coreClass }} boilerplate d-none" type="hidden" name="{{ name }}" id="answer{{ name }}" value="" />
 <!-- end of Boilerplate -->

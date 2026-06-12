@@ -12,6 +12,7 @@
  *   ls-em-error (somme hors bornes) et synchronise les messages DSFR.
  */
 
+import { tUI } from '../core/i18n.js';
 import { isValidNumber } from '../core/dom-utils.js';
 import { updateErrorSummary } from './error-summary.js';
 
@@ -82,7 +83,7 @@ export function initNumericValidation() {
                     errorMessage.setAttribute('role', 'alert');
                     messagesGroup.appendChild(errorMessage);
                 }
-                errorMessage.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
+                errorMessage.textContent = tUI('numeric_chars_only');
 
             } else {
                 // Format valide et non vide → Retirer les erreurs
@@ -111,7 +112,7 @@ export function initNumericValidation() {
                         validMessage.id = messagesGroup.id + '-valid';
                         messagesGroup.appendChild(validMessage);
                     }
-                    validMessage.textContent = 'Merci d\'avoir répondu';
+                    validMessage.textContent = tUI('thanks_answered');
                 }
 
                 // Mettre à jour le récapitulatif d'erreurs
@@ -196,7 +197,7 @@ export function handleNumericMultiValidation() {
                         errorMsg.setAttribute('role', 'alert');
                         messagesGroup.appendChild(errorMsg);
                     }
-                    errorMsg.textContent = 'Ce champ est obligatoire';
+                    errorMsg.textContent = tUI('field_mandatory');
                 }
 
                 // Masquer le message LimeSurvey .ls-em-error si présent
@@ -260,7 +261,7 @@ export function handleNumericMultiValidation() {
                         errorMsg.setAttribute('role', 'alert');
                         messagesGroup.appendChild(errorMsg);
                     }
-                    errorMsg.textContent = "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.";
+                    errorMsg.textContent = tUI('numeric_chars_only');
 
                     // Marquer que cette question a eu une erreur
                     question.dataset.hadError = 'true';
@@ -289,7 +290,7 @@ export function handleNumericMultiValidation() {
                             validMsg.className = 'fr-message fr-message--valid';
                             messagesGroup.appendChild(validMsg);
                         }
-                        validMsg.textContent = 'Merci d\'avoir répondu';
+                        validMsg.textContent = tUI('thanks_answered');
                     }
                 }
 
@@ -323,10 +324,12 @@ export function handleNumericMultiValidation() {
                         if (sumRangeMsg) {
                             hasSumConstraint = true;
                             // Parser les limites depuis le texte "entre X et Y"
-                            var rangeMatch = sumRangeMsg.textContent.match(/(\d+)\s+.+\s+(\d+)/);
-                            if (rangeMatch) {
-                                var minSum = parseFloat(rangeMatch[1]);
-                                var maxSum = parseFloat(rangeMatch[2]);
+                            // Premier et dernier nombre du message localisé
+                            // (décimaux « 2,5 » et négatifs acceptés).
+                            var rangeNumbers = sumRangeMsg.textContent.match(/-?\d+(?:[.,]\d+)?/g);
+                            if (rangeNumbers && rangeNumbers.length >= 2) {
+                                var minSum = parseFloat(rangeNumbers[0].replace(',', '.'));
+                                var maxSum = parseFloat(rangeNumbers[rangeNumbers.length - 1].replace(',', '.'));
 
                                 // Calculer la somme des champs remplis
                                 var currentSum = 0;
@@ -364,7 +367,7 @@ export function handleNumericMultiValidation() {
                                             vMsg.className = 'fr-message fr-message--valid';
                                             msgs.appendChild(vMsg);
                                         }
-                                        vMsg.textContent = 'Merci d\'avoir répondu';
+                                        vMsg.textContent = tUI('thanks_answered');
                                     }
                                 }
                             });
@@ -418,24 +421,19 @@ export function handleNumericMultiValidation() {
 
 export function observeNumericMultiSumValidation() {
     var numericMultiQuestions = document.querySelectorAll('.question-container.numeric-multi');
-    console.log('[DSFR SumValidation] Questions numeric-multi trouvées:', numericMultiQuestions.length);
 
     numericMultiQuestions.forEach(function(question) {
         var totalEl = question.querySelector('.dynamic-total');
-        console.log('[DSFR SumValidation] totalEl:', totalEl ? totalEl.id : 'NON TROUVÉ');
         if (!totalEl) return;
 
         var qId = totalEl.id ? totalEl.id.replace('totalvalue_', '') : null;
-        console.log('[DSFR SumValidation] qId:', qId);
         if (!qId) return;
 
         var sumRangeMsgId = 'vmsg_' + qId + '_sum_range-dsfr';
         var sumRangeMsg = document.getElementById(sumRangeMsgId);
-        console.log('[DSFR SumValidation] sumRangeMsg (' + sumRangeMsgId + '):', sumRangeMsg ? sumRangeMsg.textContent : 'NON TROUVÉ');
         // Aussi chercher sans le suffixe -dsfr (si transformValidationMessages n'a pas encore tourné)
         if (!sumRangeMsg) {
             sumRangeMsg = document.getElementById('vmsg_' + qId + '_sum_range');
-            console.log('[DSFR SumValidation] fallback vmsg_' + qId + '_sum_range:', sumRangeMsg ? sumRangeMsg.textContent : 'NON TROUVÉ');
         }
         if (!sumRangeMsg) return;
 
@@ -443,11 +441,10 @@ export function observeNumericMultiSumValidation() {
         totalEl.dataset.dsfrSumObserver = 'true';
 
         // Parser les limites depuis le texte du message (ex: "entre 3 et 10")
-        var rangeMatch = sumRangeMsg.textContent.match(/(\d+)\s+.+\s+(\d+)/);
-        console.log('[DSFR SumValidation] rangeMatch:', rangeMatch);
-        if (!rangeMatch) return;
-        var minSum = parseFloat(rangeMatch[1]);
-        var maxSum = parseFloat(rangeMatch[2]);
+        var rangeNumbers = sumRangeMsg.textContent.match(/-?\d+(?:[.,]\d+)?/g);
+        if (!rangeNumbers || rangeNumbers.length < 2) return;
+        var minSum = parseFloat(rangeNumbers[0].replace(',', '.'));
+        var maxSum = parseFloat(rangeNumbers[rangeNumbers.length - 1].replace(',', '.'));
 
         var totalRow = totalEl.closest('.ls-group-total');
 

@@ -17,13 +17,24 @@ export function handleRequiredFields() {
     const requiredFields = document.querySelectorAll('input[required], textarea[required], select[required], input[aria-required="true"], textarea[aria-required="true"], select[aria-required="true"]');
 
     // Méthode B: Classe .mandatory sur les questions (pages LimeSurvey)
-    // Inclut aussi les questions dont le h3 a mandatory-question (ajouté par le Twig)
-    const mandatoryQuestions = document.querySelectorAll('.mandatory.question-container, .mandatory[id^="question"], .question-container:has(.mandatory-question)');
+    // Inclut aussi les questions dont le h3 a mandatory-question (ajouté par le Twig).
+    // Pas de :has() ici : il lève une SyntaxError dans querySelectorAll sur
+    // Firefox < 121 (dont ESR 115) et Safari < 15.4 — on remonte depuis
+    // .mandatory-question avec closest() à la place.
+    const mandatoryQuestions = new Set(
+        document.querySelectorAll('.mandatory.question-container, .mandatory[id^="question"]')
+    );
+    document.querySelectorAll('.mandatory-question').forEach(el => {
+        const container = el.closest('.question-container');
+        if (container) {
+            mandatoryQuestions.add(container);
+        }
+    });
 
     // Méthode C: Badges "Obligatoire"
     const mandatoryBadges = document.querySelectorAll('.fr-badge[aria-label*="Mandatory"], .fr-badge[aria-label*="Obligatoire"]');
 
-    if (requiredFields.length === 0 && mandatoryQuestions.length === 0 && mandatoryBadges.length === 0) {
+    if (requiredFields.length === 0 && mandatoryQuestions.size === 0 && mandatoryBadges.length === 0) {
         return; // Pas de champs obligatoires sur cette page
     }
 

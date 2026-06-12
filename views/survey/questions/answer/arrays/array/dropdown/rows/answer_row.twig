@@ -13,7 +13,7 @@
  */
 #}
 <tr id="javatbd{{ myfname }}" class="question-item answer-item ls-dropdown-item{% if error %} ls-error-mandatory has-error{% endif %}">
-    <th class="answertext" scope="row">
+    <th class="answertext{% if answerwidth == 0 %} fr-sr-only{% endif %}" scope="row">
         <label for="answer{{ myfname }}" class="fr-label">
             {{ processString(answertext) }}
         </label>

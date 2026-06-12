@@ -13,7 +13,9 @@
 #}
 
 <!-- DSFR Radio Item -->
-<div class="fr-fieldset__element radio-item answer-item">
+{# id javatbd{myfname} + sDisplayStyle : cibles du masquage d'option
+   piloté par l'Expression Manager (em_javascript). #}
+<div id="javatbd{{ myfname }}" class="fr-fieldset__element radio-item answer-item" {{ sDisplayStyle }}>
     <div class="fr-radio-group">
         <input
             type="radio"

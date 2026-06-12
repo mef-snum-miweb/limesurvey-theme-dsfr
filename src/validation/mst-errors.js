@@ -43,8 +43,11 @@ export function handleMultipleShortTextErrors() {
             validContainer.style.display = 'none';
         }
 
-        // Collecter tous les inputs visibles (exclure les lignes InputOnDemand cachées)
-        var allItems = question.querySelectorAll('.answer-item:not(.d-none)');
+        // Collecter TOUTES les lignes, y compris les lignes InputOnDemand
+        // encore masquées (.d-none) : le serveur valide chaque ligne
+        // potentielle, masquée ou non — les ignorer faisait passer la
+        // question au vert alors que la soumission restait bloquée.
+        var allItems = question.querySelectorAll('.answer-item');
 
         // Retirer les erreurs individuelles injectées par le template (server-side)
         allItems.forEach(function(item) {
@@ -83,15 +86,27 @@ export function handleMultipleShortTextErrors() {
 
         // Fonction de mise à jour du compteur
         function updateCounter() {
-            var visibleItems = question.querySelectorAll('.answer-item:not(.d-none)');
-            var totalFields = visibleItems.length;
+            var allRows = question.querySelectorAll('.answer-item');
+            var totalFields = allRows.length;
             var emptyCount = 0;
+            var hiddenEmptyCount = 0;
 
-            visibleItems.forEach(function(item) {
+            allRows.forEach(function(item) {
                 var input = item.querySelector('input, textarea');
                 if (!input) return;
 
                 var value = input.value ? input.value.trim() : '';
+
+                // Ligne InputOnDemand encore masquée : compte comme manquante
+                // si vide, mais pas de stylage (elle n'est pas à l'écran).
+                if (item.classList.contains('d-none')) {
+                    if (value === '') {
+                        emptyCount++;
+                        hiddenEmptyCount++;
+                    }
+                    return;
+                }
+
                 var inputGroup = item.querySelector('.fr-input-group');
                 var messagesGroup = item.querySelector('.fr-messages-group');
 
@@ -156,11 +171,28 @@ export function handleMultipleShortTextErrors() {
                     setTimeout(updateErrorSummary, 50);
                 }
             } else {
+                // Ré-insérer le compteur s'il avait été retiré (champ re-vidé
+                // après que tout était rempli) — sinon question en erreur sans
+                // message visible ni annonce SR. Même pattern que
+                // handleChoiceArray (array-validation.js).
+                if (!counterContainer.isConnected) {
+                    if (answersList) {
+                        answersList.parentNode.insertBefore(counterContainer, answersList.nextSibling);
+                    } else {
+                        question.appendChild(counterContainer);
+                    }
+                }
                 // Il reste des champs à remplir
                 question.classList.add('input-error');
                 question.classList.remove('input-valid');
 
-                if (emptyCount === totalFields) {
+                if (hiddenEmptyCount > 0) {
+                    // Des lignes obligatoires sont encore masquées : sans ce
+                    // message dédié, l'utilisateur ne peut pas comprendre
+                    // pourquoi la page refuse de passer (les champs visibles
+                    // sont remplis, mais le serveur attend chaque ligne).
+                    counterMessage.textContent = tMandatory('iod_add_lines', emptyCount, totalFields);
+                } else if (emptyCount === totalFields) {
                     counterMessage.textContent = tMandatory('fields_all_required', null, totalFields);
                 } else if (emptyCount === 1) {
                     counterMessage.textContent = tMandatory('fields_remaining_singular');
@@ -177,7 +209,8 @@ export function handleMultipleShortTextErrors() {
         // Initialiser le compteur
         updateCounter();
 
-        // Attacher les listeners sur chaque input
+        // Attacher les listeners sur chaque input (lignes masquées comprises :
+        // elles seront révélées par « Ajouter une ligne » sans ré-init).
         allItems.forEach(function(item) {
             var input = item.querySelector('input, textarea');
             if (!input || input.dataset.errorListenerAdded) return;
@@ -185,5 +218,31 @@ export function handleMultipleShortTextErrors() {
 
             input.addEventListener('input', updateCounter);
         });
+
+        // « Ajouter une ligne » révèle une ligne en retirant d-none — son
+        // handler (input-on-demand.js) coupe la propagation du clic
+        // (stopImmediatePropagation), on observe donc la liste plutôt que
+        // d'écouter le bouton. Garde sur la transition d-none UNIQUEMENT :
+        // updateCounter modifie lui-même des classes dans la liste (--valid,
+        // --error), réagir à tout changement de class bouclerait à l'infini.
+        var iodList = question.querySelector('.selector--inputondemand-list');
+        if (iodList) {
+            new MutationObserver(function(mutations) {
+                var revealed = mutations.some(function(m) {
+                    return typeof m.oldValue === 'string' &&
+                        m.oldValue.indexOf('d-none') !== -1 &&
+                        m.target.classList &&
+                        !m.target.classList.contains('d-none');
+                });
+                if (revealed) {
+                    updateCounter();
+                }
+            }).observe(iodList, {
+                attributes: true,
+                attributeFilter: ['class'],
+                attributeOldValue: true,
+                subtree: true,
+            });
+        }
     });
 }

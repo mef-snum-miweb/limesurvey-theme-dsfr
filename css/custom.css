@@ -5,6 +5,777 @@
  * le DSFR pour des besoins spécifiques de LimeSurvey.
  */
 
+/* Couche de cascade (issue #41) — ordre déclaré dans dsfr.min.css :
+   overrides, theme, dsfr, custom. Tout le fichier vit dans `custom`. */
+/* Déclaration d'ordre des couches AVANT toute création implicite : la
+   première occurrence d'un nom de couche fige sa position. Ce fichier
+   charge avant dsfr.min.css — sans cette ligne, `custom` serait déclarée
+   première et l'ordre voulu serait perdu. */
+@layer overrides, theme, dsfr, custom;
+
+@layer custom {
+
+/* ============================================
+   FOND DES TABLEAUX — UNIFIÉ (#41, revue 2026-06-12)
+   ============================================ */
+
+/* Tous les tableaux héritent du fond de la carte question (blanc en
+   clair, gris sombre en dark). Avant : theme.css posait alt-grey
+   !important sur les tbody (imbattable depuis custom — en importance,
+   l'ordre des couches s'inverse) et certaines familles re-peignaient
+   leurs lignes en default-grey → tableaux gris OU blancs en clair,
+   noir profond OU couleur de page en sombre, selon la famille.
+   Déclarations NORMALES : la couche custom bat dsfr (tbody default-grey)
+   sans !important. Les th d'en-têtes gardent leur gris DSFR. */
+.fr-table tbody,
+.fr-table--bordered tbody,
+.fr-table__content tbody {
+    background-color: transparent;
+}
+
+/* ============================================
+   INCREASE/SAME/DECREASE TABLES - DSFR STYLE (Question 30)
+   ============================================ */
+
+/* Styles DSFR pour les tableaux type Increase/Same/Decrease */
+.array-increase-same-decrease table.radio-array {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: transparent;
+}
+
+.array-increase-same-decrease table.radio-array th,
+.array-increase-same-decrease table.radio-array td {
+    border: 1px solid var(--border-default-grey, #ddd);
+    padding: 0.75rem;
+    text-align: left;
+}
+
+/* En-têtes de colonnes */
+.array-increase-same-decrease table.radio-array thead th,
+.array-increase-same-decrease table.radio-array thead td {
+    background-color: var(--background-contrast-grey) !important;
+    background-image: linear-gradient(0deg, var(--border-plain-grey), var(--border-plain-grey)) !important;
+    background-position: bottom !important;
+    background-repeat: no-repeat !important;
+    background-size: 100% 2px !important;
+    font-weight: 700;
+    color: var(--text-title-grey) !important;
+    text-align: center;
+}
+
+/* Surcharge de la bordure Bootstrap pour utiliser la couleur DSFR */
+.array-increase-same-decrease table.radio-array > :not(:first-child) {
+    border-top-color: var(--border-default-grey) !important;
+}
+
+/* Bordures renforcées en haut de la ligne d'en-tête */
+.array-increase-same-decrease table.radio-array thead tr.ls-heading th,
+.array-increase-same-decrease table.radio-array thead tr.ls-heading td,
+.array-increase-same-decrease table.radio-array thead tr.ls-header th,
+.array-increase-same-decrease table.radio-array thead tr.ls-header td {
+    border-top-color: var(--border-default-grey) !important;
+}
+
+/* Bordures renforcées en bas de la ligne d'en-tête */
+/* DISABLED - Testing global rule (line 1680) - Can be restored if needed */
+/*
+.array-increase-same-decrease table.radio-array thead tr.ls-heading th,
+.array-increase-same-decrease table.radio-array thead tr.ls-heading td,
+.array-increase-same-decrease table.radio-array thead tr.ls-header th,
+.array-increase-same-decrease table.radio-array thead tr.ls-header td {
+    border-bottom: 2px solid var(--border-default-grey) !important;
+}
+*/
+
+/* En-têtes de lignes (première colonne) */
+.array-increase-same-decrease table.radio-array tbody th.answertext {
+    font-weight: 700;
+    color: var(--text-label-grey) !important;
+}
+
+/* Cellules avec radio buttons - centrage */
+.array-increase-same-decrease table.radio-array td.answer_cell,
+.array-increase-same-decrease table.radio-array td[class*="answer_cell_"] {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Fond transparent pour toutes les lignes (pas de fond sur mobile) */
+.array-increase-same-decrease table.radio-array tbody tr {
+    background-color: transparent !important;
+}
+
+/* Fond du tbody : géré par la règle globale « FOND DES TABLEAUX — UNIFIÉ »
+   en tête de fichier. (L'!important posé ici le 2026-06-12 était en réalité
+   inopérant : l'alt-grey venait d'un !important de la couche theme, qui bat
+   ceux de custom — supprimé à la racine dans theme.css.) */
+
+/* Matrices dont AUCUNE sous-question n'a de libellé (classe posée par
+   answer.twig, qui n'émet alors pas le <col> de la colonne d'en-têtes) :
+   on masque entièrement les cellules de première colonne. Les th vides
+   restent dans le DOM (champs cachés EM, ids référencés par headers=) mais
+   ne participent plus au tableau. NB : largeur 0/0% ne suffisait pas —
+   les algorithmes de table redistribuent toujours ~35px à une colonne vide. */
+table.array-no-row-labels tbody th.answertext,
+table.array-no-row-labels thead tr > :first-child {
+    display: none !important;
+}
+
+/* Hover sur les lignes */
+.array-increase-same-decrease table.radio-array tbody tr:hover {
+    background-color: var(--background-contrast-blue-france, #e3e3fd) !important;
+}
+
+/* ============================================
+   YES/NO/UNCERTAIN TABLES - DSFR STYLE (Question 31)
+   ============================================ */
+
+/* Styles DSFR pour les tableaux type Yes/No/Uncertain */
+.array-yes-uncertain-no table.radio-array {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: transparent;
+}
+
+.array-yes-uncertain-no table.radio-array th,
+.array-yes-uncertain-no table.radio-array td {
+    border: 1px solid var(--border-default-grey, #ddd);
+    padding: 0.75rem;
+    text-align: left;
+}
+
+/* En-têtes de colonnes */
+.array-yes-uncertain-no table.radio-array thead th,
+.array-yes-uncertain-no table.radio-array thead td {
+    background-color: var(--background-contrast-grey) !important;
+    background-image: linear-gradient(0deg, var(--border-plain-grey), var(--border-plain-grey)) !important;
+    background-position: bottom !important;
+    background-repeat: no-repeat !important;
+    background-size: 100% 2px !important;
+    font-weight: 700;
+    color: var(--text-label-grey) !important;
+    text-align: center;
+}
+
+/* Surcharge de la bordure Bootstrap pour utiliser la couleur DSFR */
+.array-yes-uncertain-no table.radio-array > :not(:first-child) {
+    border-top-color: var(--border-default-grey, #ddd) !important;
+}
+
+/* Bordures renforcées en haut de la ligne d'en-tête */
+.array-yes-uncertain-no table.radio-array thead tr.ls-heading th,
+.array-yes-uncertain-no table.radio-array thead tr.ls-heading td {
+    border-top-color: var(--border-default-grey, #ddd) !important;
+}
+
+/* Bordures renforcées en bas de la ligne d'en-tête */
+/* DISABLED - Testing global rule (line 1680) - Can be restored if needed */
+/*
+.array-yes-uncertain-no table.radio-array thead tr.ls-heading th,
+.array-yes-uncertain-no table.radio-array thead tr.ls-heading td {
+    border-bottom: 2px solid var(--border-default-grey) !important;
+}
+*/
+
+/* En-têtes de lignes (première colonne) */
+.array-yes-uncertain-no table.radio-array tbody th.answertext {
+    font-weight: 700;
+    color: var(--text-label-grey) !important;
+}
+
+/* Cellules avec radio buttons - centrage */
+.array-yes-uncertain-no table.radio-array td.answer_cell,
+.array-yes-uncertain-no table.radio-array td[class*="answer_cell_"] {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Fond transparent pour toutes les lignes (pas de fond sur mobile) */
+.array-yes-uncertain-no table.radio-array tbody tr {
+    background-color: transparent !important;
+}
+
+/* Hover sur les lignes */
+.array-yes-uncertain-no table.radio-array tbody tr:hover {
+    background-color: var(--background-contrast-blue-france, #e3e3fd) !important;
+}
+
+/* ============================================
+   DUAL SCALE TABLES - DSFR STYLE (Question 33)
+   ============================================ */
+
+/* Styles DSFR pour les tableaux type Dual Scale */
+.ls-table-wrapper table.array-flexible-dual-scale,
+table.array-flexible-dual-scale {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: transparent;
+}
+
+.ls-table-wrapper table.array-flexible-dual-scale th,
+.ls-table-wrapper table.array-flexible-dual-scale td,
+table.array-flexible-dual-scale th,
+table.array-flexible-dual-scale td {
+    padding: 0.75rem;
+    text-align: left;
+}
+
+/* En-têtes de colonnes */
+.ls-table-wrapper table.array-flexible-dual-scale thead th,
+table.array-flexible-dual-scale thead th {
+    /* DISABLED - Let DSFR thead background-image show through */
+    /*     background-color: var(--background-contrast-grey, #f6f6f6); */
+    font-weight: 700;
+    color: var(--text-title-grey);
+    text-align: center;
+}
+
+/* Surcharge de la bordure Bootstrap pour utiliser la couleur DSFR */
+.ls-table-wrapper table.array-flexible-dual-scale > :not(:first-child),
+table.array-flexible-dual-scale > :not(:first-child) {
+    border-top-color: var(--border-default-grey, #ddd);
+}
+
+/* Bordures renforcées en haut de la ligne d'en-tête */
+.ls-table-wrapper table.array-flexible-dual-scale thead tr.ls-heading th,
+.ls-table-wrapper table.array-flexible-dual-scale thead tr.ls-heading td,
+table.array-flexible-dual-scale thead tr.ls-heading th,
+table.array-flexible-dual-scale thead tr.ls-heading td {
+    border-top-color: var(--border-default-grey, #ddd);
+}
+
+/* Bordures renforcées en bas de la ligne d'en-tête */
+/* DISABLED - Testing global rule (line 1680) - Can be restored if needed */
+/*
+.ls-table-wrapper table.array-flexible-dual-scale thead tr.ls-heading th,
+.ls-table-wrapper table.array-flexible-dual-scale thead tr.ls-heading td,
+table.array-flexible-dual-scale thead tr.ls-heading th,
+table.array-flexible-dual-scale thead tr.ls-heading td {
+    border-bottom: 2px solid var(--border-default-grey);
+}
+*/
+
+/* En-têtes de lignes (première colonne) */
+.ls-table-wrapper table.array-flexible-dual-scale tbody th.answertext,
+table.array-flexible-dual-scale tbody th.answertext {
+    font-weight: 700;
+    color: var(--text-title-grey);
+}
+
+/* Cellules avec radio buttons - centrage */
+.ls-table-wrapper table.array-flexible-dual-scale td.answer_cell,
+.ls-table-wrapper table.array-flexible-dual-scale td[class*="answer_cell_"],
+table.array-flexible-dual-scale td.answer_cell,
+table.array-flexible-dual-scale td[class*="answer_cell_"] {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Fond transparent pour toutes les lignes (pas de fond alterné sur mobile) */
+.ls-table-wrapper table.array-flexible-dual-scale tbody tr,
+table.array-flexible-dual-scale tbody tr {
+    background-color: transparent;
+}
+
+/* Hover sur les lignes */
+.ls-table-wrapper table.array-flexible-dual-scale tbody tr:hover,
+table.array-flexible-dual-scale tbody tr:hover {
+    background-color: var(--background-contrast-blue-france, #e3e3fd);
+}
+
+/* En-têtes de groupe pour dual scale (gauche/droite) */
+.ls-table-wrapper table.array-flexible-dual-scale thead tr.ls-heading.groups th.dsheader,
+table.array-flexible-dual-scale thead tr.ls-heading.groups th.dsheader {
+    /* DISABLED - Let DSFR thead background-image show through */
+    /*     background-color: var(--background-contrast-grey, #f6f6f6); */
+    font-weight: 700;
+    color: var(--text-title-grey);
+    /* DISABLED - Testing global rule (line 1680) - Can be restored if needed */
+    /* border-bottom: 2px solid var(--border-default-grey); */
+}
+
+/* Séparateurs dans les tableaux dual scale */
+.ls-table-wrapper table.array-flexible-dual-scale td.dual_scale_separator,
+table.array-flexible-dual-scale td.dual_scale_separator {
+    /* DISABLED - Let DSFR thead background-image show through */
+    /*     background-color: var(--background-contrast-grey, #f6f6f6); */
+    text-align: center;
+    font-weight: 500;
+}
+
+/* La section « DUAL SCALE DROPDOWN TABLES » a été déplacée en tête de
+   custom.css (#41), comme les autres sections tableaux : doit battre
+   fr-table (couche dsfr). */
+
+/* Bloc @media dropdown-array desktop (déplacé de theme.css, #41) */
+@media (min-width: 768px) {
+    .fr-table table.dropdown-array,
+    .fr-table--bordered table.dropdown-array {
+        display: table !important;
+        width: 100%;
+    }
+
+    .fr-table table.dropdown-array tbody,
+    .fr-table--bordered table.dropdown-array tbody {
+        display: table-row-group !important;
+    }
+
+    .fr-table table.dropdown-array tr,
+    .fr-table--bordered table.dropdown-array tr {
+        display: table-row !important;
+    }
+
+    .fr-table table.dropdown-array th,
+    .fr-table table.dropdown-array td,
+    .fr-table--bordered table.dropdown-array th,
+    .fr-table--bordered table.dropdown-array td {
+        display: table-cell !important;
+        vertical-align: middle;
+        padding: 0.75rem 1rem;
+    }
+
+    /* Label column styling - uniquement pour tableaux SANS table-layout:fixed */
+    .fr-table table.dropdown-array:not([style*="table-layout"]) th.answertext,
+    .fr-table--bordered table.dropdown-array:not([style*="table-layout"]) th.answertext {
+        width: 60%;
+        font-weight: 400;
+        text-align: left;
+    }
+
+    /* Select column styling - uniquement pour tableaux SANS table-layout:fixed */
+    .fr-table table.dropdown-array:not([style*="table-layout"]) td,
+    .fr-table--bordered table.dropdown-array:not([style*="table-layout"]) td {
+        width: 40%;
+    }
+
+    /* Pour les tableaux multi-flexi avec table-layout:fixed, respecter les <col> widths */
+    .fr-table table.dropdown-array[style*="table-layout: fixed"] th.answertext,
+    .fr-table--bordered table.dropdown-array[style*="table-layout: fixed"] th.answertext {
+        font-weight: 400;
+        text-align: left;
+        /* width héritée du <col> element */
+    }
+
+    .fr-table table.dropdown-array[style*="table-layout: fixed"] td,
+    .fr-table--bordered table.dropdown-array[style*="table-layout: fixed"] td {
+        /* width héritée du <col> element */
+    }
+
+    /* Remove label styles that conflict with DSFR */
+    .fr-table table.dropdown-array th.answertext label.fr-label,
+    .fr-table--bordered table.dropdown-array th.answertext label.fr-label {
+        margin-bottom: 0;
+        font-size: 1rem;
+        font-weight: 400;
+    }
+}
+
+
+/* ============================================
+   MATRICES — EN-TÊTES MULTILIGNES (#43)
+   ============================================
+   Le DSFR pose `white-space: nowrap` sur les cellules de fr-table et prévoit
+   le modificateur fr-table--multiline pour autoriser le retour à la ligne.
+   Nos matrices sont en table-layout:fixed : avec nowrap, les libellés longs
+   d'en-têtes (lignes ET colonnes) débordent sur les cellules voisines et se
+   chevauchent (visible dès ~1280px, signalé à 1920px). On applique la
+   sémantique multiline à toutes les matrices LimeSurvey. */
+.fr-table__content table.ls-answers th,
+.fr-table__content table.ls-answers td {
+    white-space: normal;
+}
+
+/* ============================================
+   MATRICES — ARRAY TABLES (déplacé de theme.css, #41)
+   Doit battre fr-table (couche dsfr) : vivait dans theme.css du temps
+   de la guerre de spécificité, la couche theme est désormais SOUS dsfr.
+   Placé en tête de fichier pour rester battable par la linéarisation
+   mobile plus bas (ordre source intra-couche préservé).
+   ============================================ */
+
+/* Styles DSFR pour les tableaux type Array (Question 26) */
+.ls-table-wrapper table.table-array-radio,
+.ls-table-wrapper table.radio-array {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: transparent;
+}
+
+/* Bordures DSFR pour le tableau */
+.ls-table-wrapper table.table-array-radio,
+.ls-table-wrapper table.radio-array {
+    border: 1px solid var(--border-default-grey, #ddd);
+}
+
+.ls-table-wrapper table.table-array-radio th,
+.ls-table-wrapper table.table-array-radio td,
+.ls-table-wrapper table.radio-array th,
+.ls-table-wrapper table.radio-array td {
+    /* Pas de bordure par cellule : le thead a déjà son trait 2px via
+       background-image: linear-gradient (cf. règle .fr-table thead th plus
+       bas), et un border 1px ici se cumulait pour donner un « double trait »
+       sous l'en-tête. De plus, les bordures verticales entre th créaient des
+       coupures dans le soulignement gradient à chaque colonne. Séparation
+       visuelle des rows assurée par les fonds alternés DSFR et le border
+       du <table>. */
+    padding: 0.75rem;
+    text-align: left;
+}
+
+/* En-têtes de colonnes */
+.ls-table-wrapper table.table-array-radio thead th,
+.ls-table-wrapper table.radio-array thead th {
+    /* DISABLED - Let DSFR thead background-image show through */
+    /* background-color: var(--background-contrast-grey); */
+    font-weight: 700;
+    color: var(--text-title-grey);
+    text-align: center;
+}
+
+/* RÈGLE GLOBALE : Forcer le style DSFR complet sur TOUS les thead
+   Cette règle utilise !important pour surcharger toutes les règles spécifiques
+   DSFR utilise DEUX propriétés background:
+   1. background-color pour le fond gris
+   2. background-image (gradient) pour la bordure bottom
+   Note: Le background ne s'hérite pas, il faut l'appliquer sur les th/td
+*/
+.fr-table thead th,
+.fr-table thead td,
+.fr-table--bordered thead th,
+.fr-table--bordered thead td,
+.ls-table-wrapper .fr-table thead th,
+.ls-table-wrapper .fr-table thead td,
+.ls-table-wrapper table thead th,
+.ls-table-wrapper table thead td {
+    background-color: var(--background-contrast-grey) !important;
+    background-image: linear-gradient(0deg, var(--border-plain-grey), var(--border-plain-grey)) !important;
+    background-position: bottom !important;
+    background-repeat: no-repeat !important;
+    background-size: 100% 2px !important;
+    color: var(--text-title-grey) !important;
+    font-weight: 700 !important;
+}
+
+/* Surcharge de la bordure Bootstrap pour utiliser la couleur DSFR */
+.ls-table-wrapper table.table-array-radio > :not(:first-child),
+.ls-table-wrapper table.radio-array > :not(:first-child) {
+    border-top-color: var(--border-default-grey);
+}
+
+/* Bordures renforcées en haut de la ligne d'en-tête */
+.ls-table-wrapper table.table-array-radio thead tr.ls-heading th,
+.ls-table-wrapper table.table-array-radio thead tr.ls-heading td,
+.ls-table-wrapper table.radio-array thead tr.ls-heading th,
+.ls-table-wrapper table.radio-array thead tr.ls-heading td {
+    border-top-color: var(--border-default-grey);
+}
+
+/* Bordure bottom uniforme sur TOUS les éléments du thead
+   Fix pour surcharger le border:0 du DSFR natif qui ne met pas de vraies bordures
+   (DSFR utilise background-image:linear-gradient au lieu de border)
+   On utilise border-bottom shorthand avec !important et spécificité maximale */
+/*
+.ls-table-wrapper table.radio-array.fr-table thead tr > th,
+.ls-table-wrapper table.radio-array.fr-table thead tr > td,
+.ls-table-wrapper table.radio-array.fr-table--bordered thead tr > th,
+.ls-table-wrapper table.radio-array.fr-table--bordered thead tr > td,
+.ls-table-wrapper table.fr-table.fr-table--bordered thead tr > th,
+.ls-table-wrapper table.fr-table.fr-table--bordered thead tr > td,
+.ls-table-wrapper table.fr-table thead tr > th,
+.ls-table-wrapper table.fr-table thead tr > td,
+table.radio-array.fr-table.fr-table--bordered thead tr > th,
+table.radio-array.fr-table.fr-table--bordered thead tr > td,
+table.radio-array.fr-table thead tr > th,
+table.radio-array.fr-table thead tr > td,
+table.fr-table.fr-table--bordered thead tr > th,
+table.fr-table.fr-table--bordered thead tr > td,
+table.fr-table--bordered thead tr > th,
+table.fr-table--bordered thead tr > td,
+table.fr-table thead tr > th,
+table.fr-table thead tr > td {
+    border-bottom: 2px solid var(--border-default-grey) !important;
+}
+*/
+
+/* En-têtes de lignes (première colonne) */
+.ls-table-wrapper table.table-array-radio tbody th.answertext,
+.ls-table-wrapper table.radio-array tbody th.answertext {
+    font-weight: 700;
+    color: var(--text-title-grey);
+}
+
+/* Cellules avec radio buttons - centrage */
+.ls-table-wrapper table.table-array-radio td.answer_cell,
+.ls-table-wrapper table.table-array-radio td[class*="answer_cell_"],
+.ls-table-wrapper table.radio-array td.answer_cell,
+.ls-table-wrapper table.radio-array td[class*="answer_cell_"] {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Fond des lignes : transparent — hérite de la carte question (cf. « FOND
+   DES TABLEAUX — UNIFIÉ »). L'ancien default-grey forçait un blanc en
+   clair mais un noir profond (#161616) décalé de la carte en sombre. */
+.ls-table-wrapper table.table-array-radio tbody tr,
+.ls-table-wrapper table.radio-array tbody tr {
+    background-color: transparent;
+}
+
+/* Hover sur les lignes */
+.ls-table-wrapper table.table-array-radio tbody tr:hover,
+.ls-table-wrapper table.radio-array tbody tr:hover {
+    background-color: var(--background-contrast-blue-france);
+}
+
+/* ============================================
+   ARRAY COLUMN TABLES - DSFR STYLE (Question 27)
+   ============================================ */
+
+/* Styles DSFR pour les tableaux type Array Column */
+.ls-table-wrapper table.array-radio {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: transparent;
+    border: 1px solid var(--border-default-grey);
+}
+
+.ls-table-wrapper table.array-radio th,
+.ls-table-wrapper table.array-radio td {
+    border: 1px solid var(--border-default-grey);
+    padding: 0.75rem;
+    text-align: left;
+}
+
+/* En-têtes de colonnes */
+.ls-table-wrapper table.array-radio thead th {
+    /* DISABLED - Let DSFR thead background-image show through */
+    /*     background-color: var(--background-contrast-grey); */
+    font-weight: 700;
+    color: var(--text-title-grey);
+    text-align: center;
+}
+
+/* Surcharge de la bordure Bootstrap pour utiliser la couleur DSFR */
+.ls-table-wrapper table.array-radio > :not(:first-child) {
+    border-top-color: var(--border-default-grey);
+}
+
+/* Bordures renforcées en haut de la ligne d'en-tête */
+.ls-table-wrapper table.array-radio thead tr.ls-heading th,
+.ls-table-wrapper table.array-radio thead tr.ls-heading td {
+    border-top-color: var(--border-default-grey);
+}
+
+/* Bordures renforcées en bas de la ligne d'en-tête */
+/* DISABLED - Testing global rule (line 1680) - Can be restored if needed */
+/*
+.ls-table-wrapper table.array-radio thead tr.ls-heading th,
+.ls-table-wrapper table.array-radio thead tr.ls-heading td {
+    border-bottom: 2px solid var(--border-plain-grey);
+}
+*/
+
+/* En-têtes de lignes (première colonne) */
+.ls-table-wrapper table.array-radio tbody th.answertext {
+    font-weight: 700;
+    color: var(--text-title-grey);
+}
+
+/* Cellules avec radio buttons - centrage */
+.ls-table-wrapper table.array-radio td.answer_cell,
+.ls-table-wrapper table.array-radio td[class*="answer_cell_"] {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Fond des lignes : transparent — hérite de la carte question (cf. « FOND
+   DES TABLEAUX — UNIFIÉ »). */
+.ls-table-wrapper table.array-radio tbody tr {
+    background-color: transparent;
+}
+
+/* Hover sur les lignes */
+.ls-table-wrapper table.array-radio tbody tr:hover {
+    background-color: var(--background-contrast-blue-france);
+}
+
+/* Radio buttons DSFR dans les tableaux array-radio */
+.ls-table-wrapper table.array-radio .fr-radio-group {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+}
+
+.ls-table-wrapper table.array-radio .fr-radio-input {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 2px solid var(--border-plain-grey);
+    border-radius: 50%;
+    background-color: var(--background-default-grey);
+    cursor: pointer;
+    position: relative;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.ls-table-wrapper table.array-radio .fr-radio-input:checked {
+    border-color: var(--border-action-high-blue-france);
+    background-color: var(--background-default-grey);
+}
+
+.ls-table-wrapper table.array-radio .fr-radio-input:checked::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    background-color: var(--background-action-high-blue-france);
+}
+
+.ls-table-wrapper table.array-radio .fr-radio-input:hover {
+    border-color: var(--border-action-high-blue-france);
+}
+
+.ls-table-wrapper table.array-radio .fr-radio-input:focus {
+    outline: 2px solid var(--border-action-high-blue-france);
+    outline-offset: 2px;
+}
+
+/* ============================================
+   DUAL SCALE DROPDOWN TABLES - DSFR STYLE (Question 33)
+   ============================================ */
+
+/* Cibler les tableaux dual scale avec dropdown via leurs classes spécifiques */
+.ls-table-wrapper table:has(.left-header, .right-header),
+.ls-table-wrapper table:has(.ddarrayseparator) {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: transparent;
+}
+
+.ls-table-wrapper table:has(.left-header, .right-header) th,
+.ls-table-wrapper table:has(.left-header, .right-header) td,
+.ls-table-wrapper table:has(.ddarrayseparator) th,
+.ls-table-wrapper table:has(.ddarrayseparator) td {
+    padding: 0.75rem;
+    text-align: left;
+}
+
+/* En-têtes de colonnes Scale A / Scale B */
+.ls-table-wrapper table thead th.left-header,
+.ls-table-wrapper table thead th.right-header {
+    /* Copier exactement les propriétés DSFR de .fr-table thead */
+    /* DISABLED - Let DSFR thead background-image show through */
+    /*     background-color: var(--background-contrast-grey); */
+    background-image: linear-gradient(0deg, var(--border-plain-grey), var(--border-plain-grey));
+    background-position: bottom;
+    background-repeat: no-repeat;
+    background-size: 100% 2px;
+    font-weight: 700;
+    color: var(--text-title-grey);
+    text-align: center;
+}
+
+/* Surcharge de la bordure Bootstrap */
+.ls-table-wrapper table:has(.ddarrayseparator) > :not(:first-child) {
+    border-top-color: var(--border-default-grey, #ddd) !important;
+}
+
+/* Bordures renforcées en bas de la ligne d'en-tête */
+/* DISABLED - Testing global rule (line 1680) - Can be restored if needed */
+/*
+.ls-table-wrapper table thead tr.ls-heading th.left-header,
+.ls-table-wrapper table thead tr.ls-heading th.right-header,
+.ls-table-wrapper table thead tr.ls-heading td {
+    border-bottom: 2px solid var(--border-default-grey) !important;
+}
+*/
+
+/* Ajouter la bordure via background-image sur les TH spécifiquement */
+/* DISABLED - Testing global rule (line 1680) - Can be restored if needed */
+/*
+.ls-table-wrapper table thead tr.ls-heading th.left-header,
+.ls-table-wrapper table thead tr.ls-heading th.right-header {
+    background-color: var(--background-contrast-grey) !important;
+    background-image: linear-gradient(0deg, var(--border-plain-grey), var(--border-plain-grey)) !important;
+    background-position: bottom !important;
+    background-repeat: no-repeat !important;
+    background-size: 100% 2px !important;
+}
+*/
+
+/* En-têtes de lignes (première colonne) */
+.ls-table-wrapper table:has(.ddarrayseparator) tbody th.answertext {
+    font-weight: 700;
+    color: var(--text-label-grey) !important;
+}
+
+/* Cellules avec dropdown - centrage */
+.ls-table-wrapper table td.dropdown-item {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Séparateur central : masqué uniquement si vide (classe `dsfr-separator-empty`
+   posée par le template Twig). Si interddSep est renseigné, on laisse le bloc
+   custom.css prendre le relais (padding + min-width pour affichage horizontal). */
+.ls-table-wrapper table td.ddarrayseparator.dsfr-separator-empty {
+    width: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    background-color: transparent !important;
+}
+
+/* Colonne séparatrice dans colgroup : masquée uniquement si vide. */
+.ls-table-wrapper table col.ddarrayseparator.dsfr-separator-empty {
+    width: 0 !important;
+}
+
+/* Fond transparent systématique sur le séparateur (tous cas). */
+.ls-table-wrapper table td.ddarrayseparator {
+    background-color: transparent !important;
+}
+
+/* Fond transparent pour toutes les lignes (pas de fond sur mobile) */
+.ls-table-wrapper table:has(.ddarrayseparator) tbody tr {
+    background-color: transparent !important;
+}
+
+/* Hover sur les lignes */
+.ls-table-wrapper table:has(.ddarrayseparator) tbody tr:hover {
+    background-color: var(--background-contrast-blue-france, #e3e3fd) !important;
+}
+
+/* Style DSFR pour les select */
+.ls-table-wrapper table td.dropdown-item select.form-select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-default-grey, #ddd);
+    border-radius: 0.25rem;
+    background-color: var(--background-default-grey);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.ls-table-wrapper table td.dropdown-item select.form-select:focus {
+    outline: 2px solid #0a76f6;
+    outline-offset: 2px;
+    border-color: var(--border-action-high-blue-france);
+}
+/* Full width for ranking items */
+/* Source items styling (same as ranked but clickable) */
+/* Button group in ranked items */
+
+
+
 /* ============================================
    LAYOUT FIXES
    ============================================ */
@@ -30,11 +801,11 @@ body > article {
 }
 
 /* Utilitaires d'alignement de texte DSFR-compatible */
-.fr-text-left {
+.lsd-text-left {
     text-align: left;
 }
 
-.fr-text-right {
+.lsd-text-right {
     text-align: right;
 }
 
@@ -53,7 +824,7 @@ body > article {
 }
 
 .text-warning {
-    color: var(--warning-425) !important;
+    color: var(--warning-425-625) !important;
 }
 
 .text-muted {
@@ -61,8 +832,8 @@ body > article {
 }
 
 /* Navigation responsive */
-@media (max-width: 768px) {
-    .fr-text-right {
+@media (max-width: 767.98px) {
+    .lsd-text-right {
         text-align: center;
         margin-top: 1rem;
     }
@@ -130,7 +901,7 @@ html, body {
 
 /* Mobile (< 768px) : rendre les séparateurs de groupe visibles et les styler
    comme des en-têtes de section (bold, border-top, fond). */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     table .ls-xs-only.dualscale-scale-header {
         display: block !important;
         width: 100% !important;
@@ -146,8 +917,12 @@ html, body {
     }
 }
 
-/* Centrer radios/checkbox dans cellules */
-table td {
+/* Centrer radios/checkbox dans cellules.
+   :not(.fr-table__content td) : avant @layer, .fr-table__content td (DSFR,
+   spécificité supérieure) gardait ses cellules alignées à gauche ; la couche
+   custom battant désormais dsfr sans égard à la spécificité, on exclut
+   explicitement les tableaux fr-table (#41). */
+table td:not(.fr-table__content td) {
     text-align: center;
 }
 
@@ -156,102 +931,12 @@ table td input[type="checkbox"] {
     display: inline-block;
     margin: 0 auto;
 }
-
-/* ============================================
-   CHECKBOXES DSFR DANS TABLEAUX
-   Style custom pour checkbox-array et multiflexi
-   Sélecteurs très spécifiques pour override DSFR
-   ============================================ */
-
-/* Container de la cellule checkbox */
-td.checkbox-item-item {
-    text-align: center !important;
-    vertical-align: middle !important;
-}
-
 /* Checkbox DSFR custom dans tableaux - sélecteurs très spécifiques */
-.fr-table table.checkbox-array td.checkbox-item-item input[type="checkbox"],
-table.checkbox-array td.checkbox-item-item input[type="checkbox"],
-.answer-container table td input[type="checkbox"][id^="cbox"] {
-    /* Masquer le checkbox natif mais garder accessible */
-    -webkit-appearance: none !important;
-    -moz-appearance: none !important;
-    appearance: none !important;
-    /* Dimensions DSFR */
-    width: 1.5rem !important;
-    height: 1.5rem !important;
-    min-width: 1.5rem !important;
-    min-height: 1.5rem !important;
-    /* Style DSFR */
-    border: 1px solid var(--border-action-high-blue-france) !important;
-    border-radius: 0.25rem !important;
-    background-color: var(--background-default-grey) !important;
-    /* Centrage */
-    display: inline-block !important;
-    vertical-align: middle !important;
-    margin: 0 auto !important;
-    /* Curseur */
-    cursor: pointer !important;
-    /* Position relative pour le checkmark */
-    position: relative !important;
-    /* Transition */
-    transition: background-color 0.1s ease, border-color 0.1s ease !important;
-    /* Reset flex qui pourrait interférer */
-    flex: none !important;
-}
-
 /* Hover sur checkbox */
-.fr-table table.checkbox-array td.checkbox-item-item input[type="checkbox"]:hover,
-table.checkbox-array td.checkbox-item-item input[type="checkbox"]:hover,
-.answer-container table td input[type="checkbox"][id^="cbox"]:hover {
-    background-color: var(--background-alt-blue-france) !important;
-}
-
 /* Focus visible pour accessibilité */
-.fr-table table.checkbox-array td.checkbox-item-item input[type="checkbox"]:focus-visible,
-table.checkbox-array td.checkbox-item-item input[type="checkbox"]:focus-visible,
-.answer-container table td input[type="checkbox"][id^="cbox"]:focus-visible {
-    outline: 2px solid var(--border-action-high-blue-france) !important;
-    outline-offset: 2px !important;
-}
-
 /* État coché - fond bleu */
-.fr-table table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked,
-table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked,
-.answer-container table td input[type="checkbox"][id^="cbox"]:checked {
-    background-color: var(--background-action-high-blue-france) !important;
-    border-color: var(--background-action-high-blue-france) !important;
-}
-
 /* Checkmark via pseudo-element */
-.fr-table table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after,
-table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after,
-.answer-container table td input[type="checkbox"][id^="cbox"]:checked::after {
-    content: "" !important;
-    position: absolute !important;
-    left: 0.45rem !important;
-    top: 0.2rem !important;
-    width: 0.4rem !important;
-    height: 0.7rem !important;
-    border: solid white !important;
-    border-width: 0 2px 2px 0 !important;
-    transform: rotate(45deg) !important;
-}
-
 /* ============================================
-   BLOCS QUESTIONS - Style Card DSFR
-   ============================================ */
-
-.question-container,
-.group-description-card {
-    background-color: var(--background-raised-grey);
-    border: 1px solid var(--border-default-grey);
-    border-radius: 0;
-    padding: 1.5rem;
-    margin-bottom: 2rem;
-    box-shadow: var(--overlap-shadow);
-}
-
 /* Questions/groupes conditionnels - EM (ExpressionScript) ajoute ces classes
    sur les .question-container ou .group-container quand la pertinence calcule
    `false`. On les masque visuellement et on les rend non focusables.
@@ -285,12 +970,6 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
 .question-container:not(.ls-irrelevant):not(.ls-hidden) {
     opacity: 1;
 }
-
-/* État initial avant animation (pour JS) */
-.question-container.ls-animating-in {
-    opacity: 0;
-}
-
 /* Sub-question items désactivés par une option exclusive (ex. « Aucun ») :
    ils gardent leur place dans le DOM et restent visibles, mais on signale
    visuellement qu'ils sont inactifs. LimeSurvey core applique
@@ -408,14 +1087,14 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
 
 /* Erreur (rouge DSFR) */
 .ls-em-error {
-    color: var(--error-425) !important;
+    color: var(--error-425-625) !important;
 }
 
 /* Warning (orange DSFR warning-main-525) */
 .em_num_answers,
 .em_validation_q,
 .em_commented_checkbox {
-    color: var(--warning-425) !important;
+    color: var(--warning-425-625) !important;
 }
 
 /* ============================================
@@ -482,12 +1161,12 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
 
 .alert-warning {
     background-color: var(--background-contrast-warning);
-    border-left-color: var(--warning-425);
+    border-left-color: var(--warning-425-625);
 }
 
 .alert .h4,
 .alert strong {
-    color: var(--error-425) !important;
+    color: var(--error-425-625) !important;
 }
 
 /* Cartes d'erreur Bootstrap → DSFR */
@@ -519,15 +1198,18 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
    BOUTONS NAVIGATION - Secondary
    ============================================ */
 
+/* Concurrent : dsfr.min.css (couche dsfr, battue par custom en déclarations
+   normales) — pas de core non layerisé sur cette classe, !important inutiles
+   (déposés, #41 étape 3a). */
 .fr-btn--secondary {
-    background-color: transparent !important;
-    color: var(--text-action-high-blue-france) !important;
-    border: 1px solid var(--border-action-high-blue-france) !important;
-    box-shadow: inset 0 0 0 1px var(--border-action-high-blue-france) !important;
+    background-color: transparent;
+    color: var(--text-action-high-blue-france);
+    border: 1px solid var(--border-action-high-blue-france);
+    box-shadow: inset 0 0 0 1px var(--border-action-high-blue-france);
 }
 
 .fr-btn--secondary:hover {
-    background-color: var(--background-action-low-blue-france-hover) !important;
+    background-color: var(--background-action-low-blue-france-hover);
 }
 
 /* ============================================
@@ -617,7 +1299,7 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
 
 /* Drag handle icon */
 .selector__dragHandle {
-    color: #666;
+    color: var(--text-mention-grey);
     opacity: 0.5;
     transition: opacity 0.2s ease;
 }
@@ -779,6 +1461,14 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
     display: block;
 }
 
+/* Masquage JS du core LimeSurvey. Cette classe était fournie par
+   template-core.css, retiré via <remove> dans config.xml : sans cette
+   redéfinition, l'alerte RGPD #datasecurity_error (privacy_text.twig)
+   et d'autres éléments restent visibles en permanence. */
+.ls-js-hidden {
+    display: none !important;
+}
+
 .ls-js-hidden-sr {
     position: absolute;
     width: 1px;
@@ -855,7 +1545,7 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
 }
 
 /* Responsive : boutons en colonne sur mobile */
-@media (max-width: 576px) {
+@media (max-width: 575.98px) {
     .fr-alert .fr-btns-group {
         flex-direction: column;
     }
@@ -873,12 +1563,6 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
 .modal {
     display: none !important;
 }
-
-/* Ne l'afficher QUE si elle a du contenu valide ET la classe dsfr-show */
-.modal.dsfr-show {
-    display: block !important;
-}
-
 /* Supprimer le backdrop Bootstrap */
 .modal-backdrop {
     display: none !important;
@@ -899,6 +1583,22 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
 .question-container .fr-input-group--error::before,
 .question-container .fr-input-group--valid::before {
     display: none !important;
+}
+
+/* Même principe pour les fieldsets (radios/cases) : errors-dsfr.js pose
+   fr-fieldset--error (état DSFR normatif — labels rouges, à conserver),
+   mais le trait vertical natif du fieldset doublait notre liseré
+   question-container. DSFR le dessine en 3 morceaux : background-image
+   du fieldset, background-image du legend, box-shadow du content::before. */
+.question-container .fr-fieldset--error,
+.question-container .fr-fieldset--error .fr-fieldset__legend,
+.question-container .fr-fieldset--valid,
+.question-container .fr-fieldset--valid .fr-fieldset__legend {
+    background-image: none !important;
+}
+.question-container .fr-fieldset--error .fr-fieldset__content::before,
+.question-container .fr-fieldset--valid .fr-fieldset__content::before {
+    box-shadow: none !important;
 }
 
 /* Bordure transparente par défaut pour éviter le décalage lors des erreurs */
@@ -1011,6 +1711,14 @@ table.checkbox-array td.checkbox-item-item input[type="checkbox"]:checked::after
     display: none !important;
 }
 
+/* Cellules de tableau (arrays texte/nombre) : le fr-input-group garde son
+   margin-bottom DSFR (24px) dans la cellule → champ décentré verticalement
+   (vide sous le champ). Le padding du td suffit. */
+td.text-item .fr-input-group,
+td.answer-item .fr-input-group {
+    margin-bottom: 0;
+}
+
 /* ============================================
    DATE PICKER - Alignement des séparateurs
    ============================================ */
@@ -1065,16 +1773,19 @@ textarea,
     padding: 0 !important;
 }
 
-/* Supprimer toutes les marges et padding sur les containers de questions */
-.ls-answers.subquestion-list .question-item,
-.ls-answers.subquestion-list .answer-item,
-.ls-answers.subquestion-list .text-item,
-.questions-list.text-list .question-item,
-.questions-list.text-list .answer-item,
-.questions-list.text-list .text-item,
-.questions-list.number-list .question-item,
-.questions-list.number-list .answer-item,
-.questions-list.number-list .text-item {
+/* Supprimer toutes les marges et padding sur les containers de questions.
+   Scopé sur li : les tables d'arrays portent aussi ls-answers.subquestion-list
+   et leurs td.text-item/answer-item perdaient leur padding gauche (champ collé
+   au bord de la cellule). */
+.ls-answers.subquestion-list li.question-item,
+.ls-answers.subquestion-list li.answer-item,
+.ls-answers.subquestion-list li.text-item,
+.questions-list.text-list li.question-item,
+.questions-list.text-list li.answer-item,
+.questions-list.text-list li.text-item,
+.questions-list.number-list li.question-item,
+.questions-list.number-list li.answer-item,
+.questions-list.number-list li.text-item {
     margin-left: 0 !important;
     padding-left: 0 !important;
 }
@@ -1204,41 +1915,12 @@ textarea,
 
 /* TODO: Ajouter les styles spécifiques ici au fur et à mesure */
 
-/* ============================================
-   LOGO MARIANNE (DRAPEAU + BLOC)
-   ============================================ */
-
-/* Drapeau tricolore */
-.fr-logo:before {
-    background-image: url(../files/logos/marianne-flag.svg), linear-gradient(90deg, #000091, #000091 50%, #e1000f 0, #e1000f), linear-gradient(90deg, #000, #000);
-    background-position: 0 -0.0625rem, 0 0, 0 0;
-    background-repeat: no-repeat, no-repeat, no-repeat;
-    background-size: 2.75rem 1.125rem, 2.75rem 1rem, 0;
-    content: "";
-    display: block !important;
-    height: 1rem;
-    margin-bottom: 0.333rem;
-    width: 2.75rem;
-    box-shadow: 0 0 0 1px #fff;
-}
-
-/* Bloc graphique Marianne (Liberté Égalité Fraternité) */
-.fr-logo:after {
-    background-image: url(../files/logos/marianne-block.svg);
-    background-position: 0 calc(100% + 1.875rem);
-    background-repeat: no-repeat;
-    background-size: 5.25rem 3.75rem;
-    content: "";
-    display: block !important;
-    min-width: 2.625rem;
-    padding-top: 2.2083333333rem;
-}
-
-@media (min-width: 62em) {
-    .fr-logo:after {
-        background-position: -2.625rem 100%;
-    }
-}
+/* Le bloc « LOGO MARIANNE » historique (redéfinition .fr-logo:before/:after
+   vers files/logos/marianne-*.svg, fix CSP antérieur à ADR-019) a été déposé
+   avec la migration @layer (#41) : ses sélecteurs à 1 classe écrasaient les
+   variantes DSFR à 2 classes (.fr-header__logo .fr-logo:after — échelle
+   header) dès lors que la spécificité ne s'applique plus entre couches. Le
+   DSFR vendored porte ses propres SVG externalisés depuis ADR-019. */
 
 /* ============================================
    PROTECTION ANTI-BOT (Alternative au CAPTCHA)
@@ -1326,6 +2008,7 @@ table td > input[type="radio"],
 table th > input[type="radio"],
 td.answer-item input[type="radio"],
 td.radio-item input[type="radio"],
+.dualscale-noanswer input[type="radio"],
 .dsfr-radio-table {
     appearance: none !important;
     -webkit-appearance: none !important;
@@ -1352,8 +2035,9 @@ table td > input[type="radio"]:hover,
 table th > input[type="radio"]:hover,
 td.answer-item input[type="radio"]:hover,
 td.radio-item input[type="radio"]:hover,
+.dualscale-noanswer input[type="radio"]:hover,
 .dsfr-radio-table:hover {
-    border-color: var(--border-action-high-blue-france-hover) !important;
+    border-color: var(--border-action-high-blue-france) !important;
     background-color: var(--background-alt-grey) !important;
 }
 
@@ -1361,11 +2045,13 @@ table td > input[type="radio"]:focus,
 table th > input[type="radio"]:focus,
 td.answer-item input[type="radio"]:focus,
 td.radio-item input[type="radio"]:focus,
+.dualscale-noanswer input[type="radio"]:focus,
 .dsfr-radio-table:focus,
 table td > input[type="radio"]:focus-visible,
 table th > input[type="radio"]:focus-visible,
 td.answer-item input[type="radio"]:focus-visible,
 td.radio-item input[type="radio"]:focus-visible,
+.dualscale-noanswer input[type="radio"]:focus-visible,
 .dsfr-radio-table:focus-visible {
     /* La variable --focus n'est pas définie côté DSFR — on utilise la
        couleur d'action principale (cohérence avec le reste du fichier)
@@ -1383,10 +2069,11 @@ table td > input[type="radio"]:checked,
 table th > input[type="radio"]:checked,
 td.answer-item input[type="radio"]:checked,
 td.radio-item input[type="radio"]:checked,
+.dualscale-noanswer input[type="radio"]:checked,
 .dsfr-radio-table:checked {
-    border-color: #000091 !important;
-    background-color: #000091 !important;
-    box-shadow: inset 0 0 0 5px #FFF !important;
+    border-color: var(--border-action-high-blue-france) !important;
+    background-color: var(--background-action-high-blue-france) !important;
+    box-shadow: inset 0 0 0 5px var(--background-default-grey) !important;
 }
 
 table td > input[type="radio"]:checked:hover,
@@ -1394,8 +2081,8 @@ table th > input[type="radio"]:checked:hover,
 td.answer-item input[type="radio"]:checked:hover,
 td.radio-item input[type="radio"]:checked:hover,
 .dsfr-radio-table:checked:hover {
-    background-color: #1212FF !important;
-    border-color: #1212FF !important;
+    background-color: var(--background-action-high-blue-france-hover) !important;
+    border-color: var(--background-action-high-blue-france-hover) !important;
 }
 
 /* Centrage dans les cellules de tableau */
@@ -1409,6 +2096,7 @@ td.answer-item.radio-item {
 .ls-error-mandatory table th > input[type="radio"],
 .ls-error-mandatory td.answer-item input[type="radio"],
 .ls-error-mandatory td.radio-item input[type="radio"],
+.ls-error-mandatory .dualscale-noanswer input[type="radio"],
 .ls-error-mandatory .dsfr-radio-table {
     border-color: var(--border-plain-error) !important;
 }
@@ -1417,7 +2105,98 @@ td.answer-item.radio-item {
 .ls-error-mandatory table th > input[type="radio"]:checked,
 .ls-error-mandatory td.answer-item input[type="radio"]:checked,
 .ls-error-mandatory td.radio-item input[type="radio"]:checked,
+.ls-error-mandatory .dualscale-noanswer input[type="radio"]:checked,
 .ls-error-mandatory .dsfr-radio-table:checked {
+    background-color: var(--border-plain-error) !important;
+}
+
+/* ============================================
+   CHECKBOXES DSFR DANS TABLEAUX
+   ============================================ */
+
+/* Même traitement que les radios ci-dessus : les matrices « cases à cocher »
+   (multiflexi checkbox layout — cellule core answer_td_checkboxes.twig,
+   td.checkbox-item) rendaient la checkbox NATIVE (~13px), hors DSFR.
+   Enfant direct (>) uniquement : ne surtout pas matcher les inputs des
+   .fr-checkbox-group, que DSFR masque pour dessiner la case sur le label. */
+table td > input[type="checkbox"],
+td.answer-item > input[type="checkbox"],
+td.checkbox-item > input[type="checkbox"] {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+    min-width: 1.5rem !important;
+    min-height: 1.5rem !important;
+    border: 1px solid var(--border-action-high-blue-france) !important;
+    border-radius: 0.25rem !important;
+    background-color: var(--background-default-grey) !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    vertical-align: middle;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 1;
+    margin: 0 auto;
+    display: block;
+}
+
+table td > input[type="checkbox"]:hover,
+td.answer-item > input[type="checkbox"]:hover,
+td.checkbox-item > input[type="checkbox"]:hover {
+    border-color: var(--border-action-high-blue-france) !important;
+    background-color: var(--background-alt-grey) !important;
+}
+
+table td > input[type="checkbox"]:focus,
+td.answer-item > input[type="checkbox"]:focus,
+td.checkbox-item > input[type="checkbox"]:focus,
+table td > input[type="checkbox"]:focus-visible,
+td.answer-item > input[type="checkbox"]:focus-visible,
+td.checkbox-item > input[type="checkbox"]:focus-visible {
+    /* Même correctif que les radios : fallback #000091 obligatoire
+       (var(--focus) indéfinie côté DSFR) — RGAA 7.1. */
+    outline: 2px solid var(--border-action-high-blue-france, #000091) !important;
+    outline-offset: 2px !important;
+}
+
+table td > input[type="checkbox"]:checked,
+td.answer-item > input[type="checkbox"]:checked,
+td.checkbox-item > input[type="checkbox"]:checked {
+    border-color: var(--border-action-high-blue-france) !important;
+    background-color: var(--background-action-high-blue-france) !important;
+    /* Coche : SVG externe (conformité CSP, cf. bloc CHECKBOX CHECKMARK) */
+    background-image: url("../files/icons/system/checkbox-checkmark.svg") !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: 1.125rem 1.125rem !important;
+}
+
+table td > input[type="checkbox"]:checked:hover,
+td.answer-item > input[type="checkbox"]:checked:hover,
+td.checkbox-item > input[type="checkbox"]:checked:hover {
+    background-color: var(--background-action-high-blue-france-hover) !important;
+    border-color: var(--background-action-high-blue-france-hover) !important;
+}
+
+/* Centrage dans les cellules de tableau */
+td.answer-item.checkbox-item,
+td.checkbox-item {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Ligne en erreur */
+.ls-error-mandatory table td > input[type="checkbox"],
+.ls-error-mandatory td.answer-item > input[type="checkbox"],
+.ls-error-mandatory td.checkbox-item > input[type="checkbox"] {
+    border-color: var(--border-plain-error) !important;
+}
+
+.ls-error-mandatory table td > input[type="checkbox"]:checked,
+.ls-error-mandatory td.answer-item > input[type="checkbox"]:checked,
+.ls-error-mandatory td.checkbox-item > input[type="checkbox"]:checked {
     background-color: var(--border-plain-error) !important;
 }
 
@@ -1433,7 +2212,7 @@ td.answer-item.radio-item {
  * où les règles DSFR écrasaient la linéarisation mobile.
  */
 
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     /* ============================================
        LINÉARISATION TABLEAUX EN VUE MOBILE
        Force l'affichage en cartes verticales
@@ -1911,7 +2690,7 @@ select.fr-select:focus,
 }
 
 /* Responsive: une seule colonne sur mobile */
-@media (max-width: 576px) {
+@media (max-width: 575.98px) {
     .ls-columns,
     .ls-columns-2,
     .ls-columns-3,
@@ -1922,7 +2701,7 @@ select.fr-select:focus,
 }
 
 /* Tablette: maximum 2 colonnes */
-@media (min-width: 577px) and (max-width: 768px) {
+@media (min-width: 576px) and (max-width: 767.98px) {
     .ls-columns-3,
     .ls-columns-4,
     .ls-columns-5 {
@@ -1937,48 +2716,9 @@ select.fr-select:focus,
 .ls-columns > div {
     margin: 0;
 }
-
-/* ============================================
-   OUI/NON - ALIGNEMENT DES LABELS
-   Issue #13: Oui/Non alignement
-   ============================================ */
-
-/* Alignement vertical des icônes et texte dans les labels Oui/Non */
-.question-yesno .fr-radio-group .fr-label {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
 /* Style des icônes Oui/Non */
-.question-yesno .fr-label [class^="ri-"],
-.question-yesno .fr-label .ri-checkbox-circle-line,
-.question-yesno .fr-label .ri-close-circle-line {
-    font-size: 1.25rem;
-    line-height: 1;
-    flex-shrink: 0;
-}
-
 /* Couleurs des icônes */
-.question-yesno .fr-label .ri-checkbox-circle-line {
-    color: var(--text-default-success, #18753C);
-}
-
-.question-yesno .fr-label .ri-close-circle-line {
-    color: var(--text-default-error, #CE0500);
-}
-
-/* Assurer l'alignement des radio-group dans la grille */
-.question-yesno .fr-grid-row .fr-radio-group {
-    display: flex;
-    align-items: flex-start;
-}
-
 /* Espacement égal entre les options */
-.question-yesno .fr-grid-row--gutters > [class*="fr-col"] {
-    margin-bottom: 1rem;
-}
-
 /* ============================================
    BOOTSTRAP BUTTONS → DSFR STYLE
    Question theme "Bootstrap buttons" avec apparence DSFR
@@ -1995,24 +2735,32 @@ select.fr-select:focus,
     padding: 0.25rem;
 }
 
-/* Label bouton - transformer btn-primary Bootstrap en style DSFR */
-.bootstrap-buttons-div label.btn {
-    /* Base DSFR */
-    display: inline-flex;
+/* SECTION CANONIQUE (#41 étapes 3a + 5) — remplace les 3 définitions
+   historiques contradictoires (deux sections « → DSFR » + une section
+   checkbox), supprime le `all: unset !important`.
+
+   Règle de cascade : Bootstrap est servi par le core LimeSurvey HORS
+   layer — toute déclaration normale d'une couche perd contre lui, quelle
+   que soit la spécificité. Les !important ci-dessous ne sont donc gardés
+   QUE sur les propriétés que Bootstrap pose sur .btn/.btn-primary ;
+   les autres (align-items, gap, min-height…) sont en déclarations
+   normales. */
+
+/* Boutons : transformer .btn Bootstrap en bouton DSFR secondaire.
+   Couvre label.btn (radio/checkbox de bootstrap_buttons) et .btn nu. */
+.bootstrap-buttons-div .btn {
+    display: inline-flex !important;
     align-items: center;
     justify-content: center;
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-    font-weight: 500;
-    line-height: 1.5rem;
+    padding: 0.5rem 1rem !important;
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    line-height: 1.5rem !important;
     min-height: 2.5rem;
-    border-radius: 0;
+    border-radius: 0 !important;
     cursor: pointer;
     text-decoration: none;
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-    /* Empêche l'apparition d'un caret de texte dans le label au clic
-       (comportement standard d'un bouton, intégré nativement à .btn Bootstrap
-       mais perdu lors de la redéfinition complète ci-dessus). */
     -webkit-user-select: none;
     user-select: none;
 
@@ -2023,22 +2771,25 @@ select.fr-select:focus,
     box-shadow: inset 0 0 0 1px var(--border-action-high-blue-france, #000091) !important;
 }
 
-/* Hover - style DSFR secondaire */
-.bootstrap-buttons-div label.btn:hover {
+/* Hover non sélectionné — sémantique DSFR « secondary » : teinte claire.
+   (#41 étape 5 : l'ancienne 2e définition posait un hover bleu plein +
+   texte blanc, contradictoire — c'est elle qui gagnait. Unifié ici.) */
+.bootstrap-buttons-div .btn:hover {
     background-color: var(--background-action-low-blue-france-hover, #e3e3fd) !important;
 }
 
 /* Focus - outline DSFR */
-.bootstrap-buttons-div input.btn-check:focus + label.btn,
-.bootstrap-buttons-div input.button-item:focus + label.btn {
+.bootstrap-buttons-div .btn-check:focus + .btn,
+.bootstrap-buttons-div input.button-item:focus + .btn {
     outline: 2px solid var(--border-action-high-blue-france, #000091);
     outline-offset: 2px;
 }
 
-/* État sélectionné - style DSFR primaire (bleu plein) */
-.bootstrap-buttons-div .form-check.active label.btn,
-.bootstrap-buttons-div input.btn-check:checked + label.btn,
-.bootstrap-buttons-div input.button-item:checked + label.btn {
+/* État sélectionné - style DSFR primaire (bleu plein) — radios ET checkboxes */
+.bootstrap-buttons-div .form-check.active .btn,
+.bootstrap-buttons-div .btn-check:checked + .btn,
+.bootstrap-buttons-div input.button-item:checked + .btn,
+.bootstrap-buttons-div input[type="checkbox"]:checked + .btn {
     background-color: var(--background-action-high-blue-france, #000091) !important;
     color: var(--text-inverted-blue-france, #fff) !important;
     border-color: var(--background-action-high-blue-france, #000091) !important;
@@ -2046,17 +2797,32 @@ select.fr-select:focus,
 }
 
 /* Hover sur état sélectionné */
-.bootstrap-buttons-div .form-check.active label.btn:hover,
-.bootstrap-buttons-div input.btn-check:checked + label.btn:hover,
-.bootstrap-buttons-div input.button-item:checked + label.btn:hover {
+.bootstrap-buttons-div .form-check.active .btn:hover,
+.bootstrap-buttons-div .btn-check:checked + .btn:hover,
+.bootstrap-buttons-div input.button-item:checked + .btn:hover,
+.bootstrap-buttons-div input[type="checkbox"]:checked + .btn:hover {
     background-color: var(--background-action-high-blue-france-hover, #1212ff) !important;
 }
 
-/* Supprimer les classes Bootstrap résiduelles */
-.bootstrap-buttons-div label.btn-primary,
-.bootstrap-buttons-div label.btn-secondary,
-.bootstrap-buttons-div label.btn-outline-primary {
-    /* Les styles ci-dessus prennent le relais */
+/* Bouton « Sans réponse » - style tertiaire */
+.bootstrap-buttons-div .noanswer-item .btn,
+.bootstrap-buttons-div[class*="noanswer"] .btn {
+    color: var(--text-mention-grey) !important;
+    border-color: var(--border-default-grey) !important;
+    box-shadow: inset 0 0 0 1px var(--border-default-grey) !important;
+}
+
+.bootstrap-buttons-div .noanswer-item .btn:hover {
+    background-color: var(--background-alt-grey) !important;
+    color: var(--text-default-grey) !important;
+}
+
+/* Layout du container de boutons (gap : aucun concurrent core → normal) */
+[data-bs-toggle="buttons"],
+.btn-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
 /* Bloc « Autre : [champ texte] » qui apparaît sous la rangée de boutons
@@ -2071,7 +2837,7 @@ select.fr-select:focus,
 }
 
 /* Responsive - pleine largeur sur mobile */
-@media (max-width: 576px) {
+@media (max-width: 575.98px) {
     .bootstrap-buttons-div {
         flex: 0 0 100%;
         max-width: 100%;
@@ -2253,7 +3019,7 @@ table.fr-table--bordered {
    BORDURES TABLEAUX LINÉARISÉS MOBILE
    Cohérence visuelle : 4 bordures sur chaque carte (au lieu de partielles).
    ============================================ */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .fr-table table tbody tr,
     .fr-table--bordered table tbody tr,
     div[class*="fr-table"] table tbody tr,
@@ -2312,6 +3078,17 @@ table.fr-table--bordered {
     margin-bottom: 1rem !important;
     padding: 0 !important;
     list-style: none !important;
+}
+
+/* Avant @layer, .answer-item.numeric-item/.text-item (theme.css, 2 classes)
+   battait par spécificité les display:flex concurrents (.selector--inputondemand-
+   list-item ci-dessus, mais aussi .fr-grid-row du DSFR sur les lignes texte de
+   527199 — un wrapper sans fr-col s'écrase alors au contenu, textarea à 218px).
+   La couche theme étant désormais sous dsfr et custom, on restaure ce
+   comportement ici, avec le sélecteur d'origine de theme.css (#41). */
+.answer-item.numeric-item,
+.answer-item.text-item {
+    display: block;
 }
 
 /* Respecter d-none pour les éléments cachés (input on demand) */
@@ -2402,7 +3179,7 @@ table.fr-table--bordered {
     height: auto;
     display: block;
     margin: 0.5rem 0;
-    border-radius: var(--border-radius, 0.25rem); /* Border radius DSFR */
+    border-radius: 0.25rem; /* Border radius DSFR */
     box-shadow: var(--overlap-shadow, 0 8px 16px rgba(0,0,0,0.1)); /* Ombre légère DSFR */
 }
 
@@ -2451,6 +3228,19 @@ table.fr-table--bordered {
 .star-rating-item {
     display: inline-flex;
     align-items: center;
+}
+
+/* Mobile : la marge inline générique (2rem sur fr-fieldset__element--inline)
+   et le padding horizontal DSFR (0.5rem de chaque côté) faisaient passer les
+   5 étoiles sur 2 lignes (5×56px + gaps > 301px utiles à 375px) — le gap du
+   conteneur (0.5rem) suffit comme espacement. */
+@media (max-width: 767.98px) {
+    .star-rating-container .fr-fieldset__element--inline {
+        margin-right: 0;
+        margin-bottom: 0;
+        padding-left: 0;
+        padding-right: 0;
+    }
 }
 
 /* Hide radio inputs */
@@ -2604,7 +3394,7 @@ table.fr-table--bordered {
 }
 
 /* Mobile: responsive adjustments for star rating */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     /* Étoiles plus grandes sur mobile pour faciliter le touch */
     .star-rating-container {
         gap: 0.75rem !important;
@@ -2636,9 +3426,20 @@ table.fr-table--bordered {
     height: 1px;
 }
 
-/* Hide DSFR radio button pseudo-element in emoji mode */
-.fr-fieldset[data-display-mode="2"] .fr-radio-group input[type="radio"] + label::before {
+/* Hide DSFR radio button pseudo-element in emoji mode.
+   Scopé au label emoji : le « Sans réponse » du même fieldset est un radio
+   DSFR standard qui doit garder son rond (sinon aucun indicateur visible
+   alors qu'il est coché par défaut). */
+.fr-fieldset[data-display-mode="2"] .fr-radio-group input[type="radio"] + label.fr-label--emoji-rating::before {
     display: none !important;
+}
+
+/* Le rond du radio DSFR est AUSSI dessiné en background-image du label
+   (SVG externalisé, position 0 50%) — pas seulement en ::before. Sans ce
+   masquage, un cercle bleu dépasse derrière chaque emoji/étoile (#43). */
+.fr-fieldset[data-display-mode="1"] .fr-radio-group input[type="radio"] + label,
+.fr-fieldset[data-display-mode="2"] .fr-radio-group input[type="radio"] + label.fr-label--emoji-rating {
+    background-image: none;
 }
 
 /* Center emoji in fr-radio-rich box */
@@ -2666,31 +3467,102 @@ table.fr-table--bordered {
     line-height: 1;
     text-align: center;
     display: block;
+    /* Item flex du label : remplir l'axe principal comme avant @layer,
+       sinon la boîte rétrécit au contenu (48px → 40px) et l'emoji décale. */
+    width: 100%;
 }
 
-/* Responsive adjustments for 5-point choice */
-@media (max-width: 767px) {
-    /* Stack radio buttons vertically on mobile */
-    .fr-fieldset[data-display-mode] .fr-grid-row {
-        flex-direction: column;
+/* Feedback de sélection en mode emoji (revue 2026-06-12).
+   Le rond radio DSFR (::before + background-image) est masqué ci-dessus :
+   sans ces règles, aucun retour visuel au survol ni à la sélection. On
+   matérialise la boîte : cadre gris par défaut, fond léger au survol,
+   fond bleu clair + anneau bleu quand l'option est cochée. */
+.fr-fieldset[data-display-mode="2"] .fr-radio-group input[type="radio"] + label.fr-label--emoji-rating {
+    border-radius: 0.5rem;
+    box-shadow: inset 0 0 0 1px var(--border-default-grey, #ddd);
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.fr-fieldset[data-display-mode="2"] .fr-radio-group input[type="radio"]:not(:checked) + label.fr-label--emoji-rating:hover {
+    background-color: var(--background-default-grey-hover, #f6f6f6);
+}
+
+.fr-fieldset[data-display-mode="2"] .fr-radio-group input[type="radio"]:checked + label.fr-label--emoji-rating {
+    background-color: var(--background-action-low-blue-france, #e3e3fd);
+    box-shadow: inset 0 0 0 2px var(--border-active-blue-france, #000091);
+}
+
+.fr-fieldset[data-display-mode="2"] .fr-radio-group input[type="radio"]:focus-visible + label.fr-label--emoji-rating {
+    outline: 2px solid var(--border-action-high-blue-france, #000091);
+    outline-offset: 2px;
+}
+
+/* Responsive adjustments for 5-point choice (revue 2026-06-12) :
+   les 5 options restent sur UNE ligne compacte (boîtes égales) au lieu
+   d'un empilement pleine largeur ; seul le « Sans réponse » passe en
+   pleine largeur dessous. Modes 0 (numéros) et 2 (emoji) — le mode 1
+   (étoiles) a sa propre ligne compacte plus haut. */
+@media (max-width: 767.98px) {
+    .fr-fieldset[data-display-mode="0"] .fr-grid-row,
+    .fr-fieldset[data-display-mode="2"] .fr-grid-row {
+        flex-wrap: wrap;
+        gap: 0.25rem;
     }
 
-    .fr-fieldset[data-display-mode] .fr-col-auto {
-        width: 100%;
+    .fr-fieldset[data-display-mode="0"] .fr-col-auto,
+    .fr-fieldset[data-display-mode="2"] .fr-col-auto {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: 0;
+    }
+
+    /* Le « Sans réponse » occupe sa propre ligne, pleine largeur. */
+    .fr-fieldset[data-display-mode="0"] .fr-col-auto:has(.noanswer-item),
+    .fr-fieldset[data-display-mode="2"] .fr-col-auto:has(.noanswer-item) {
+        flex: 1 1 100%;
+        margin-top: 0.5rem;
     }
 
     .fr-fieldset[data-display-mode] .fr-radio-group.fr-radio-rich {
         width: 100%;
     }
 
-    /* Larger touch targets for mobile */
-    .fr-label--star-rating,
+    /* Boîtes compactes : 5 tiennent dans 320 px utiles. */
     .fr-label--emoji-rating {
-        min-height: 3.5rem;
+        min-width: 0;
+        min-height: 3rem;
+        padding: 0.5rem !important;
+    }
+
+    /* Hauteur unifiée (~3 rem) avec les options riches : le label rich
+       DSFR (chiffres 1-5, « Sans réponse ») fait 5.5 rem par défaut. On ne
+       réduit que le padding vertical — l'horizontal loge le rond radio. */
+    .fr-fieldset[data-display-mode="0"] .fr-radio-group.fr-radio-rich .fr-label,
+    .fr-fieldset[data-display-mode="2"] .fr-radio-group.fr-radio-rich .fr-label {
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+        min-height: 3rem;
     }
 
     .fr-label--emoji-rating .emoji-icon {
-        font-size: 3rem;
+        font-size: 1.75rem;
+    }
+
+    /* Options « riches » hors notation (Genre, Oui/Non…) : largeur
+       uniforme pleine ligne, libellé étiré pour aligner les pictos à
+       droite — sinon chaque boîte s'arrête à son contenu (rendu en
+       escalier constaté en mobile). */
+    .question-container .fr-fieldset:not([data-display-mode]) .fr-fieldset__element--inline:has(> .fr-radio-group.fr-radio-rich) {
+        width: 100%;
+        margin-right: 0;
+    }
+
+    .question-container .fr-fieldset:not([data-display-mode]) .fr-fieldset__element--inline > .fr-radio-group.fr-radio-rich {
+        width: 100%;
+    }
+
+    .question-container .fr-fieldset:not([data-display-mode]) .fr-fieldset__element--inline > .fr-radio-group.fr-radio-rich > label.fr-label {
+        flex: 1;
     }
 }
 
@@ -2821,7 +3693,7 @@ li.imageselect-container > input:checked + label.imageselect-radiobutton::after 
     width: 1.5rem;
     height: 1.5rem;
     background: var(--background-action-high-blue-france);
-    color: white;
+    color: var(--text-inverted-blue-france);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -2840,7 +3712,7 @@ li.imageselect-listitem .imageselect-checkbox:checked ~ .imageselect-label::afte
     width: 1.5rem;
     height: 1.5rem;
     background: var(--background-action-high-blue-france);
-    color: white;
+    color: var(--text-inverted-blue-france);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -2937,7 +3809,7 @@ ul.imageselect-list > li.no-anwser-item > label:hover::before {
 }
 
 /* Responsive - images 2 colonnes sur mobile */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     li.imageselect-container {
         flex: 1 1 calc(50% - 0.5rem) !important;
         max-width: calc(50% - 0.5rem) !important;
@@ -2951,7 +3823,7 @@ ul.imageselect-list > li.no-anwser-item > label:hover::before {
 }
 
 /* Responsive - Images sur mobile */
-@media (max-width: 767px) {
+@media (max-width: 767.98px) {
     .answer-item img,
     .fr-fieldset__content img,
     .answertext img {
@@ -2965,108 +3837,35 @@ ul.imageselect-list > li.no-anwser-item > label:hover::before {
 
 /* ============================================
    BOOTSTRAP BUTTONS → DSFR BUTTONS
-   Surcharge du style des thèmes de questions
-   Bootstrap pour un rendu DSFR
    ============================================ */
 
-/* Container des boutons Bootstrap */
+/* Section consolidée dans « BOOTSTRAP BUTTONS → DSFR STYLE » (#41
+   étapes 3a + 5) : la définition `all: unset !important` qui vivait ici
+   écrasait la section canonique avec un hover contradictoire (bleu plein
+   sur bouton non sélectionné). Ne restent ici que les compléments non
+   dupliqués. */
+
+/* Container des boutons Bootstrap. !important requis : l'élément porte
+   des classes de grille/utilities Bootstrap (non layerisées) qui gagnent
+   sinon sur toute déclaration normale layerisée (gate visuel 2026-06-12 :
+   ~8px de décalage sous la question sans lui). */
 .bootstrap-buttons-div {
     margin-bottom: 0.5rem !important;
 }
 
-/* Masquer le radio Bootstrap */
-.bootstrap-buttons-div .btn-check {
+/* Masquer le contrôle natif. Bootstrap masque déjà .btn-check
+   (position:absolute + clip) — on couvre aussi input.button-item (classe
+   LimeSurvey) qui peut apparaître sans .btn-check. */
+.bootstrap-buttons-div .btn-check,
+.bootstrap-buttons-div input.button-item {
     position: absolute !important;
     opacity: 0 !important;
     pointer-events: none !important;
 }
 
-/* Transformer les boutons Bootstrap en boutons DSFR */
-.bootstrap-buttons-div .btn,
-.bootstrap-buttons-div .btn-primary,
-.bootstrap-buttons-div .btn-secondary {
-    /* Reset Bootstrap */
-    all: unset !important;
-    box-sizing: border-box !important;
-
-    /* Style DSFR button secondary */
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 0.5rem 1rem !important;
-    min-height: 2.5rem !important;
-
-    /* Couleurs DSFR secondary */
-    background-color: transparent !important;
-    color: var(--text-action-high-blue-france) !important;
-    border: 1px solid var(--border-action-high-blue-france) !important;
-    border-radius: 0 !important;
-
-    /* Typographie */
-    font-family: Marianne, arial, sans-serif !important;
-    font-size: 1rem !important;
-    font-weight: 500 !important;
-    line-height: 1.5rem !important;
-    text-align: center !important;
-
-    /* Interactions */
-    cursor: pointer !important;
-    transition: background-color 0.1s, color 0.1s !important;
-}
-
-/* État hover */
-.bootstrap-buttons-div .btn:hover,
-.bootstrap-buttons-div .btn-primary:hover {
-    background-color: var(--background-action-high-blue-france-hover) !important;
-    color: var(--text-inverted-blue-france) !important;
-}
-
-/* État focus */
-.bootstrap-buttons-div .btn:focus,
-.bootstrap-buttons-div .btn-primary:focus,
-.bootstrap-buttons-div .btn-check:focus + .btn {
-    outline: 2px solid var(--border-action-high-blue-france) !important;
-    outline-offset: 2px !important;
-}
-
-/* État sélectionné (checked) */
-.bootstrap-buttons-div .btn-check:checked + .btn,
-.bootstrap-buttons-div .btn-check:checked + .btn-primary,
-.bootstrap-buttons-div .form-check.active .btn {
-    background-color: var(--background-action-high-blue-france) !important;
-    color: var(--text-inverted-blue-france) !important;
-    border-color: var(--border-action-high-blue-france) !important;
-}
-
-/* État sélectionné + hover */
-.bootstrap-buttons-div .btn-check:checked + .btn:hover,
-.bootstrap-buttons-div .form-check.active .btn:hover {
-    background-color: var(--background-action-high-blue-france-hover) !important;
-}
-
-/* Bouton "Sans réponse" - style tertiaire */
-.bootstrap-buttons-div .noanswer-item .btn,
-.bootstrap-buttons-div[class*="noanswer"] .btn {
-    background-color: transparent !important;
-    color: var(--text-mention-grey) !important;
-    border-color: var(--border-default-grey) !important;
-}
-
-.bootstrap-buttons-div .noanswer-item .btn:hover {
-    background-color: var(--background-alt-grey) !important;
-    color: var(--text-default-grey) !important;
-}
-
-/* Layout du container de boutons */
-[data-bs-toggle="buttons"],
-.btn-toolbar {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 0.5rem !important;
-}
-
-/* Responsive - colonnes sur mobile */
-@media (max-width: 767px) {
+/* Responsive - colonnes sur mobile. !important requis : combat les classes
+   de colonnes Bootstrap (row-cols-*, col-*) non layerisées. */
+@media (max-width: 767.98px) {
     .bootstrap-buttons-div {
         flex: 1 1 100% !important;
         max-width: 100% !important;
@@ -3362,20 +4161,9 @@ html body tr.dsfr-has-ddfix td.dropdown-item .ls-input-group > select {
    BOOTSTRAP BUTTONS MULTI (CHECKBOXES)
    ============================================ */
 
-/* Mêmes styles que pour les radio buttons */
-.bootstrap-buttons-div input[type="checkbox"].btn-check {
-    position: absolute !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-}
-
-/* État sélectionné pour les checkboxes */
-.bootstrap-buttons-div input[type="checkbox"]:checked + .btn,
-.bootstrap-buttons-div input[type="checkbox"]:checked + label.btn {
-    background-color: var(--background-action-high-blue-france) !important;
-    color: var(--text-inverted-blue-france) !important;
-    border-color: var(--border-action-high-blue-france) !important;
-}
+/* Consolidé dans « BOOTSTRAP BUTTONS → DSFR STYLE » (#41 étape 3a) :
+   le masquage couvre input.button-item/.btn-check (tous types) et l'état
+   sélectionné inclut input[type="checkbox"]:checked. */
 
 /* ============================================
    FILE UPLOAD - DSFR
@@ -3639,7 +4427,7 @@ dialog.fr-modal[open] {
 }
 
 .dsfr-combobox-toggle:focus {
-    outline: 2px solid var(--focus-blue-france, #0a76f6);
+    outline: 2px solid #0a76f6;
     outline-offset: 2px;
 }
 
@@ -3797,4 +4585,110 @@ dialog.fr-modal[open] {
 /* Tableaux (échelles doubles, multi-flexi) : on s'appuie sur .fr-table. */
 .printanswers-q__answer .fr-table {
     margin: 0;
+}
+
+/* ============================================
+   REVUE 2026-06 (#25) — remplacements d'icônes-fontes
+   ============================================ */
+
+/* Astérisque de champ obligatoire (texte, plus de fa-asterisk).
+   Classe partagée avec l'injection JS de required-fields.js. */
+.required-asterisk {
+    color: var(--text-default-error);
+    font-weight: 700;
+}
+
+/* Icônes DSFR des radios riches yesno/gender (remplacent les ri-*
+   qui portaient des styles inline font-size/couleur en dur). */
+.lsd-rich-radio-icon {
+    color: var(--text-mention-grey);
+}
+
+.lsd-rich-radio-icon::before {
+    --icon-size: 2rem;
+}
+
+/* Utilitaires projet (ex-classes fr-* inventées, renommées lsd- :
+   le préfixe fr- est réservé au DSFR). */
+.lsd-text-center {
+    text-align: center;
+}
+
+.lsd-text-muted {
+    color: var(--text-mention-grey);
+}
+
+.lsd-mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.lsd-text-error {
+    color: var(--text-default-error);
+}
+
+/* ============================================
+   NEUTRALISATION CIBLÉE DU CORE NON LAYÉRISÉ (#41)
+   ============================================
+   survey.css (package core) n'est pas layérisable depuis un thème : ses
+   règles normales battent désormais toutes nos couches. Chaque règle core
+   qui entrait en conflit était historiquement battue par ordre de source ;
+   on la neutralise ici explicitement. Les !important de cette section sont
+   le PRIX BORNÉ de la migration @layer : ils ciblent uniquement le core,
+   jamais nos propres feuilles. */
+
+/* survey.css : `.input-error input { border: 1px solid #e75041 }` (rouge
+   Bootstrap). Le DSFR signale l'erreur par le soulignement box-shadow. */
+.input-error input {
+    border: none !important;
+}
+
+/* survey.css : `.ls-input-group { display: table }` (≥481px, émulation
+   Bootstrap input-group). theme.css le remplace par un layout flex, que
+   l'ordre de source faisait gagner — sans !important le display:table du
+   core ferait exploser la largeur des dropdown-array (table-layout). */
+.ls-input-group {
+    display: flex !important;
+}
+}
+
+/* ============================================
+   COUCHE OVERRIDES (#41)
+   ============================================
+   Déclarée première dans l'ordre des couches : ses !important battent ceux
+   du DSFR (l'ordre des couches s'inverse pour les déclarations importantes).
+   N'y mettre QUE les règles qui doivent battre un !important du DSFR
+   (utilitaires fr-mb-N, fr-p-N…). */
+@layer overrides {
+    /* Les <li> de sous-questions portent fr-mb-3w (margin-bottom:1.5rem
+       !important, couche dsfr) qui battrait le 1rem !important de la couche
+       custom — avant @layer, l'ordre source donnait raison à custom.css. */
+    .ls-answers.subquestion-list li,
+    .questions-list.text-list li,
+    .questions-list.number-list li {
+        margin-bottom: 1rem !important;
+    }
+
+    /* theme.css pose margin-left:0.25rem !important sur les labels
+       inputondemand (sélecteur `…-list-item label`) — l'inversion des
+       importants donne theme > custom : seul overrides peut remettre le 0
+       attendu sur les labels DSFR des sous-questions. */
+    .ls-answers.subquestion-list .fr-label,
+    .questions-list.text-list .fr-label,
+    .questions-list.number-list .fr-label {
+        margin-left: 0 !important;
+    }
+
+    /* Cellules mobile-only (.ls-xs-only : en-têtes « Scale A/B » des lignes
+       dual-scale) : theme.css restaure display:table-cell !important sur les
+       cellules à ≥768px (sortie de linéarisation) avec une spécificité qui
+       battait déjà le masquage de custom.css — les cellules restaient donc
+       VISIBLES sur desktop (préexistant, #43) : 13 cellules pour 11 <col>,
+       dernières colonnes écrasées, pastilles « Sans réponse » débordantes.
+       Seul overrides bat l'important de la couche theme. */
+    @media (min-width: 768px) {
+        table .ls-xs-only {
+            display: none !important;
+        }
+    }
 }

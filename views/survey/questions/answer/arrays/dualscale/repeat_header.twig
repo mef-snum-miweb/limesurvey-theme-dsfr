@@ -13,10 +13,9 @@
     {% if leftheader or rightheader %}
         <tr class="ls-heading dualscale-header">
             <td>&nbsp;</td>
-            <th class="fr-text--bold" colspan="{{ labelans0|length }}">{{ processString(leftheader) }}</th>
+            <th class="fr-text--bold" colspan="{{ labelans0|length + (shownoanswer ? 1 : 0) }}">{{ processString(leftheader) }}</th>
             {% if separatorwidth %}<td>&nbsp;</td>{% endif %}
-            <th class="fr-text--bold" colspan="{{ labelans1|length }}">{{ processString(rightheader) }}</th>
-            {% if shownoanswer %}<td>&nbsp;</td>{% endif %}
+            <th class="fr-text--bold" colspan="{{ labelans1|length + (shownoanswer and labelcode1 is not empty ? 1 : 0) }}">{{ processString(rightheader) }}</th>
             {% if rightexists %}<td>&nbsp;</td>{% endif %}
         </tr>
     {% endif %}
@@ -26,11 +25,14 @@
         {% for code, label in labelans0 %}
             <th class="fr-text--bold answertext" role="columnheader">{{ processString(label) }}</th>
         {% endfor %}
+        {% if shownoanswer %}
+            <th class="fr-text--bold noanswer-text">{{ gT('No answer') }}</th>
+        {% endif %}
         {% if separatorwidth %}<td>&nbsp;</td>{% endif %}
         {% for code, label in labelans1 %}
             <th class="fr-text--bold answertext" role="columnheader">{{ processString(label) }}</th>
         {% endfor %}
-        {% if shownoanswer %}
+        {% if shownoanswer and labelcode1 is not empty %}
             <th class="fr-text--bold noanswer-text">{{ gT('No answer') }}</th>
         {% endif %}
         {% if rightexists %}

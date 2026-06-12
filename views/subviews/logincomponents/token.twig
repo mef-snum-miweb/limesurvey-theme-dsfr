@@ -5,8 +5,8 @@
     {% endblock %}
 
     {% block description %}
-        <div class="fr-col-lg-8 fr-col-offset-2--lg">
-            <p class='{{ aSurveyInfo.class.maincoldivdivbp }} text-info' {{ aSurveyInfo.attr.maincoldivdivbp }}>
+        <div class="fr-col-lg-8 fr-col-offset-lg-2">
+            <p class='{{ aSurveyInfo.class.maincoldivdivbp }} fr-text--sm' {{ aSurveyInfo.attr.maincoldivdivbp }}>
                 {% if aSurveyInfo.aForm.token == null %}
                     {{ gT("If you have been issued an access code, please enter it in the box below and click continue.") }}
                 {% else %}
@@ -18,7 +18,7 @@
 
 
     {% block formcontent %}
-        <div class="fr-col-lg-8 fr-col-offset-2--lg">
+        <div class="fr-col-lg-8 fr-col-offset-lg-2">
             <div class='fr-input-group {{ aSurveyInfo.class.maincolform }} fr-mb-3w{% if aSurveyInfo.aForm.aEnterErrors is defined and aSurveyInfo.aForm.aEnterErrors is not empty %} fr-input-group--error{% endif %}' {{ aSurveyInfo.attr.maincolform }}>
                 <label class='{{ aSurveyInfo.class.maincolformlabel }} fr-label' {{ aSurveyInfo.attr.maincolformlabel }} for='token'>
                     {{ gT("Access code:") }}
@@ -89,10 +89,10 @@
                     <label
                         class='{{ aSurveyInfo.class.maincolformdivblabel }} fr-label' {{ aSurveyInfo.attr.maincolformdivblabel }} >
                         {{ gT("Please solve the following equation:") }}
-                        <small
-                            class="{{ aSurveyInfo.class.maincolformdivblabelsmall }} fr-text--error asterisk fa fa-asterisk fr-float-left small" {{ aSurveyInfo.attr.maincolformdivblabelsmall }} >&nbsp;</small>
                         <span
-                            class="{{ aSurveyInfo.class.maincolformdivblabelspan }} fr-sr-only fr-text--error asterisk" {{ aSurveyInfo.attr.maincolformdivblabelspan }}>
+                            class="{{ aSurveyInfo.class.maincolformdivblabelsmall }} asterisk required-asterisk" {{ aSurveyInfo.attr.maincolformdivblabelsmall }} aria-hidden="true">*</span>
+                        <span
+                            class="{{ aSurveyInfo.class.maincolformdivblabelspan }} fr-sr-only" {{ aSurveyInfo.attr.maincolformdivblabelspan }}>
                         ( {{ gT("Mandatory") }} )
                     </span>
                     </label>
@@ -100,13 +100,12 @@
                         <div class="fr-col-2">
                             {{ renderCaptcha().renderOut() }}
                         </div>
-                        <div class="fr-col-1 align-self-center">
+                        <div class="fr-col-1">
                             <a href="#" class="fr-btn fr-btn--sm fr-btn--tertiary" id="reloadCaptcha"
-                               title="{{ gT("Reload captcha") }}" data-fr-toggle="captcha"><i
-                                    class="fa fa-refresh"></i></a>
+                               title="{{ gT("Reload captcha") }}" data-captcha-reload="true"><span class="fr-icon-refresh-line" aria-hidden="true"></span><span class="fr-sr-only">{{ gT("Reload captcha") }}</span></a>
                         </div>
                         <div
-                            class="{{ aSurveyInfo.class.maincolformdivbdiv }} fr-col-9 align-self-center" {{ aSurveyInfo.attr.maincolformdivbdiv }}>
+                            class="{{ aSurveyInfo.class.maincolformdivbdiv }} fr-col-9" {{ aSurveyInfo.attr.maincolformdivbdiv }}>
                             <input
                                 class='fr-input {{ aSurveyInfo.class.maincolformdivbdivdivinput }}' {{ aSurveyInfo.attr.maincolformdivbdivdivinput }} >
                         </div>
@@ -118,7 +117,7 @@
 
             <div class='{{ aSurveyInfo.class.maincolformdivc }} fr-mb-3w ' {{ aSurveyInfo.attr.maincolformdivc }}>
                 <div
-                    class='{{ aSurveyInfo.class.maincolformdivcdiv }} float-end ' {{ aSurveyInfo.attr.maincolformdivcdiv }}>
+                    class='{{ aSurveyInfo.class.maincolformdivcdiv }}' {{ aSurveyInfo.attr.maincolformdivcdiv }}>
                     <button type="submit"
                             class='{{ aSurveyInfo.class.maincolformdivcdivbutton }} fr-btn fr-btn--secondary' {{ aSurveyInfo.attr.maincolformdivcdivbutton }}>
                         {{ gT("Continue") }}

@@ -19,9 +19,9 @@
 #}
 
 <!-- answer_row - DSFR -->
-<tr id="javatbd{{ myfname }}" class="row-inc-same-dec answers-list radio-list {% if odd %}ls-odd{% else %}ls-even{% endif %} {% if error %}ls-error-mandatory has-error{% endif %}" role="radiogroup" aria-labelledby="answertext{{ myfname }}">
+<tr id="javatbd{{ myfname }}" class="row-inc-same-dec answers-list radio-list {% if odd %}ls-odd{% else %}ls-even{% endif %} {% if error %}ls-error-mandatory has-error{% endif %}" aria-labelledby="answertext{{ myfname }}">
     <!-- Answer text -->
-    <th id="answertext{{ myfname }}" class="answertext control-label{% if answerwidth == 0 %} visually-hidden{% endif %}" scope="row">
+    <th id="answertext{{ myfname }}" class="answertext control-label{% if answerwidth == 0 %} fr-sr-only{% endif %}" scope="row">
         {{ processString(answertext) }}
         {{ C.Html.hiddenField("java"~myfname, value, {
             'id': "java"~myfname,
@@ -32,7 +32,7 @@
     {# Labels visibles en mode linéarisé mobile ; aria-hidden car le SR lit
        via aria-labelledby de l'input (column header + row header). #}
     <!-- Increase -->
-    <td class="answer_cell_I answer-item radio-item fr-text--center" headers="answertext{{ myfname }} answer{{ basename }}-I">
+    <td class="answer_cell_I answer-item radio-item lsd-text-center" headers="answertext{{ myfname }} answer{{ basename }}-I">
         <input
             type="radio"
             name="{{ myfname }}"
@@ -46,7 +46,7 @@
     </td>
 
     <!-- Same -->
-    <td class="answer_cell_S answer-item radio-item fr-text--center" headers="answertext{{ myfname }} answer{{ basename }}-S">
+    <td class="answer_cell_S answer-item radio-item lsd-text-center" headers="answertext{{ myfname }} answer{{ basename }}-S">
         <input
             type="radio"
             name="{{ myfname }}"
@@ -60,7 +60,7 @@
     </td>
 
     <!-- Decrease -->
-    <td class="answer_cell_D answer-item radio-item fr-text--center" headers="answertext{{ myfname }} answer{{ basename }}-D">
+    <td class="answer_cell_D answer-item radio-item lsd-text-center" headers="answertext{{ myfname }} answer{{ basename }}-D">
         <input
             type="radio"
             name="{{ myfname }}"
@@ -75,7 +75,7 @@
 
     <!-- No Answer -->
     {% if no_answer %}
-        <td class="answer_cell_ answer-item noanswer-item radio-item fr-text--center" headers="answertext{{ myfname }} answer{{ basename }}-">
+        <td class="answer_cell_ answer-item noanswer-item radio-item lsd-text-center" headers="answertext{{ myfname }} answer{{ basename }}-">
             <input
                 type="radio"
                 name="{{ myfname }}"

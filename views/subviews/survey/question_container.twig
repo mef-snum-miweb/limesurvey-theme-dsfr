@@ -8,7 +8,11 @@
 
 <!-- Question {{ aQuestion.qid }} -->
 <div {{ aQuestion.attributes }}
-     class="fr-mb-6w {{ aQuestion.class }} {{ aQuestion.input_error_class }} {{ aSurveyInfo.class.questioncontainer }} {% if aQuestion.input_error_class %}fr-input-group--error{% endif %}"
+     {# Pas de fr-input-group--error ici : cette classe DSFR appartient au
+        groupe du champ (posée par errors-dsfr.js au bon niveau, ou
+        fr-fieldset--error pour les radios/cases). Le marqueur question
+        reste input-error (liseret rouge + récapitulatif). #}
+     class="fr-mb-6w {{ aQuestion.class }} {{ aQuestion.input_error_class }} {{ aSurveyInfo.class.questioncontainer }}"
      {{ aSurveyInfo.attr.questioncontainer }}>
 
     {# Question number/code - controlled by theme option showquestioncode #}

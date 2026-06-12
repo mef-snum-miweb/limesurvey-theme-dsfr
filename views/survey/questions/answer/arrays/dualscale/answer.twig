@@ -28,8 +28,11 @@
 
 <!-- Array Dual Scale (Type 1) - DSFR -->
 <div role="group" aria-labelledby="ls-question-text-{{ basename }}">
-    <div class="fr-table fr-table--bordered" data-fr-js-table="true">
-        <table class="{{ coreClass }}" aria-label="{{ t.dual_scale_matrix|default('Matrice de réponses à double échelle') }}">
+    <div class="fr-table fr-table--bordered">
+    <div class="fr-table__wrapper">
+        <div class="fr-table__container">
+            <div class="fr-table__content">
+        <table class="{{ coreClass }}">
             <caption class="fr-sr-only">
                 Tableau de {{ aSubQuestions|length }} sous-questions avec deux échelles de réponse
                 {%- if leftheader and rightheader -%}
@@ -42,18 +45,25 @@
                 {%- endif -%}
                 .
             </caption>
+            {# « Sans réponse » : une colonne PAR échelle, accolée aux options
+               de son échelle (avant le séparateur pour Scale A) — et non une
+               colonne unique en bout de tableau avec les deux radios empilés,
+               illisible et impossible à rattacher visuellement à une échelle. #}
             <colgroup class="col-responses">
                 <col class="answertext" style="width: {{ answerwidth }}%;" />
                 {% for code, label in labelans0 %}
                     <col class="answer-scale0" style="width: {{ cellwidth }}%;" />
                 {% endfor %}
+                {% if shownoanswer %}
+                    <col class="noanswer" style="width: {{ cellwidth }}%;" />
+                {% endif %}
                 {% if separatorwidth %}
                     <col class="separator" style="width: {{ separatorwidth }}%;" />
                 {% endif %}
                 {% for code, label in labelans1 %}
                     <col class="answer-scale1" style="width: {{ cellwidth }}%;" />
                 {% endfor %}
-                {% if shownoanswer %}
+                {% if shownoanswer and labelcode1 is not empty %}
                     <col class="noanswer" style="width: {{ cellwidth }}%;" />
                 {% endif %}
                 {% if rightexists %}
@@ -65,10 +75,9 @@
                 {% if leftheader or rightheader %}
                     <tr class="ls-heading dualscale-header">
                         <th></th>
-                        <th id="scale0-header-{{ basename }}" class="fr-text--bold" colspan="{{ labelans0|length }}">{{ processString(leftheader) }}</th>
+                        <th id="scale0-header-{{ basename }}" class="fr-text--bold" colspan="{{ labelans0|length + (shownoanswer ? 1 : 0) }}">{{ processString(leftheader) }}</th>
                         {% if separatorwidth %}<th></th>{% endif %}
-                        <th id="scale1-header-{{ basename }}" class="fr-text--bold" colspan="{{ labelans1|length }}">{{ processString(rightheader) }}</th>
-                        {% if shownoanswer %}<th></th>{% endif %}
+                        <th id="scale1-header-{{ basename }}" class="fr-text--bold" colspan="{{ labelans1|length + (shownoanswer and labelcode1 is not empty ? 1 : 0) }}">{{ processString(rightheader) }}</th>
                         {% if rightexists %}<th></th>{% endif %}
                     </tr>
                 {% endif %}
@@ -78,12 +87,15 @@
                     {% for code, label in labelans0 %}
                         <th id="answer{{ basename }}-s0-{{ labelcode0[code] }}" class="fr-text--bold answertext">{{ processString(label) }}</th>
                     {% endfor %}
+                    {% if shownoanswer %}
+                        <th id="noanswer0-header-{{ basename }}" class="fr-text--bold noanswer-text">{{ gT('No answer') }}</th>
+                    {% endif %}
                     {% if separatorwidth %}<th></th>{% endif %}
                     {% for code, label in labelans1 %}
                         <th id="answer{{ basename }}-s1-{{ labelcode1[code] }}" class="fr-text--bold answertext">{{ processString(label) }}</th>
                     {% endfor %}
-                    {% if shownoanswer %}
-                        <th class="fr-text--bold noanswer-text">{{ gT('No answer') }}</th>
+                    {% if shownoanswer and labelcode1 is not empty %}
+                        <th id="noanswer1-header-{{ basename }}" class="fr-text--bold noanswer-text">{{ gT('No answer') }}</th>
                     {% endif %}
                     {% if rightexists %}
                         <th></th>
@@ -97,9 +109,24 @@
                         {{ include('./survey/questions/answer/arrays/dualscale/repeat_header.twig') }}
                     {% endif %}
 
-                    <tr id="javatbd{{ subquestion.myfname }}" class="answers-list dualscale-row {% if i % 2 %}ls-odd{% else %}ls-even{% endif %}{% if subquestion.alert %} ls-mandatory-error{% endif %}" role="group">
+                    <tr id="javatbd{{ subquestion.myfname }}" class="answers-list dualscale-row {% if i % 2 %}ls-odd{% else %}ls-even{% endif %}{% if subquestion.showmandatoryviolation %} ls-error-mandatory has-error{% endif %}" role="group" aria-labelledby="answertext{{ subquestion.myfname }}">
                         <th scope="row" id="answertext{{ subquestion.myfname }}" class="answertext fr-text--bold{% if answerwidth==0 %} fr-sr-only{% endif %}">
                             {{ processString(subquestion.answertext) }}
+                            {# Valeurs pour l'Expression Manager (adressées par id,
+                               jamais soumises). Ids en myfid (séparateur « _ ») :
+                               em_javascript remplace le « # » des SGQA par « _ »
+                               pour construire ses sélecteurs — un id contenant
+                               « # » casse relevance/validation/équations. #}
+                            {{ C.Html.hiddenField("java"~subquestion.myfid0, subquestion.sessionfname0, ({
+                                'id': "java"~subquestion.myfid0,
+                                'disabled': true
+                            })) }}
+                            {% if labelcode1 is not empty %}
+                                {{ C.Html.hiddenField("java"~subquestion.myfid1, subquestion.sessionfname1, ({
+                                    'id': "java"~subquestion.myfid1,
+                                    'disabled': true
+                                })) }}
+                            {% endif %}
                         </th>
 
                         {# Entête de groupe Échelle 1 — visible uniquement en
@@ -120,16 +147,39 @@
                                     type="radio"
                                     name="{{ subquestion.myfname0 }}"
                                     value="{{ ld }}"
-                                    id="answer{{ subquestion.myfname0 }}-{{ ld }}"
+                                    id="answer{{ subquestion.myfid0 }}-{{ ld }}"
                                     aria-labelledby="answer{{ basename }}-s0-{{ ld }} answertext{{ subquestion.myfname }}"
                                     {{ labelcode0_checked[subquestion.title][ld]|raw }}
                                 />
                                 {# Label visible en mode linéarisé mobile. #}
-                                <label for="answer{{ subquestion.myfname0 }}-{{ ld }}" class="ls-label-xs-visibility" aria-hidden="true">
+                                <label for="answer{{ subquestion.myfid0 }}-{{ ld }}" class="ls-label-xs-visibility" aria-hidden="true">
                                     {{ processString(labelans0[j]) }}
                                 </label>
                             </td>
                         {% endfor %}
+
+                        {# No answer — Échelle 1 : value="" (état « non répondu »).
+                           Le core 6.16.16 cache ce radio derrière ls-js-hidden ;
+                           on le rend visible (RGAA — l'utilisateur doit pouvoir
+                           annuler son choix sur chaque échelle), dans sa propre
+                           colonne accolée aux options de l'échelle. #}
+                        {% if shownoanswer %}
+                            <td class="answer-item radio-item noanswer-item" headers="answertext{{ subquestion.myfname }} {% if leftheader %}scale0-header-{{ basename }} {% endif %}noanswer0-header-{{ basename }}">
+                                <div class="dualscale-noanswer">
+                                    <input
+                                        type="radio"
+                                        name="{{ subquestion.myfname0 }}"
+                                        value=""
+                                        id="answer{{ subquestion.myfid0 }}-"
+                                        aria-label="{{ gT("No answer") }}{% if leftheader %} — {{ processString(leftheader)|striptags }}{% endif %}"
+                                        {{ subquestion.myfname0_notset|raw }}
+                                    />
+                                    <label for="answer{{ subquestion.myfid0 }}-" class="ls-label-xs-visibility" aria-hidden="true">
+                                        {{ gT("No answer") }}
+                                    </label>
+                                </div>
+                            </td>
+                        {% endif %}
 
                         {# Separator column #}
                         {% if separatorwidth %}
@@ -153,21 +203,34 @@
                                     type="radio"
                                     name="{{ subquestion.myfname1 }}"
                                     value="{{ ld }}"
-                                    id="answer{{ subquestion.myfname1 }}-{{ ld }}"
+                                    id="answer{{ subquestion.myfid1 }}-{{ ld }}"
                                     aria-labelledby="answer{{ basename }}-s1-{{ ld }} answertext{{ subquestion.myfname }}"
                                     {{ labelcode1_checked[subquestion.title][ld]|raw }}
                                 />
                                 {# Label visible en mode linéarisé mobile. #}
-                                <label for="answer{{ subquestion.myfname1 }}-{{ ld }}" class="ls-label-xs-visibility" aria-hidden="true">
+                                <label for="answer{{ subquestion.myfid1 }}-{{ ld }}" class="ls-label-xs-visibility" aria-hidden="true">
                                     {{ processString(labelans1[j]) }}
                                 </label>
                             </td>
                         {% endfor %}
 
-                        {# No answer option #}
-                        {% if shownoanswer %}
-                            <td class="answer-item noanswer-item">
-                                {# No answer is handled by JavaScript #}
+                        {# No answer — Échelle 2 : même traitement, colonne
+                           dédiée après les options de l'échelle 2. #}
+                        {% if shownoanswer and labelcode1 is not empty %}
+                            <td class="answer-item radio-item noanswer-item" headers="answertext{{ subquestion.myfname }} {% if rightheader %}scale1-header-{{ basename }} {% endif %}noanswer1-header-{{ basename }}">
+                                <div class="dualscale-noanswer">
+                                    <input
+                                        type="radio"
+                                        name="{{ subquestion.myfname1 }}"
+                                        value=""
+                                        id="answer{{ subquestion.myfid1 }}-"
+                                        aria-label="{{ gT("No answer") }}{% if rightheader %} — {{ processString(rightheader)|striptags }}{% endif %}"
+                                        {{ subquestion.myfname1_notset|raw }}
+                                    />
+                                    <label for="answer{{ subquestion.myfid1 }}-" class="ls-label-xs-visibility" aria-hidden="true">
+                                        {{ gT("No answer") }}
+                                    </label>
+                                </div>
                             </td>
                         {% endif %}
 
@@ -179,20 +242,12 @@
                         {% endif %}
                     </tr>
 
-                    {# Hidden fields for expression manager #}
-                    {{ C.Html.hiddenField("java"~subquestion.myfname0, subquestion.sessionfname0, ({
-                        'id': "java"~subquestion.myfname0,
-                        'disabled': true
-                    })) }}
-                    {% if labelcode1 is not empty %}
-                        {{ C.Html.hiddenField("java"~subquestion.myfname1, subquestion.sessionfname1, ({
-                            'id': "java"~subquestion.myfname1,
-                            'disabled': true
-                        })) }}
-                    {% endif %}
                 {% endfor %}
             </tbody>
         </table>
+            </div>
+        </div>
+    </div>
     </div>
 </div>
 

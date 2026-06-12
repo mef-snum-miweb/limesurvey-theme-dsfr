@@ -72,5 +72,25 @@ export function initRadioOtherField() {
                 otherInput.value = hiddenInput.value;
             }
         }
+
+        // Comportement core (onclick inline de listradio/rows/answer_row) :
+        // choisir une AUTRE option vide le champ « autre » — sinon l'ancien
+        // texte resterait soumis avec la nouvelle réponse.
+        // Pas de CSS.escape : absent de jsdom, et les noms SGQA LimeSurvey
+        // sont alphanumériques (NNNXNNXNN), sans caractère à échapper.
+        document.querySelectorAll('input[type="radio"][name="' + name + '"]').forEach(function(sibling) {
+            if (sibling.dataset.dsfrOtherClear) {
+                return;
+            }
+            sibling.dataset.dsfrOtherClear = '1';
+            sibling.addEventListener('change', function() {
+                if (this.checked && this.value !== '-oth-') {
+                    otherInput.value = '';
+                    if (hiddenInput) {
+                        hiddenInput.value = '';
+                    }
+                }
+            });
+        });
     });
 }

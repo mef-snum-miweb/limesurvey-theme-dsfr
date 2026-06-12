@@ -25,6 +25,7 @@
         class="fr-input"
         name="{{ name }}"
         id="answer{{ name }}"
+        placeholder="{{ flatString(processString(placeholder,1),1) }}"
         rows="{% if drows %}{{ drows }}{% else %}20{% endif %}"
         {% if maxlength %}maxlength="{{ maxlength }}"{% endif %}
         {% if readonly %}readonly="readonly"{% endif %}

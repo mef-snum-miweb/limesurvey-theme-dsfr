@@ -18,7 +18,11 @@
     <!-- Main Col -->
     <div class="{{ aSurveyInfo.class.maincol }} col-centered  space-col" id="{{ aSurveyInfo.id.maincol }}" {{ aSurveyInfo.attr.maincol }}>
 
-        {# This is the main block that will be replaced/extended by other layouts#}
+        {# Landmark principal commun à TOUTES les pages (welcome, submit,
+           register, save/load, optin/optout…) : cible du lien d'évitement
+           #main-content du layout_global (RGAA 12.7). Le contenu questions
+           (main.twig) ne pose plus son propre <main>. #}
+        <main id="main-content">
             {# Include the various Warnings (preview mode, unanswered mandatory questions, etc) #}
             {{ include('./subviews/messages/warnings.twig') }}
             {# Include the just saved success #}
@@ -28,6 +32,7 @@
             {% if(include_content) != "./subviews/content/" %}
                 {{ include(include_content) }}
             {% endif %}
+        </main>
 
 
     </div> <!-- main col -->

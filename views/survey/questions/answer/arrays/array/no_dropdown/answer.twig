@@ -5,13 +5,36 @@
  */
 #}
 
+{# Sous-questions toutes SANS libellé (ex. matrices à une ligne où le LSS
+   force answer_width=1) : la colonne d'en-têtes de lignes serait vide mais
+   visible (filet de quelques px). On la détecte ici pour la collapser
+   (classe + largeur 0) — :has()/:empty est inopérant car les th contiennent
+   des champs cachés de l'Expression Manager. #}
+{% set hasRowLabels = false %}
+{% for aRow in aRows %}
+    {% if aRow.content.answertext is defined and aRow.content.answertext|striptags|trim %}
+        {% set hasRowLabels = true %}
+    {% endif %}
+{% endfor %}
+
 <!-- DSFR Array Flexible Table -->
 <div class="ls-table-wrapper" role="group" aria-labelledby="ls-question-text-{{ basename }}">
-    <div class="fr-table fr-table--bordered" data-fr-js-table="true">
-        <table class="{{ coreClass }}" data-fr-js-table-element="true" aria-label="{{ t.response_matrix|default('Matrice de réponses') }}">
+    <div class="fr-table fr-table--bordered">
+    <div class="fr-table__wrapper">
+        <div class="fr-table__container">
+            <div class="fr-table__content">
+        <table class="{{ coreClass }}{% if not hasRowLabels %} array-no-row-labels{% endif %}">
+                    <caption class="fr-sr-only">{{ t.response_matrix|default('Matrice de réponses') }}</caption>
         <colgroup class="col-responses">
-            <col class="col-answers" style='width: {{ answerwidth }}%;' />
-            {{ sColumns }}
+            {# Pas de <col> pour la colonne d'en-têtes quand elle est vide :
+               ses cellules sont en display:none (CSS .array-no-row-labels),
+               le nombre de <col> doit correspondre aux cellules restantes. #}
+            {% if hasRowLabels %}
+                <col class="col-answers" style='width: {{ answerwidth }}%;' />
+            {% endif %}
+            {% for aColumn in aColumns %}
+                <col class="{{ aColumn.class }}" style='width: {{ aColumn.cellwidth }}%'/>
+            {% endfor %}
         </colgroup>
 
         <thead>
@@ -21,14 +44,24 @@
         </thead>
 
         <tbody>
+            {% if anscount == 0 %}
+                <tr>
+                    <th class="answertext">
+                        {{ gT('Error: This question has no answers.') }}
+                    </th>
+                </tr>
+            {% endif %}
+            {# Chaque ligne porte son template (answer_row OU repeat_header
+               quand l'attribut « Répéter les en-têtes » est actif) : il faut
+               inclure aRow.template comme le core — forcer answer_row rendait
+               les lignes repeat_header comme des answer_rows corrompues. #}
             {% for aRow in aRows %}
-                {% if aRow.template is defined %}
-                    {{ doRender('/survey/questions/answer/arrays/array/no_dropdown/rows/answer_row', aRow.content, true) }}
-                {% else %}
-                    {{ aRow }}
-                {% endif %}
+                {% include aRow.template with aRow.content %}
             {% endfor %}
         </tbody>
         </table>
+            </div>
+        </div>
+    </div>
     </div>
 </div>
