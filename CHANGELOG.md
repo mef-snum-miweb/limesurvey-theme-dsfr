@@ -5,6 +5,59 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/). L'historique antérieur à
 `1.4.0` est consultable via les tags Git (`git tag`) et les *releases* GitHub.
 
+## [1.11.0] — 2026-06-13
+
+Release **cascade `@layer` (étape A) + régressions visuelles de la revue**
+(#41, #43) : le CSS du thème est désormais organisé en couches de cascade,
+et l'ensemble des régressions visuelles signalées sur les questionnaires
+de référence est corrigé.
+
+### Ajouté
+
+- **Cascade `@layer`** (étape A, ADR-037) : `custom.css`, `theme.css` et les
+  feuilles DSFR sont enveloppés dans l'ordre `overrides, theme, dsfr, custom`
+  — iso-rendu vérifié par le filet visuel (88 captures). Socle de la dépose
+  progressive des `!important`. _Refs #41._
+- Questions « à la demande » (InputOnDemand) : message d'erreur dédié quand
+  des lignes masquées restent à remplir — « cliquez sur “Ajouter une ligne” » —
+  avec comptage des lignes restantes (clé i18n `iod_add_lines`) et suivi du
+  dévoilement par MutationObserver. _Closes #43._
+- Mode emoji : retour visuel complet — cadre au repos, fond léger au survol,
+  fond bleu et anneau à la sélection, outline au focus clavier.
+- Compatibilité **LimeSurvey 7.0** déclarée dans les question themes.
+
+### Corrigé
+
+- Les 8 régressions visuelles de la revue 2026-06 (_closes #43_) :
+  dual-scale avec **une colonne « Sans réponse » par échelle** (structure
+  Twig revue), centrage des champs en matrice, checkboxes DSFR dans les
+  tableaux, double liseré d'erreur (liseré natif `fr-fieldset--error`
+  neutralisé), étoiles sur une seule ligne en mobile, fond gris des
+  tableaux ISD, colonnes d'en-têtes vides (`array-no-row-labels`),
+  gestion d'erreur InputOnDemand.
+- Matrices : en-têtes multilignes ; dual-scale : cellules mobile-only
+  masquées sur desktop, radios « Sans réponse » au composant DSFR.
+- **Fonds de tableaux unifiés** : dépose de la règle
+  `.fr-table tbody { alt-grey !important }` (couche theme, imbattable
+  depuis custom) — toutes les matrices héritent de la carte question, en
+  thème clair comme en sombre.
+- Le radio « Sans réponse » des questions emoji — coché par défaut —
+  était invisible (masquage du rond DSFR scopé aux seuls labels emoji).
+- Signaux ExpressionManager relayés vers les messages DSFR sans marquage
+  d'erreur « à froid » sur les pages vierges.
+- Régression `@layer` : `display: block` des answer-items texte/numérique
+  restauré.
+
+### Modifié
+
+- Boutons Bootstrap → DSFR : trois définitions concurrentes fusionnées en
+  une section canonique, survol unifié sur la teinte claire DSFR,
+  −28 `!important`. _Refs #41 (étapes 3a + 5)._
+- Mobile (<768 px) : les 5 options (chiffres ou emoji) tiennent sur une
+  seule ligne en boîtes égales, « Sans réponse » en pleine largeur
+  dessous ; options riches (Genre, Oui/Non…) en largeur uniforme avec
+  pictogrammes alignés ; hauteurs unifiées à 3 rem.
+
 ## [1.10.0] — 2026-06-10
 
 Release de l'**épic P2 — options, backoffice & documentation** (#40),
