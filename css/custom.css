@@ -1179,15 +1179,18 @@ table td input[type="checkbox"] {
    BOUTONS NAVIGATION - Secondary
    ============================================ */
 
+/* Concurrent : dsfr.min.css (couche dsfr, battue par custom en déclarations
+   normales) — pas de core non layerisé sur cette classe, !important inutiles
+   (déposés, #41 étape 3a). */
 .fr-btn--secondary {
-    background-color: transparent !important;
-    color: var(--text-action-high-blue-france) !important;
-    border: 1px solid var(--border-action-high-blue-france) !important;
-    box-shadow: inset 0 0 0 1px var(--border-action-high-blue-france) !important;
+    background-color: transparent;
+    color: var(--text-action-high-blue-france);
+    border: 1px solid var(--border-action-high-blue-france);
+    box-shadow: inset 0 0 0 1px var(--border-action-high-blue-france);
 }
 
 .fr-btn--secondary:hover {
-    background-color: var(--background-action-low-blue-france-hover) !important;
+    background-color: var(--background-action-low-blue-france-hover);
 }
 
 /* ============================================
@@ -2713,24 +2716,32 @@ select.fr-select:focus,
     padding: 0.25rem;
 }
 
-/* Label bouton - transformer btn-primary Bootstrap en style DSFR */
-.bootstrap-buttons-div label.btn {
-    /* Base DSFR */
-    display: inline-flex;
+/* SECTION CANONIQUE (#41 étapes 3a + 5) — remplace les 3 définitions
+   historiques contradictoires (deux sections « → DSFR » + une section
+   checkbox), supprime le `all: unset !important`.
+
+   Règle de cascade : Bootstrap est servi par le core LimeSurvey HORS
+   layer — toute déclaration normale d'une couche perd contre lui, quelle
+   que soit la spécificité. Les !important ci-dessous ne sont donc gardés
+   QUE sur les propriétés que Bootstrap pose sur .btn/.btn-primary ;
+   les autres (align-items, gap, min-height…) sont en déclarations
+   normales. */
+
+/* Boutons : transformer .btn Bootstrap en bouton DSFR secondaire.
+   Couvre label.btn (radio/checkbox de bootstrap_buttons) et .btn nu. */
+.bootstrap-buttons-div .btn {
+    display: inline-flex !important;
     align-items: center;
     justify-content: center;
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
-    font-weight: 500;
-    line-height: 1.5rem;
+    padding: 0.5rem 1rem !important;
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    line-height: 1.5rem !important;
     min-height: 2.5rem;
-    border-radius: 0;
+    border-radius: 0 !important;
     cursor: pointer;
     text-decoration: none;
     transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-    /* Empêche l'apparition d'un caret de texte dans le label au clic
-       (comportement standard d'un bouton, intégré nativement à .btn Bootstrap
-       mais perdu lors de la redéfinition complète ci-dessus). */
     -webkit-user-select: none;
     user-select: none;
 
@@ -2741,22 +2752,25 @@ select.fr-select:focus,
     box-shadow: inset 0 0 0 1px var(--border-action-high-blue-france, #000091) !important;
 }
 
-/* Hover - style DSFR secondaire */
-.bootstrap-buttons-div label.btn:hover {
+/* Hover non sélectionné — sémantique DSFR « secondary » : teinte claire.
+   (#41 étape 5 : l'ancienne 2e définition posait un hover bleu plein +
+   texte blanc, contradictoire — c'est elle qui gagnait. Unifié ici.) */
+.bootstrap-buttons-div .btn:hover {
     background-color: var(--background-action-low-blue-france-hover, #e3e3fd) !important;
 }
 
 /* Focus - outline DSFR */
-.bootstrap-buttons-div input.btn-check:focus + label.btn,
-.bootstrap-buttons-div input.button-item:focus + label.btn {
+.bootstrap-buttons-div .btn-check:focus + .btn,
+.bootstrap-buttons-div input.button-item:focus + .btn {
     outline: 2px solid var(--border-action-high-blue-france, #000091);
     outline-offset: 2px;
 }
 
-/* État sélectionné - style DSFR primaire (bleu plein) */
-.bootstrap-buttons-div .form-check.active label.btn,
-.bootstrap-buttons-div input.btn-check:checked + label.btn,
-.bootstrap-buttons-div input.button-item:checked + label.btn {
+/* État sélectionné - style DSFR primaire (bleu plein) — radios ET checkboxes */
+.bootstrap-buttons-div .form-check.active .btn,
+.bootstrap-buttons-div .btn-check:checked + .btn,
+.bootstrap-buttons-div input.button-item:checked + .btn,
+.bootstrap-buttons-div input[type="checkbox"]:checked + .btn {
     background-color: var(--background-action-high-blue-france, #000091) !important;
     color: var(--text-inverted-blue-france, #fff) !important;
     border-color: var(--background-action-high-blue-france, #000091) !important;
@@ -2764,17 +2778,32 @@ select.fr-select:focus,
 }
 
 /* Hover sur état sélectionné */
-.bootstrap-buttons-div .form-check.active label.btn:hover,
-.bootstrap-buttons-div input.btn-check:checked + label.btn:hover,
-.bootstrap-buttons-div input.button-item:checked + label.btn:hover {
+.bootstrap-buttons-div .form-check.active .btn:hover,
+.bootstrap-buttons-div .btn-check:checked + .btn:hover,
+.bootstrap-buttons-div input.button-item:checked + .btn:hover,
+.bootstrap-buttons-div input[type="checkbox"]:checked + .btn:hover {
     background-color: var(--background-action-high-blue-france-hover, #1212ff) !important;
 }
 
-/* Supprimer les classes Bootstrap résiduelles */
-.bootstrap-buttons-div label.btn-primary,
-.bootstrap-buttons-div label.btn-secondary,
-.bootstrap-buttons-div label.btn-outline-primary {
-    /* Les styles ci-dessus prennent le relais */
+/* Bouton « Sans réponse » - style tertiaire */
+.bootstrap-buttons-div .noanswer-item .btn,
+.bootstrap-buttons-div[class*="noanswer"] .btn {
+    color: var(--text-mention-grey) !important;
+    border-color: var(--border-default-grey) !important;
+    box-shadow: inset 0 0 0 1px var(--border-default-grey) !important;
+}
+
+.bootstrap-buttons-div .noanswer-item .btn:hover {
+    background-color: var(--background-alt-grey) !important;
+    color: var(--text-default-grey) !important;
+}
+
+/* Layout du container de boutons (gap : aucun concurrent core → normal) */
+[data-bs-toggle="buttons"],
+.btn-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
 /* Bloc « Autre : [champ texte] » qui apparaît sous la rangée de boutons
@@ -3718,107 +3747,34 @@ ul.imageselect-list > li.no-anwser-item > label:hover::before {
 
 /* ============================================
    BOOTSTRAP BUTTONS → DSFR BUTTONS
-   Surcharge du style des thèmes de questions
-   Bootstrap pour un rendu DSFR
    ============================================ */
 
-/* Container des boutons Bootstrap */
+/* Section consolidée dans « BOOTSTRAP BUTTONS → DSFR STYLE » (#41
+   étapes 3a + 5) : la définition `all: unset !important` qui vivait ici
+   écrasait la section canonique avec un hover contradictoire (bleu plein
+   sur bouton non sélectionné). Ne restent ici que les compléments non
+   dupliqués. */
+
+/* Container des boutons Bootstrap. !important requis : l'élément porte
+   des classes de grille/utilities Bootstrap (non layerisées) qui gagnent
+   sinon sur toute déclaration normale layerisée (gate visuel 2026-06-12 :
+   ~8px de décalage sous la question sans lui). */
 .bootstrap-buttons-div {
     margin-bottom: 0.5rem !important;
 }
 
-/* Masquer le radio Bootstrap */
-.bootstrap-buttons-div .btn-check {
+/* Masquer le contrôle natif. Bootstrap masque déjà .btn-check
+   (position:absolute + clip) — on couvre aussi input.button-item (classe
+   LimeSurvey) qui peut apparaître sans .btn-check. */
+.bootstrap-buttons-div .btn-check,
+.bootstrap-buttons-div input.button-item {
     position: absolute !important;
     opacity: 0 !important;
     pointer-events: none !important;
 }
 
-/* Transformer les boutons Bootstrap en boutons DSFR */
-.bootstrap-buttons-div .btn,
-.bootstrap-buttons-div .btn-primary,
-.bootstrap-buttons-div .btn-secondary {
-    /* Reset Bootstrap */
-    all: unset !important;
-    box-sizing: border-box !important;
-
-    /* Style DSFR button secondary */
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 0.5rem 1rem !important;
-    min-height: 2.5rem !important;
-
-    /* Couleurs DSFR secondary */
-    background-color: transparent !important;
-    color: var(--text-action-high-blue-france) !important;
-    border: 1px solid var(--border-action-high-blue-france) !important;
-    border-radius: 0 !important;
-
-    /* Typographie */
-    font-family: Marianne, arial, sans-serif !important;
-    font-size: 1rem !important;
-    font-weight: 500 !important;
-    line-height: 1.5rem !important;
-    text-align: center !important;
-
-    /* Interactions */
-    cursor: pointer !important;
-    transition: background-color 0.1s, color 0.1s !important;
-}
-
-/* État hover */
-.bootstrap-buttons-div .btn:hover,
-.bootstrap-buttons-div .btn-primary:hover {
-    background-color: var(--background-action-high-blue-france-hover) !important;
-    color: var(--text-inverted-blue-france) !important;
-}
-
-/* État focus */
-.bootstrap-buttons-div .btn:focus,
-.bootstrap-buttons-div .btn-primary:focus,
-.bootstrap-buttons-div .btn-check:focus + .btn {
-    outline: 2px solid var(--border-action-high-blue-france) !important;
-    outline-offset: 2px !important;
-}
-
-/* État sélectionné (checked) */
-.bootstrap-buttons-div .btn-check:checked + .btn,
-.bootstrap-buttons-div .btn-check:checked + .btn-primary,
-.bootstrap-buttons-div .form-check.active .btn {
-    background-color: var(--background-action-high-blue-france) !important;
-    color: var(--text-inverted-blue-france) !important;
-    border-color: var(--border-action-high-blue-france) !important;
-}
-
-/* État sélectionné + hover */
-.bootstrap-buttons-div .btn-check:checked + .btn:hover,
-.bootstrap-buttons-div .form-check.active .btn:hover {
-    background-color: var(--background-action-high-blue-france-hover) !important;
-}
-
-/* Bouton "Sans réponse" - style tertiaire */
-.bootstrap-buttons-div .noanswer-item .btn,
-.bootstrap-buttons-div[class*="noanswer"] .btn {
-    background-color: transparent !important;
-    color: var(--text-mention-grey) !important;
-    border-color: var(--border-default-grey) !important;
-}
-
-.bootstrap-buttons-div .noanswer-item .btn:hover {
-    background-color: var(--background-alt-grey) !important;
-    color: var(--text-default-grey) !important;
-}
-
-/* Layout du container de boutons */
-[data-bs-toggle="buttons"],
-.btn-toolbar {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 0.5rem !important;
-}
-
-/* Responsive - colonnes sur mobile */
+/* Responsive - colonnes sur mobile. !important requis : combat les classes
+   de colonnes Bootstrap (row-cols-*, col-*) non layerisées. */
 @media (max-width: 767.98px) {
     .bootstrap-buttons-div {
         flex: 1 1 100% !important;
@@ -4115,20 +4071,9 @@ html body tr.dsfr-has-ddfix td.dropdown-item .ls-input-group > select {
    BOOTSTRAP BUTTONS MULTI (CHECKBOXES)
    ============================================ */
 
-/* Mêmes styles que pour les radio buttons */
-.bootstrap-buttons-div input[type="checkbox"].btn-check {
-    position: absolute !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-}
-
-/* État sélectionné pour les checkboxes */
-.bootstrap-buttons-div input[type="checkbox"]:checked + .btn,
-.bootstrap-buttons-div input[type="checkbox"]:checked + label.btn {
-    background-color: var(--background-action-high-blue-france) !important;
-    color: var(--text-inverted-blue-france) !important;
-    border-color: var(--border-action-high-blue-france) !important;
-}
+/* Consolidé dans « BOOTSTRAP BUTTONS → DSFR STYLE » (#41 étape 3a) :
+   le masquage couvre input.button-item/.btn-check (tous types) et l'état
+   sélectionné inclut input[type="checkbox"]:checked. */
 
 /* ============================================
    FILE UPLOAD - DSFR
