@@ -17,6 +17,9 @@ export const MANDATORY_I18N_FR = {
     rows_remaining_plural: 'Veuillez répondre aux %remaining% lignes restantes sur %total%.',
     rows_remaining_singular: 'Veuillez répondre à la dernière ligne.',
     rows_all_required: 'Veuillez répondre à toutes les lignes (%total% lignes).',
+    // Saisie à la demande (InputOnDemand) : des lignes obligatoires sont encore
+    // masquées — il faut les ajouter via le bouton pour pouvoir y répondre.
+    iod_add_lines: 'Cette question attend une réponse pour chacune des %total% lignes : cliquez sur « Ajouter une ligne » puis complétez les %remaining% lignes manquantes.',
     field_valid: 'Saisie valide',
     numeric_only: "Ce champ n'accepte que des valeurs numériques.",
 };
@@ -28,6 +31,7 @@ export const MANDATORY_I18N_EN = {
     rows_remaining_plural: 'Please answer the remaining %remaining% of %total% rows.',
     rows_remaining_singular: 'Please answer the last row.',
     rows_all_required: 'Please answer all rows (%total% rows).',
+    iod_add_lines: 'This question expects an answer for each of its %total% lines: click "Add a line" and complete the %remaining% missing lines.',
     field_valid: 'Valid input',
     numeric_only: 'This field only accepts numeric values.',
 };

@@ -88,6 +88,24 @@
     background-color: transparent !important;
 }
 
+/* Le fond gris du tableau ISD ne venait PAS des tr/td (transparents) mais du
+   TBODY : DSFR fr-table pose background-color sur tbody (sonde 2026-06-12).
+   Sans cette règle, le gris persistait malgré le transparent des lignes. */
+.array-increase-same-decrease table.radio-array tbody {
+    background-color: transparent !important;
+}
+
+/* Matrices dont AUCUNE sous-question n'a de libellé (classe posée par
+   answer.twig, qui n'émet alors pas le <col> de la colonne d'en-têtes) :
+   on masque entièrement les cellules de première colonne. Les th vides
+   restent dans le DOM (champs cachés EM, ids référencés par headers=) mais
+   ne participent plus au tableau. NB : largeur 0/0% ne suffisait pas —
+   les algorithmes de table redistribuent toujours ~35px à une colonne vide. */
+table.array-no-row-labels tbody th.answertext,
+table.array-no-row-labels thead tr > :first-child {
+    display: none !important;
+}
+
 /* Hover sur les lignes */
 .array-increase-same-decrease table.radio-array tbody tr:hover {
     background-color: var(--background-contrast-blue-france, #e3e3fd) !important;
@@ -1545,6 +1563,22 @@ table td input[type="checkbox"] {
     display: none !important;
 }
 
+/* Même principe pour les fieldsets (radios/cases) : errors-dsfr.js pose
+   fr-fieldset--error (état DSFR normatif — labels rouges, à conserver),
+   mais le trait vertical natif du fieldset doublait notre liseré
+   question-container. DSFR le dessine en 3 morceaux : background-image
+   du fieldset, background-image du legend, box-shadow du content::before. */
+.question-container .fr-fieldset--error,
+.question-container .fr-fieldset--error .fr-fieldset__legend,
+.question-container .fr-fieldset--valid,
+.question-container .fr-fieldset--valid .fr-fieldset__legend {
+    background-image: none !important;
+}
+.question-container .fr-fieldset--error .fr-fieldset__content::before,
+.question-container .fr-fieldset--valid .fr-fieldset__content::before {
+    box-shadow: none !important;
+}
+
 /* Bordure transparente par défaut pour éviter le décalage lors des erreurs */
 .question-container {
     border-left: 2px solid transparent;
@@ -1655,6 +1689,14 @@ table td input[type="checkbox"] {
     display: none !important;
 }
 
+/* Cellules de tableau (arrays texte/nombre) : le fr-input-group garde son
+   margin-bottom DSFR (24px) dans la cellule → champ décentré verticalement
+   (vide sous le champ). Le padding du td suffit. */
+td.text-item .fr-input-group,
+td.answer-item .fr-input-group {
+    margin-bottom: 0;
+}
+
 /* ============================================
    DATE PICKER - Alignement des séparateurs
    ============================================ */
@@ -1709,16 +1751,19 @@ textarea,
     padding: 0 !important;
 }
 
-/* Supprimer toutes les marges et padding sur les containers de questions */
-.ls-answers.subquestion-list .question-item,
-.ls-answers.subquestion-list .answer-item,
-.ls-answers.subquestion-list .text-item,
-.questions-list.text-list .question-item,
-.questions-list.text-list .answer-item,
-.questions-list.text-list .text-item,
-.questions-list.number-list .question-item,
-.questions-list.number-list .answer-item,
-.questions-list.number-list .text-item {
+/* Supprimer toutes les marges et padding sur les containers de questions.
+   Scopé sur li : les tables d'arrays portent aussi ls-answers.subquestion-list
+   et leurs td.text-item/answer-item perdaient leur padding gauche (champ collé
+   au bord de la cellule). */
+.ls-answers.subquestion-list li.question-item,
+.ls-answers.subquestion-list li.answer-item,
+.ls-answers.subquestion-list li.text-item,
+.questions-list.text-list li.question-item,
+.questions-list.text-list li.answer-item,
+.questions-list.text-list li.text-item,
+.questions-list.number-list li.question-item,
+.questions-list.number-list li.answer-item,
+.questions-list.number-list li.text-item {
     margin-left: 0 !important;
     padding-left: 0 !important;
 }
@@ -2040,6 +2085,96 @@ td.answer-item.radio-item {
 .ls-error-mandatory td.radio-item input[type="radio"]:checked,
 .ls-error-mandatory .dualscale-noanswer input[type="radio"]:checked,
 .ls-error-mandatory .dsfr-radio-table:checked {
+    background-color: var(--border-plain-error) !important;
+}
+
+/* ============================================
+   CHECKBOXES DSFR DANS TABLEAUX
+   ============================================ */
+
+/* Même traitement que les radios ci-dessus : les matrices « cases à cocher »
+   (multiflexi checkbox layout — cellule core answer_td_checkboxes.twig,
+   td.checkbox-item) rendaient la checkbox NATIVE (~13px), hors DSFR.
+   Enfant direct (>) uniquement : ne surtout pas matcher les inputs des
+   .fr-checkbox-group, que DSFR masque pour dessiner la case sur le label. */
+table td > input[type="checkbox"],
+td.answer-item > input[type="checkbox"],
+td.checkbox-item > input[type="checkbox"] {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+    min-width: 1.5rem !important;
+    min-height: 1.5rem !important;
+    border: 1px solid var(--border-action-high-blue-france) !important;
+    border-radius: 0.25rem !important;
+    background-color: var(--background-default-grey) !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    vertical-align: middle;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 1;
+    margin: 0 auto;
+    display: block;
+}
+
+table td > input[type="checkbox"]:hover,
+td.answer-item > input[type="checkbox"]:hover,
+td.checkbox-item > input[type="checkbox"]:hover {
+    border-color: var(--border-action-high-blue-france) !important;
+    background-color: var(--background-alt-grey) !important;
+}
+
+table td > input[type="checkbox"]:focus,
+td.answer-item > input[type="checkbox"]:focus,
+td.checkbox-item > input[type="checkbox"]:focus,
+table td > input[type="checkbox"]:focus-visible,
+td.answer-item > input[type="checkbox"]:focus-visible,
+td.checkbox-item > input[type="checkbox"]:focus-visible {
+    /* Même correctif que les radios : fallback #000091 obligatoire
+       (var(--focus) indéfinie côté DSFR) — RGAA 7.1. */
+    outline: 2px solid var(--border-action-high-blue-france, #000091) !important;
+    outline-offset: 2px !important;
+}
+
+table td > input[type="checkbox"]:checked,
+td.answer-item > input[type="checkbox"]:checked,
+td.checkbox-item > input[type="checkbox"]:checked {
+    border-color: var(--border-action-high-blue-france) !important;
+    background-color: var(--background-action-high-blue-france) !important;
+    /* Coche : SVG externe (conformité CSP, cf. bloc CHECKBOX CHECKMARK) */
+    background-image: url("../files/icons/system/checkbox-checkmark.svg") !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: 1.125rem 1.125rem !important;
+}
+
+table td > input[type="checkbox"]:checked:hover,
+td.answer-item > input[type="checkbox"]:checked:hover,
+td.checkbox-item > input[type="checkbox"]:checked:hover {
+    background-color: var(--background-action-high-blue-france-hover) !important;
+    border-color: var(--background-action-high-blue-france-hover) !important;
+}
+
+/* Centrage dans les cellules de tableau */
+td.answer-item.checkbox-item,
+td.checkbox-item {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Ligne en erreur */
+.ls-error-mandatory table td > input[type="checkbox"],
+.ls-error-mandatory td.answer-item > input[type="checkbox"],
+.ls-error-mandatory td.checkbox-item > input[type="checkbox"] {
+    border-color: var(--border-plain-error) !important;
+}
+
+.ls-error-mandatory table td > input[type="checkbox"]:checked,
+.ls-error-mandatory td.answer-item > input[type="checkbox"]:checked,
+.ls-error-mandatory td.checkbox-item > input[type="checkbox"]:checked {
     background-color: var(--border-plain-error) !important;
 }
 
@@ -3047,6 +3182,19 @@ table.fr-table--bordered {
     align-items: center;
 }
 
+/* Mobile : la marge inline générique (2rem sur fr-fieldset__element--inline)
+   et le padding horizontal DSFR (0.5rem de chaque côté) faisaient passer les
+   5 étoiles sur 2 lignes (5×56px + gaps > 301px utiles à 375px) — le gap du
+   conteneur (0.5rem) suffit comme espacement. */
+@media (max-width: 767.98px) {
+    .star-rating-container .fr-fieldset__element--inline {
+        margin-right: 0;
+        margin-bottom: 0;
+        padding-left: 0;
+        padding-right: 0;
+    }
+}
+
 /* Hide radio inputs */
 .star-rating-input {
     position: absolute;
@@ -3233,6 +3381,14 @@ table.fr-table--bordered {
 /* Hide DSFR radio button pseudo-element in emoji mode */
 .fr-fieldset[data-display-mode="2"] .fr-radio-group input[type="radio"] + label::before {
     display: none !important;
+}
+
+/* Le rond du radio DSFR est AUSSI dessiné en background-image du label
+   (SVG externalisé, position 0 50%) — pas seulement en ::before. Sans ce
+   masquage, un cercle bleu dépasse derrière chaque emoji/étoile (#43). */
+.fr-fieldset[data-display-mode="1"] .fr-radio-group input[type="radio"] + label,
+.fr-fieldset[data-display-mode="2"] .fr-radio-group input[type="radio"] + label {
+    background-image: none;
 }
 
 /* Center emoji in fr-radio-rich box */

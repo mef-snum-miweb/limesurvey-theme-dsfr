@@ -45,18 +45,25 @@
                 {%- endif -%}
                 .
             </caption>
+            {# « Sans réponse » : une colonne PAR échelle, accolée aux options
+               de son échelle (avant le séparateur pour Scale A) — et non une
+               colonne unique en bout de tableau avec les deux radios empilés,
+               illisible et impossible à rattacher visuellement à une échelle. #}
             <colgroup class="col-responses">
                 <col class="answertext" style="width: {{ answerwidth }}%;" />
                 {% for code, label in labelans0 %}
                     <col class="answer-scale0" style="width: {{ cellwidth }}%;" />
                 {% endfor %}
+                {% if shownoanswer %}
+                    <col class="noanswer" style="width: {{ cellwidth }}%;" />
+                {% endif %}
                 {% if separatorwidth %}
                     <col class="separator" style="width: {{ separatorwidth }}%;" />
                 {% endif %}
                 {% for code, label in labelans1 %}
                     <col class="answer-scale1" style="width: {{ cellwidth }}%;" />
                 {% endfor %}
-                {% if shownoanswer %}
+                {% if shownoanswer and labelcode1 is not empty %}
                     <col class="noanswer" style="width: {{ cellwidth }}%;" />
                 {% endif %}
                 {% if rightexists %}
@@ -68,10 +75,9 @@
                 {% if leftheader or rightheader %}
                     <tr class="ls-heading dualscale-header">
                         <th></th>
-                        <th id="scale0-header-{{ basename }}" class="fr-text--bold" colspan="{{ labelans0|length }}">{{ processString(leftheader) }}</th>
+                        <th id="scale0-header-{{ basename }}" class="fr-text--bold" colspan="{{ labelans0|length + (shownoanswer ? 1 : 0) }}">{{ processString(leftheader) }}</th>
                         {% if separatorwidth %}<th></th>{% endif %}
-                        <th id="scale1-header-{{ basename }}" class="fr-text--bold" colspan="{{ labelans1|length }}">{{ processString(rightheader) }}</th>
-                        {% if shownoanswer %}<th></th>{% endif %}
+                        <th id="scale1-header-{{ basename }}" class="fr-text--bold" colspan="{{ labelans1|length + (shownoanswer and labelcode1 is not empty ? 1 : 0) }}">{{ processString(rightheader) }}</th>
                         {% if rightexists %}<th></th>{% endif %}
                     </tr>
                 {% endif %}
@@ -81,12 +87,15 @@
                     {% for code, label in labelans0 %}
                         <th id="answer{{ basename }}-s0-{{ labelcode0[code] }}" class="fr-text--bold answertext">{{ processString(label) }}</th>
                     {% endfor %}
+                    {% if shownoanswer %}
+                        <th id="noanswer0-header-{{ basename }}" class="fr-text--bold noanswer-text">{{ gT('No answer') }}</th>
+                    {% endif %}
                     {% if separatorwidth %}<th></th>{% endif %}
                     {% for code, label in labelans1 %}
                         <th id="answer{{ basename }}-s1-{{ labelcode1[code] }}" class="fr-text--bold answertext">{{ processString(label) }}</th>
                     {% endfor %}
-                    {% if shownoanswer %}
-                        <th id="noanswer-header-{{ basename }}" class="fr-text--bold noanswer-text">{{ gT('No answer') }}</th>
+                    {% if shownoanswer and labelcode1 is not empty %}
+                        <th id="noanswer1-header-{{ basename }}" class="fr-text--bold noanswer-text">{{ gT('No answer') }}</th>
                     {% endif %}
                     {% if rightexists %}
                         <th></th>
@@ -149,6 +158,29 @@
                             </td>
                         {% endfor %}
 
+                        {# No answer — Échelle 1 : value="" (état « non répondu »).
+                           Le core 6.16.16 cache ce radio derrière ls-js-hidden ;
+                           on le rend visible (RGAA — l'utilisateur doit pouvoir
+                           annuler son choix sur chaque échelle), dans sa propre
+                           colonne accolée aux options de l'échelle. #}
+                        {% if shownoanswer %}
+                            <td class="answer-item radio-item noanswer-item" headers="answertext{{ subquestion.myfname }} {% if leftheader %}scale0-header-{{ basename }} {% endif %}noanswer0-header-{{ basename }}">
+                                <div class="dualscale-noanswer">
+                                    <input
+                                        type="radio"
+                                        name="{{ subquestion.myfname0 }}"
+                                        value=""
+                                        id="answer{{ subquestion.myfid0 }}-"
+                                        aria-label="{{ gT("No answer") }}{% if leftheader %} — {{ processString(leftheader)|striptags }}{% endif %}"
+                                        {{ subquestion.myfname0_notset|raw }}
+                                    />
+                                    <label for="answer{{ subquestion.myfid0 }}-" class="ls-label-xs-visibility" aria-hidden="true">
+                                        {{ gT("No answer") }}
+                                    </label>
+                                </div>
+                            </td>
+                        {% endif %}
+
                         {# Separator column #}
                         {% if separatorwidth %}
                             <td class="separator">
@@ -182,41 +214,23 @@
                             </td>
                         {% endfor %}
 
-                        {# No answer : un radio par échelle, value="" (état
-                           « non répondu »). Le core 6.16.16 masque celui de
-                           l'échelle 1 derrière ls-js-hidden ; on les rend
-                           tous les deux visibles (RGAA — l'utilisateur doit
-                           pouvoir annuler son choix sur chaque échelle). #}
-                        {% if shownoanswer %}
-                            <td class="answer-item radio-item noanswer-item" headers="answertext{{ subquestion.myfname }} noanswer-header-{{ basename }}">
+                        {# No answer — Échelle 2 : même traitement, colonne
+                           dédiée après les options de l'échelle 2. #}
+                        {% if shownoanswer and labelcode1 is not empty %}
+                            <td class="answer-item radio-item noanswer-item" headers="answertext{{ subquestion.myfname }} {% if rightheader %}scale1-header-{{ basename }} {% endif %}noanswer1-header-{{ basename }}">
                                 <div class="dualscale-noanswer">
                                     <input
                                         type="radio"
-                                        name="{{ subquestion.myfname0 }}"
+                                        name="{{ subquestion.myfname1 }}"
                                         value=""
-                                        id="answer{{ subquestion.myfid0 }}-"
-                                        aria-label="{{ gT("No answer") }}{% if leftheader %} — {{ processString(leftheader)|striptags }}{% endif %}"
-                                        {{ subquestion.myfname0_notset|raw }}
+                                        id="answer{{ subquestion.myfid1 }}-"
+                                        aria-label="{{ gT("No answer") }}{% if rightheader %} — {{ processString(rightheader)|striptags }}{% endif %}"
+                                        {{ subquestion.myfname1_notset|raw }}
                                     />
-                                    <label for="answer{{ subquestion.myfid0 }}-" class="ls-label-xs-visibility" aria-hidden="true">
+                                    <label for="answer{{ subquestion.myfid1 }}-" class="ls-label-xs-visibility" aria-hidden="true">
                                         {{ gT("No answer") }}
                                     </label>
                                 </div>
-                                {% if labelcode1 is not empty %}
-                                    <div class="dualscale-noanswer">
-                                        <input
-                                            type="radio"
-                                            name="{{ subquestion.myfname1 }}"
-                                            value=""
-                                            id="answer{{ subquestion.myfid1 }}-"
-                                            aria-label="{{ gT("No answer") }}{% if rightheader %} — {{ processString(rightheader)|striptags }}{% endif %}"
-                                            {{ subquestion.myfname1_notset|raw }}
-                                        />
-                                        <label for="answer{{ subquestion.myfid1 }}-" class="ls-label-xs-visibility" aria-hidden="true">
-                                            {{ gT("No answer") }}
-                                        </label>
-                                    </div>
-                                {% endif %}
                             </td>
                         {% endif %}
 

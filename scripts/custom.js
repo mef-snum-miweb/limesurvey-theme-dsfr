@@ -545,6 +545,9 @@
     rows_remaining_plural: "Veuillez répondre aux %remaining% lignes restantes sur %total%.",
     rows_remaining_singular: "Veuillez répondre à la dernière ligne.",
     rows_all_required: "Veuillez répondre à toutes les lignes (%total% lignes).",
+    // Saisie à la demande (InputOnDemand) : des lignes obligatoires sont encore
+    // masquées — il faut les ajouter via le bouton pour pouvoir y répondre.
+    iod_add_lines: "Cette question attend une réponse pour chacune des %total% lignes : cliquez sur « Ajouter une ligne » puis complétez les %remaining% lignes manquantes.",
     field_valid: "Saisie valide",
     numeric_only: "Ce champ n'accepte que des valeurs numériques."
   };
@@ -555,6 +558,7 @@
     rows_remaining_plural: "Please answer the remaining %remaining% of %total% rows.",
     rows_remaining_singular: "Please answer the last row.",
     rows_all_required: "Please answer all rows (%total% rows).",
+    iod_add_lines: 'This question expects an answer for each of its %total% lines: click "Add a line" and complete the %remaining% missing lines.',
     field_valid: "Valid input",
     numeric_only: "This field only accepts numeric values."
   };
@@ -875,7 +879,7 @@
       if (validContainer) {
         validContainer.style.display = "none";
       }
-      var allItems = question.querySelectorAll(".answer-item:not(.d-none)");
+      var allItems = question.querySelectorAll(".answer-item");
       allItems.forEach(function(item) {
         var inputGroup = item.querySelector(".fr-input-group");
         var messagesGroup = item.querySelector(".fr-messages-group");
@@ -903,13 +907,21 @@
         question.appendChild(counterContainer);
       }
       function updateCounter() {
-        var visibleItems = question.querySelectorAll(".answer-item:not(.d-none)");
-        var totalFields = visibleItems.length;
+        var allRows = question.querySelectorAll(".answer-item");
+        var totalFields = allRows.length;
         var emptyCount = 0;
-        visibleItems.forEach(function(item) {
+        var hiddenEmptyCount = 0;
+        allRows.forEach(function(item) {
           var input = item.querySelector("input, textarea");
           if (!input) return;
           var value = input.value ? input.value.trim() : "";
+          if (item.classList.contains("d-none")) {
+            if (value === "") {
+              emptyCount++;
+              hiddenEmptyCount++;
+            }
+            return;
+          }
           var inputGroup = item.querySelector(".fr-input-group");
           var messagesGroup = item.querySelector(".fr-messages-group");
           if (value === "") {
@@ -972,7 +984,9 @@
           }
           question.classList.add("input-error");
           question.classList.remove("input-valid");
-          if (emptyCount === totalFields) {
+          if (hiddenEmptyCount > 0) {
+            counterMessage.textContent = tMandatory("iod_add_lines", emptyCount, totalFields);
+          } else if (emptyCount === totalFields) {
             counterMessage.textContent = tMandatory("fields_all_required", null, totalFields);
           } else if (emptyCount === 1) {
             counterMessage.textContent = tMandatory("fields_remaining_singular");
@@ -991,6 +1005,22 @@
         input.dataset.errorListenerAdded = "true";
         input.addEventListener("input", updateCounter);
       });
+      var iodList = question.querySelector(".selector--inputondemand-list");
+      if (iodList) {
+        new MutationObserver(function(mutations) {
+          var revealed = mutations.some(function(m) {
+            return typeof m.oldValue === "string" && m.oldValue.indexOf("d-none") !== -1 && m.target.classList && !m.target.classList.contains("d-none");
+          });
+          if (revealed) {
+            updateCounter();
+          }
+        }).observe(iodList, {
+          attributes: true,
+          attributeFilter: ["class"],
+          attributeOldValue: true,
+          subtree: true
+        });
+      }
     });
   }
 

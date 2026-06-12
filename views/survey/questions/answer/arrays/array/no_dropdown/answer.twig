@@ -5,16 +5,33 @@
  */
 #}
 
+{# Sous-questions toutes SANS libellé (ex. matrices à une ligne où le LSS
+   force answer_width=1) : la colonne d'en-têtes de lignes serait vide mais
+   visible (filet de quelques px). On la détecte ici pour la collapser
+   (classe + largeur 0) — :has()/:empty est inopérant car les th contiennent
+   des champs cachés de l'Expression Manager. #}
+{% set hasRowLabels = false %}
+{% for aRow in aRows %}
+    {% if aRow.content.answertext is defined and aRow.content.answertext|striptags|trim %}
+        {% set hasRowLabels = true %}
+    {% endif %}
+{% endfor %}
+
 <!-- DSFR Array Flexible Table -->
 <div class="ls-table-wrapper" role="group" aria-labelledby="ls-question-text-{{ basename }}">
     <div class="fr-table fr-table--bordered">
     <div class="fr-table__wrapper">
         <div class="fr-table__container">
             <div class="fr-table__content">
-        <table class="{{ coreClass }}">
+        <table class="{{ coreClass }}{% if not hasRowLabels %} array-no-row-labels{% endif %}">
                     <caption class="fr-sr-only">{{ t.response_matrix|default('Matrice de réponses') }}</caption>
         <colgroup class="col-responses">
-            <col class="col-answers" style='width: {{ answerwidth }}%;' />
+            {# Pas de <col> pour la colonne d'en-têtes quand elle est vide :
+               ses cellules sont en display:none (CSS .array-no-row-labels),
+               le nombre de <col> doit correspondre aux cellules restantes. #}
+            {% if hasRowLabels %}
+                <col class="col-answers" style='width: {{ answerwidth }}%;' />
+            {% endif %}
             {% for aColumn in aColumns %}
                 <col class="{{ aColumn.class }}" style='width: {{ aColumn.cellwidth }}%'/>
             {% endfor %}
