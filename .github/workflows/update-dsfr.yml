@@ -98,7 +98,7 @@ jobs:
 
       - name: Ouvrir une Pull Request
         if: steps.target.outputs.version != steps.current.outputs.version
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           commit-message: "chore(dsfr): bump to ${{ steps.target.outputs.version }}"
           branch: "dsfr-update/${{ steps.target.outputs.version }}"
