@@ -1,0 +1,45 @@
+name: Release ZIP
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  package-and-upload:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout au tag
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Extraire la version du tag
+        id: ver
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Vérifier que config.xml correspond au tag
+        run: |
+          CONFIG_VERSION=$(sed -n 's/.*<version>\([^<]*\)<\/version>.*/\1/p' config.xml | head -1)
+          if [[ "$CONFIG_VERSION" != "${{ steps.ver.outputs.version }}" ]]; then
+            echo "::error::config.xml indique version $CONFIG_VERSION mais le tag est ${{ steps.ver.outputs.version }}. Bumpez config.xml AVANT de tagger."
+            exit 1
+          fi
+
+      - name: Packager le ZIP
+        run: ./release.sh "${{ steps.ver.outputs.version }}" --package-only
+
+      - name: Uploader vers la release GitHub
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ZIP="dist/dsfr-${{ steps.ver.outputs.version }}.zip"
+          if gh release view "${{ github.ref_name }}" >/dev/null 2>&1; then
+            gh release upload "${{ github.ref_name }}" "$ZIP" --clobber
+          else
+            gh release create "${{ github.ref_name }}" "$ZIP" \
+              --title "${{ github.ref_name }}" \
+              --generate-notes
+          fi

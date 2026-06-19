@@ -72,7 +72,7 @@ Possible uniquement si l'instance autorise l'upload de SVG côté serveur. Pour 
 
 ### Pour tester ou contribuer
 
-Le repo [`bmatge/limesurvey-dsfr-suite`](https://github.com/bmatge/limesurvey-dsfr-suite) fournit un environnement Docker prêt à l'emploi (LimeSurvey 6 + MySQL + questionnaire de test RGAA + suite de tests) qui monte ce thème en direct. Il sert au développement et à la validation a11y ; il n'est **pas** requis pour utiliser le thème en production.
+Le repo [`mef-snum-miweb/limesurvey-dsfr-suite`](https://github.com/mef-snum-miweb/limesurvey-dsfr-suite) fournit un environnement Docker prêt à l'emploi (LimeSurvey 6 + MySQL + questionnaire de test RGAA + suite de tests) qui monte ce thème en direct. Il sert au développement et à la validation a11y ; il n'est **pas** requis pour utiliser le thème en production.
 
 ---
 
@@ -201,7 +201,7 @@ Le thème est compatible avec une CSP **`default-src 'self'`** stricte, sans né
 | **[`DECLARATION_RGAA.md`](DECLARATION_RGAA.md)** | Déclaration d'accessibilité complète (audit + corrections) |
 | **[`DECLARATION_RGAA_AUDIT_INITIAL.md`](DECLARATION_RGAA_AUDIT_INITIAL.md)** | Résultat brut de l'audit initial |
 | **[`CONTRIBUTING.md`](CONTRIBUTING.md)** | Guide développeur : arbo `src/`, pipeline esbuild, Twig, workflow git |
-| Tests (couverture, lancement, rapports) | Dans le repo [`bmatge/limesurvey-dsfr-suite`](https://github.com/bmatge/limesurvey-dsfr-suite) |
+| Tests (couverture, lancement, rapports) | Dans le repo [`mef-snum-miweb/limesurvey-dsfr-suite`](https://github.com/mef-snum-miweb/limesurvey-dsfr-suite) |
 
 ---
 
@@ -215,4 +215,4 @@ Le thème est compatible avec une CSP **`default-src 'self'`** stricte, sans né
 
 **Mission Ingénierie du Web, Service du Numérique** — Ministère de l'Économie et des Finances
 
-- GitHub : [@bmatge](https://github.com/bmatge)
+- GitHub : [@mef-snum-miweb](https://github.com/mef-snum-miweb)

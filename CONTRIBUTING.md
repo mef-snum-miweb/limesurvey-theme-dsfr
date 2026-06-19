@@ -135,7 +135,7 @@ Exemple (simplifié) :
 
 ## Workflow git
 
-Le thème vit en **submodule** du repo parent [`limesurvey-dsfr-suite`](https://github.com/bmatge/limesurvey-dsfr-suite). Règle d'or : on édite **toujours** depuis `modules/theme-dsfr/`, jamais ailleurs.
+Le thème vit en **submodule** du repo parent [`limesurvey-dsfr-suite`](https://github.com/mef-snum-miweb/limesurvey-dsfr-suite). Règle d'or : on édite **toujours** depuis `modules/theme-dsfr/`, jamais ailleurs.
 
 ### Commit dans le submodule
 
