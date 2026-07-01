@@ -26,5 +26,33 @@
     <div class="fr-hint-text ls-questionhelp {{ aSurveyInfo.class.lsquestionhelp }}">
         {{ aQuestion.help.text | raw }}
     </div>
+
+    {# Repère contributeur (aperçu uniquement) : dans l'aide, la structure HTML riche est conservée,
+       mais les styles inline sont normalisés quand sanitize_rte_content est actif. #}
+    {% if (aSurveyInfo.active != 'Y')
+        and (aSurveyInfo.options.contributor_hints|default('on') == 'on')
+        and (aSurveyInfo.options.sanitize_rte_content|default('on') == 'on') %}
+        {% set scanh = helpText|lower|replace({'background-color': '§bg', 'background': '§bg', 'bgcolor': '§bg'}) %}
+        {% set removedh = [] %}
+        {% if ('color:' in scanh) or ('color=' in scanh) or ('<font' in scanh) %}{% set removedh = removedh|merge(['une couleur de texte']) %}{% endif %}
+        {% if '§bg' in scanh %}{% set removedh = removedh|merge(['une couleur de fond']) %}{% endif %}
+        {% if 'font-size' in scanh %}{% set removedh = removedh|merge(['une taille de police']) %}{% endif %}
+        {% if 'font-family' in scanh %}{% set removedh = removedh|merge(['une police']) %}{% endif %}
+        {% if ('font-weight' in scanh) or ('font-style' in scanh) %}{% set removedh = removedh|merge(['un style de police']) %}{% endif %}
+        {% if 'text-decoration' in scanh %}{% set removedh = removedh|merge(['une décoration de texte']) %}{% endif %}
+        {% if 'text-align' in scanh %}{% set removedh = removedh|merge(['un alignement']) %}{% endif %}
+        {% if ('margin' in scanh) or ('padding' in scanh) or ('line-height' in scanh) or ('letter-spacing' in scanh) %}{% set removedh = removedh|merge(['des espacements']) %}{% endif %}
+        {% if 'border' in scanh %}{% set removedh = removedh|merge(['une bordure']) %}{% endif %}
+        {% if removedh|length > 0 %}
+            <div class="fr-alert fr-alert--info fr-alert--sm dsfr-contributor-hint fr-mt-1w" role="note">
+                <p>
+                    <strong>Aperçu contributeur —</strong> dans l'aide, le contenu et la structure sont conservés,
+                    mais la mise en forme suivante est normalisée (conformité DSFR) :
+                    {%- for item in removedh %}{{ loop.first ? ' ' : (loop.last ? ' et ' : ', ') }}{{ item }}{% endfor -%}.
+                    Pour mettre en avant un élément, utilisez un composant DSFR (encadré, mise en avant) plutôt qu'une couleur.
+                </p>
+            </div>
+        {% endif %}
+    {% endif %}
 </div>
 {% endif %}

@@ -67,6 +67,7 @@
         <fixnumauto type="buttons" category="Options générales" width="4" title="Correction automatique des valeurs numériques" options="enable|partial|disable" optionlabels="Oui|Pour expression|Non">enable</fixnumauto>
         <showquestioncode type="buttons" category="Options générales" width="4" title="Afficher le code/numéro de question (utile pour les questions conditionnelles)" options="on|off" optionlabels="Oui|Non">on</showquestioncode>
         <sanitize_rte_content type="buttons" category="Options générales" width="12" title="Nettoyer les styles inline du titre et de l'aide des questions (conformité DSFR)" options="on|off" optionlabels="Oui|Non" default="on">on</sanitize_rte_content>
+        <contributor_hints type="buttons" category="Options générales" width="12" title="Repères contributeur en prévisualisation : signaler la mise en forme non conservée (visible uniquement en aperçu, jamais par les répondants)" options="on|off" optionlabels="Oui|Non" default="on">on</contributor_hints>
         <show_pdf_export type="buttons" category="Options générales" width="12" title="Récapitulatif des réponses : afficher le bouton « Exporter en PDF » (le bouton « Export PDF queXML » reste toujours disponible)" options="on|off" optionlabels="Oui|Non" default="on">on</show_pdf_export>
 
         <!-- Images et logos -->

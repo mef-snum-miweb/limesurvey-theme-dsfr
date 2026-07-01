@@ -23,3 +23,41 @@
 <h3 id="ls-question-text-{{ aQuestion.SGQ }}" class="{{ aSurveyInfo.class.questiontext }} fr-h5 fr-mb-1w{% if aQuestion.mandatory == 'Y' %} mandatory-question{% endif %}" {{ aSurveyInfo.attr.questiontext }}>
     {{ aQuestion.text | striptags('<strong><em><u><br><span><a><abbr><sub><sup>') | raw }}
 </h3>
+
+{# Repère contributeur (aperçu uniquement) : signale la mise en forme non conservée dans l'intitulé.
+   Jamais rendu pour un répondant — gate sur sondage inactif (aperçu) + option contributor_hints. #}
+{% if (aSurveyInfo.active != 'Y') and (aSurveyInfo.options.contributor_hints|default('on') == 'on') %}
+    {% set rawq = aQuestion.text|lower %}
+    {# On masque background-color/bgcolor pour ne pas les confondre avec une couleur de texte. #}
+    {% set scanq = rawq|replace({'background-color': '§bg', 'background': '§bg', 'bgcolor': '§bg'}) %}
+    {% set removed = [] %}
+
+    {# Structure aplatie par le <h3> — un <p> d'enrobage CKEditor unique n'est PAS une perte. #}
+    {% set pcount = rawq|split('<p')|length - 1 %}
+    {% if pcount >= 2 %}{% set removed = removed|merge([pcount ~ ' paragraphes']) %}{% endif %}
+    {% if ('<ul' in rawq) or ('<ol' in rawq) %}{% set removed = removed|merge(['une liste']) %}{% endif %}
+    {% if '<table' in rawq %}{% set removed = removed|merge(['un tableau']) %}{% endif %}
+    {% if ('<h1' in rawq) or ('<h2' in rawq) or ('<h3' in rawq) or ('<h4' in rawq) %}{% set removed = removed|merge(['un sous-titre']) %}{% endif %}
+    {% if '<blockquote' in rawq %}{% set removed = removed|merge(['une citation']) %}{% endif %}
+
+    {# Styles inline retirés (miroir de RTE_STYLE_PROPERTIES côté JS). #}
+    {% if ('color:' in scanq) or ('color=' in scanq) or ('<font' in scanq) %}{% set removed = removed|merge(['une couleur de texte']) %}{% endif %}
+    {% if '§bg' in scanq %}{% set removed = removed|merge(['une couleur de fond']) %}{% endif %}
+    {% if 'font-size' in scanq %}{% set removed = removed|merge(['une taille de police']) %}{% endif %}
+    {% if 'font-family' in scanq %}{% set removed = removed|merge(['une police']) %}{% endif %}
+    {% if ('font-weight' in scanq) or ('font-style' in scanq) %}{% set removed = removed|merge(['un style de police']) %}{% endif %}
+    {% if 'text-decoration' in scanq %}{% set removed = removed|merge(['une décoration de texte']) %}{% endif %}
+    {% if 'text-align' in scanq %}{% set removed = removed|merge(['un alignement']) %}{% endif %}
+    {% if ('margin' in scanq) or ('padding' in scanq) or ('line-height' in scanq) or ('letter-spacing' in scanq) %}{% set removed = removed|merge(['des espacements']) %}{% endif %}
+    {% if 'border' in scanq %}{% set removed = removed|merge(['une bordure']) %}{% endif %}
+
+    {% if removed|length > 0 %}
+        <div class="fr-alert fr-alert--info fr-alert--sm dsfr-contributor-hint fr-mt-1w fr-mb-2w" role="note">
+            <p>
+                <strong>Aperçu contributeur —</strong> l'intitulé est un titre : la mise en forme suivante n'est pas conservée :
+                {%- for item in removed %}{{ loop.first ? ' ' : (loop.last ? ' et ' : ', ') }}{{ item }}{% endfor -%}.
+                Pour du contenu riche, placez-le dans le champ <strong>Aide</strong> de la question.
+            </p>
+        </div>
+    {% endif %}
+{% endif %}
