@@ -680,22 +680,18 @@
     }
 
 
-    /**
-     * SOLUTION SIMPLE: Nettoyer les classes problématiques
-     */
-    document.addEventListener('DOMContentLoaded', function() {
-        // Supprimer answer-item, radio-item, checkbox-item dans les tableaux
-        document.querySelectorAll('table td.answer-item, table td.radio-item, table td.checkbox-item').forEach(function(td) {
-            td.classList.remove('answer-item', 'radio-item', 'checkbox-item', 'dsfr-enhanced');
-            td.style.display = 'table-cell';
-        });
-
-    });
-
-    // NOTE: Le code qui appelait checkconditions() directement a été supprimé
-    // car il créait une double exécution avec em_javascript.js et causait des
-    // problèmes de réactivité. em_javascript.js gère déjà les événements change
-    // sur les radio/checkbox via ses propres sélecteurs jQuery.
+    // NE PAS retirer les classes fonctionnelles `radio-item` / `checkbox-item`
+    // des cellules de tableau : le core `em_javascript.js` y attache la
+    // délégation d'événements qui met à jour le miroir caché `#java{sgqa}` et
+    // relance ExpressionManager
+    // (`$(document).on('change', '.radio-item :radio, .checkbox-item :checkbox', …)`).
+    // Les strip-er cassait tout le calcul dynamique sur les questions array
+    // (relevance conditionnelle, statFunctions/statCountIf : le champ `#java`
+    // restait vide, EM calculait sur du néant). La mise en page tableau est
+    // déjà assurée par `css/theme.css` (`table td.radio-item { display:
+    // table-cell !important; margin-bottom:0; … }`), donc aucun besoin de
+    // toucher au DOM ici. `answer-item` sert aussi à la relevance
+    // (`relevance-jquery.js`) et à la validation (`mst-errors.js`) du thème.
 
     /**
      * Validation des champs numériques (data-number)
