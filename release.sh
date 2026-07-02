@@ -147,17 +147,19 @@ ln -s "$SCRIPT_DIR" "$TMPDIR_ZIP/$THEME_NAME"
 
 cd "$TMPDIR_ZIP"
 # Exclusions : tout ce qui ne sert QU'au développement du thème (pas à son
-# fonctionnement côté LimeSurvey). Garde :
-#   - README.md, DECLARATION_RGAA.md, THEME_COVERAGE.md, THEME_OPTIONS.md
-#     (utiles comme référence pour les admins LimeSurvey)
+# fonctionnement côté LimeSurvey).
 # Exclut :
 #   - git, DS_Store, dist, release.sh, exemple
 #   - src/ + esbuild.config.mjs (sources JS — le bundle scripts/custom.js est déjà là)
 #   - externalize-data-uris.mjs (script de post-build CSS, pas de prod — cf. ADR-019)
+#   - wrap-css-layers.mjs (script de post-build CSS @layer, pas de prod)
 #   - scripts/update-dsfr.sh (outil de maintenance, pas de prod)
 #   - .github/ (workflows, pas utiles dans le ZIP)
-#   - CONTRIBUTING.md, DECLARATION_RGAA_AUDIT_INITIAL.md (dev-only)
-#   - DOCUMENTATION.md, DECLARATION_RGAA_INITIALE.md (obsolètes depuis la réorg doc)
+#   - docs/ (documentation projet, pas de prod)
+#   - tous les .md à la racine (documentation projet — CHANGELOG, README,
+#     CONTRIBUTING, DECLARATION_RGAA*, THEME_COVERAGE, THEME_OPTIONS).
+#     Les admins LimeSurvey consultent ces docs sur GitHub, pas dans le ZIP
+#     installé.
 zip -r "$ZIP_FILE" "$THEME_NAME/" \
     -x "${THEME_NAME}/.git" \
     -x "${THEME_NAME}/.git/*" \
@@ -171,11 +173,10 @@ zip -r "$ZIP_FILE" "$THEME_NAME/" \
     -x "${THEME_NAME}/src/*" \
     -x "${THEME_NAME}/esbuild.config.mjs" \
     -x "${THEME_NAME}/externalize-data-uris.mjs" \
+    -x "${THEME_NAME}/wrap-css-layers.mjs" \
     -x "${THEME_NAME}/scripts/update-dsfr.sh" \
-    -x "${THEME_NAME}/CONTRIBUTING.md" \
-    -x "${THEME_NAME}/DECLARATION_RGAA_AUDIT_INITIAL.md" \
-    -x "${THEME_NAME}/DOCUMENTATION.md" \
-    -x "${THEME_NAME}/DECLARATION_RGAA_INITIALE.md" \
+    -x "${THEME_NAME}/docs/*" \
+    -x "${THEME_NAME}/*.md" \
     > /dev/null
 
 rm -rf "$TMPDIR_ZIP"
