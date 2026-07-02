@@ -41,8 +41,6 @@ Taille recommandée : 6rem (96 px) de hauteur dans le header.
 | `dsfr_theme` | dropdown | `light` | Variante par défaut du thème (clair / sombre) |
 | `show_marianne` | on / off | on | Afficher le logo Marianne |
 | `show_footer_links` | on / off | on | Afficher la barre de liens du pied de page (accessibilité, mentions légales, données personnelles, cookies) |
-| `showpopups` | 1 / 0 / -1 | 0 | Messages (sauvegarde, soft mandatory) : popup, sur la page, ou masqués |
-| `container` | on / off | off | Conteneur centré (`fr-container`) ou pleine largeur (`fr-container--fluid`) |
 | `questionhelptextposition` | top / bottom | top | Position de l'aide de question |
 | `showquestioncode` | on / off | on | Afficher le numéro/code des questions (selon réglages du sondage) |
 | `sanitize_rte_content` | on / off | on | Nettoyer les styles inline des titres/aides de questions (conformité DSFR) |

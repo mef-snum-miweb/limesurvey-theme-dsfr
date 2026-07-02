@@ -60,8 +60,14 @@
     <!-- Options du thème (configurables dans l'interface admin) -->
     <options>
         <!-- Options simples -->
-        <container type="buttons" category="Options générales" width="4" title="Conteneur de l'enquête centré (off = pleine largeur)" options="on|off" optionlabels="Oui|Non">off</container>
-        <showpopups type="buttons" category="Options générales" width="4" title="Affichage des messages (sauvegarde, soft mandatory)" options="1|0|-1" optionlabels="Popup|Sur la page|Non">0</showpopups>
+        <!-- container / showpopups : héritées de la vanilla, non exposées côté DSFR.
+             - container : outerframe.twig bascule bien fr-container ↔ fr-container--fluid,
+               mais les enfants (group, welcome, submit, header, footer, progress bar,
+               navigator) forcent leur propre fr-container → aucun effet observable.
+             - showpopups : le thème DSFR ne rend aucun popup ; l'option ne ferait que
+               masquer les alertes on-page.
+             Les branches twig retombent proprement sur leur défaut historique
+             (fluid / on-page) quand l'option est absente. -->
         <showclearall type="buttons" category="Options générales" width="4" title="Bouton 'Tout effacer'" options="on|off" optionlabels="Oui|Non">off</showclearall>
         <questionhelptextposition type="buttons" category="Options générales" width="4" title="Position de l'aide de question" options="top|bottom" optionlabels="Haut|Bas">top</questionhelptextposition>
         <fixnumauto type="buttons" category="Options générales" width="4" title="Correction automatique des valeurs numériques" options="enable|partial|disable" optionlabels="Oui|Pour expression|Non">enable</fixnumauto>
