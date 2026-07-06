@@ -60,15 +60,23 @@
     <!-- Options du thème (configurables dans l'interface admin) -->
     <options>
         <!-- Options simples -->
-        <!-- container / showpopups : héritées de la vanilla, non exposées côté DSFR.
-             - container : outerframe.twig bascule bien entre les classes DSFR
-               «centré» et «fluide», mais tous les enfants (group, welcome, submit,
-               header, footer, progress bar, navigator) forcent leur propre
-               conteneur centré, donc aucun effet observable.
-             - showpopups : le thème DSFR ne rend aucun popup ; l'option ne ferait
-               que masquer les alertes on-page.
-             Les branches twig retombent proprement sur leur défaut historique
-             (fluide / on-page) quand l'option est absente. -->
+        <!-- container : héritée de la vanilla, non exposée côté DSFR.
+             outerframe.twig bascule bien entre les classes DSFR «centré» et
+             «fluide», mais tous les enfants (group, welcome, submit, header,
+             footer, progress bar, navigator) forcent leur propre conteneur
+             centré, donc aucun effet observable. La branche twig retombe
+             proprement sur son défaut historique (fluide) quand l'option est
+             absente. -->
+        <!-- showpopups : DOIT rester déclarée avec la valeur 0 («Sur la page»).
+             Contrairement aux branches twig, le fallback core n'est PAS le
+             défaut historique : quand l'option est absente,
+             TemplateConfiguration::getshowpopups() retombe sur 1 (mode Popup).
+             Sur les pages d'erreur de validation, templateCore.alertSurveyDialog()
+             tente alors d'ouvrir la modale Bootstrap (crash du bloc de scripts
+             de fin de page, dont le chronomètre countdown()) et le bloc
+             d'alerte on-page (warnings.twig, gate errorHtml.show == showpopups 0)
+             n'est plus rendu. Voir issue #52. -->
+        <showpopups type="buttons" category="Options générales" width="4" title="Affichage des messages d'erreur de validation (sauvegarde, soft mandatory)" options="1|0|-1" optionlabels="Popup|Sur la page|Non">0</showpopups>
         <showclearall type="buttons" category="Options générales" width="4" title="Bouton 'Tout effacer'" options="on|off" optionlabels="Oui|Non">off</showclearall>
         <questionhelptextposition type="buttons" category="Options générales" width="4" title="Position de l'aide de question" options="top|bottom" optionlabels="Haut|Bas">top</questionhelptextposition>
         <fixnumauto type="buttons" category="Options générales" width="4" title="Correction automatique des valeurs numériques" options="enable|partial|disable" optionlabels="Oui|Pour expression|Non">enable</fixnumauto>

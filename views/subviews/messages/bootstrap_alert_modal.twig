@@ -22,10 +22,14 @@
 
 
 {# Register script for modal #}
+{# try/catch : les scripts POS_END et POS_POSTSCRIPT sont concaténés dans une
+   seule balise <script> (#bottomScripts). Une exception ici tuerait tout ce
+   qui suit dans le bloc — notamment le countdown() du chronomètre (time_limit),
+   enregistré en POS_POSTSCRIPT et exécuté après les POS_END. #}
 {% if( empty(json_decode(aSurveyInfo.jPopup)) == false ) %}
     {{ registerScript('startPopup',"LSvar.startPopups = " ~ aSurveyInfo.jPopup , "POS_HEAD") }}
-    {{ registerScript('showStartPopups',"window.templateCore.alertSurveyDialog(" ~ aSurveyInfo.jPopup ~ ");", "POS_END") }}
-    {{ registerScript('activateSoftMandatory',"activateSoftMandatory();", "POS_END") }}
+    {{ registerScript('showStartPopups',"try { window.templateCore.alertSurveyDialog(" ~ aSurveyInfo.jPopup ~ "); } catch (e) { if (window.console) { console.error('showStartPopups', e); } }", "POS_END") }}
+    {{ registerScript('activateSoftMandatory',"try { activateSoftMandatory(); } catch (e) { if (window.console) { console.error('activateSoftMandatory', e); } }", "POS_END") }}
 {% endif %}
 <!-- Bootstrap Modal Alert -->
 {% if(aSurveyInfo.id.alertmodal)%}

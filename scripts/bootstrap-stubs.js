@@ -188,20 +188,24 @@
         // ============================================
 
         if (typeof bootstrap === 'undefined') {
+            // Modal doit être un VRAI constructeur : le core LimeSurvey fait
+            // `new bootstrap.Modal(element, options)` puis `.show()`
+            // (ex. templateCore.alertSurveyDialog sur les pages d'erreur de
+            // validation). Avec un simple objet, le `new` lève un TypeError
+            // qui interrompt tout le bloc de scripts inline de fin de page
+            // (#bottomScripts) : countdown() du chronomètre, etc.
+            var ModalStub = function(element) {
+                this.$element = $(element);
+            };
+            ModalStub.prototype.show = function() { this.$element.modal('show'); };
+            ModalStub.prototype.hide = function() { this.$element.modal('hide'); };
+            ModalStub.prototype.toggle = function() { this.$element.modal('toggle'); };
+            ModalStub.prototype.dispose = function() {};
+            ModalStub.getInstance = function(element) { return new ModalStub(element); };
+            ModalStub.getOrCreateInstance = function(element) { return new ModalStub(element); };
+
             window.bootstrap = {
-                Modal: {
-                    getInstance: function(element) {
-                        var $el = $(element);
-                        return {
-                            show: function() { $el.modal('show'); },
-                            hide: function() { $el.modal('hide'); },
-                            toggle: function() { $el.modal('toggle'); }
-                        };
-                    },
-                    getOrCreateInstance: function(element) {
-                        return this.getInstance(element);
-                    }
-                },
+                Modal: ModalStub,
                 Tooltip: function() { return { dispose: function() {} }; },
                 Popover: function() { return { dispose: function() {} }; },
                 Collapse: function() { return { dispose: function() {} }; },
