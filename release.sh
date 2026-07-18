@@ -34,6 +34,15 @@ info()  { echo -e "${GREEN}✓${NC} $*"; }
 warn()  { echo -e "${YELLOW}⚠${NC} $*"; }
 error() { echo -e "${RED}✗${NC} $*" >&2; exit 1; }
 
+# sed -i portable BSD (macOS) / GNU (Linux) : les deux variantes acceptent
+# un suffixe de backup collé à -i (`-i.bak`), contrairement à `-i ''` (BSD
+# uniquement) ou `-i` seul (GNU uniquement). On supprime le backup ensuite.
+# Même idiome que scripts/update-dsfr.sh.
+sed_inplace() {
+    local script="$1" file="$2"
+    sed -i.bak "$script" "$file" && rm -f "${file}.bak"
+}
+
 usage() {
     echo "Usage : $0 <version> [--dry]"
     echo ""
@@ -105,8 +114,8 @@ fi
 # --- 1. Mettre à jour config.xml ---
 if [[ "$CURRENT_VERSION" != "$VERSION" ]]; then
     info "Mise à jour de config.xml..."
-    sed -i '' "s|<version>${CURRENT_VERSION}</version>|<version>${VERSION}</version>|" "$CONFIG_XML"
-    sed -i '' "s|<lastUpdate>[^<]*</lastUpdate>|<lastUpdate>${LAST_UPDATE}</lastUpdate>|" "$CONFIG_XML"
+    sed_inplace "s|<version>${CURRENT_VERSION}</version>|<version>${VERSION}</version>|" "$CONFIG_XML"
+    sed_inplace "s|<lastUpdate>[^<]*</lastUpdate>|<lastUpdate>${LAST_UPDATE}</lastUpdate>|" "$CONFIG_XML"
 
     NEW_VERSION=$(sed -n 's/.*<version>\([^<]*\)<\/version>.*/\1/p' "$CONFIG_XML" | head -1)
     NEW_UPDATE=$(sed -n 's/.*<lastUpdate>\([^<]*\)<\/lastUpdate>.*/\1/p' "$CONFIG_XML")
