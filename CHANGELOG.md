@@ -5,6 +5,83 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/). L'historique antérieur à
 `1.4.0` est consultable via les tags Git (`git tag`) et les *releases* GitHub.
 
+## [1.14.1] — 2026-09-11
+
+Release **consentement RGPD bloquant + correctifs d'accessibilité et de
+robustesse** accumulés depuis 1.12.0. Les numéros 1.13.x et 1.14.0 n'ont
+pas été publiés.
+
+### Modifié
+
+- **Politique de confidentialité de l'écran de bienvenue** (réglage
+  questionnaire « Afficher la politique de confidentialité », variantes
+  texte et modale) : la case d'acceptation est désormais **bloquante**.
+  Sans elle cochée, « Suivant » ne fait pas progresser le questionnaire ;
+  un message d'erreur DSFR s'affiche sous la case (`fr-checkbox-group--error`,
+  `aria-invalid`, `aria-describedby`, focus sur la case), avec le message
+  saisi dans les réglages du questionnaire ou, à défaut, « Vous devez
+  accepter la politique de confidentialité pour continuer. » (clé i18n
+  `datasecurity_required`). Le script inline hérité est remplacé par
+  `src/validation/datasecurity.js` (alignement CSP). Les boutons
+  « Charger un questionnaire non terminé », « Reprendre plus tard » et
+  « Quitter et effacer » portent `formnovalidate` et restent utilisables.
+  _Refs #61, #62._
+- Options de thème `container` et `showpopups` retirées : sans effet
+  observable côté DSFR, elles n'étaient qu'une source de confusion dans
+  l'admin. Rendu inchangé (les gabarits retombent sur leur défaut).
+- ZIP de release allégé : `wrap-css-layers.mjs`, `docs/` et les `.md` de
+  la racine n'y figurent plus (documentation consultable sur GitHub).
+
+### Corrigé
+
+- L'astérisque « champ obligatoire » **remplaçait la case** à cocher de la
+  politique de confidentialité (pseudo-élément `::before` que le DSFR
+  utilise pour dessiner la case, écrasé depuis la cascade `@layer`) : la
+  case est rendue au DSFR (`revert-layer`) et l'astérisque passe après le
+  libellé. _Refs #61._
+- Questions type 5 en mode **étoiles / emoji** invisibles (question vide) :
+  la parade `visually-hidden` était battue par l'inversion des `!important`
+  entre couches ; déplacée dans `@layer overrides`. _#59._
+- Double échelle en variante liste déroulante : les `<select>` n'avaient
+  aucune étiquette programmatique en linéarisation mobile ; l'intitulé de
+  l'échelle devient un vrai `<label for>`. _#57._
+- Chronomètre (`time_limit`) disparu après une erreur de validation : le
+  stub Bootstrap `Modal` devient un vrai constructeur, ce qui évite
+  l'exception qui tuait le bloc de scripts de fin de page. _#53._
+- `config.xml` : commentaire XML invalide (`--`) qui provoquait une
+  erreur 500 après purge du cache.
+
+### Limite connue
+
+- LimeSurvey 6.16.x ne contrôle pas le consentement côté serveur
+  (`SurveyRuntimeHelper::checkForDataSecurityAccepted` compare
+  `thisstep === '0'` à un entier) : le blocage du thème est une barrière
+  d'interface, une requête forgée reste acceptée. À corriger en amont.
+
+## [1.12.0] — 2026-07-01
+
+### Ajouté
+
+- **Repères contributeur en prévisualisation** (questionnaire inactif
+  uniquement, jamais visibles des répondants) : énumèrent la mise en forme
+  non conservée par la normalisation DSFR/RGAA (structure aplatie dans les
+  intitulés, styles inline normalisés dans l'aide). Nouvelle option
+  `contributor_hints`, activée par défaut.
+- Workflow CI `release.yml` : ZIP installable construit et attaché
+  automatiquement à la release GitHub à chaque tag `vX.Y.Z` (vérifie que
+  `config.xml` correspond au tag). Dependabot pour les GitHub Actions.
+
+### Corrigé
+
+- ExpressionManager cassé sur les questions de type tableau (`statFunctions`,
+  pertinence) : le thème ne retire plus `radio-item` / `checkbox-item` des
+  cellules. _#51._
+
+### Modifié
+
+- URLs du projet (README, CONTRIBUTING, `authorUrl`) basculées vers
+  l'organisation `mef-snum-miweb`.
+
 ## [1.11.0] — 2026-06-13
 
 Release **cascade `@layer` (étape A) + régressions visuelles de la revue**
