@@ -27,6 +27,7 @@ import { createErrorSummary } from './validation/error-summary.js';
 import { initNumericValidation, handleNumericMultiValidation, observeNumericMultiSumValidation } from './validation/numeric-validation.js';
 import { handleArrayValidation, handleSimpleQuestionValidation } from './validation/array-validation.js';
 import { transformValidationMessages } from './validation/validation-messages.js';
+import { initDataSecurityConsent } from './validation/datasecurity.js';
 import { fixDropdownArrayInlineStyles, setupStyleObserver } from './dropdowns/dropdown-array.js';
 import { initSearchableDropdowns } from './dropdowns/combobox.js';
 import { initStepperProgress } from './ui/stepper-progress.js';
@@ -97,6 +98,9 @@ onReady(() => {
     safeInit(handleNumericMultiValidation);
     safeInit(handleSimpleQuestionValidation);
     safeInit(transformValidationMessages);
+    // Consentement RGPD de l'écran de bienvenue (#61) : message DSFR à la
+    // place de la bulle native déclenchée par le `required` de la case.
+    safeInit(initDataSecurityConsent);
     // Laisser un petit délai aux messages d'Expression Manager pour se peupler
     setTimeout(() => safeInit(transformValidationMessages), 100);
     // L'observer de somme des numeric-multi a besoin que le DOM soit stable

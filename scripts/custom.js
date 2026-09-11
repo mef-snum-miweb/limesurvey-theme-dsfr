@@ -610,6 +610,7 @@
     thanks_answered: "Merci d'avoir répondu",
     numeric_chars_only: "Ce champ n'accepte que des chiffres. Les caractères non numériques sont automatiquement supprimés.",
     captcha_enter_answer: "Veuillez saisir votre réponse",
+    datasecurity_required: "Vous devez accepter la politique de confidentialité pour continuer.",
     summary_all_fixed_title: "Toutes les erreurs ont été corrigées",
     summary_all_fixed_desc: "Vous pouvez maintenant soumettre le formulaire.",
     summary_one_error: "Une erreur à corriger",
@@ -635,6 +636,7 @@
     thanks_answered: "Thank you for answering",
     numeric_chars_only: "This field only accepts digits. Non-numeric characters are removed automatically.",
     captcha_enter_answer: "Please enter your answer",
+    datasecurity_required: "You must accept the privacy policy to continue.",
     summary_all_fixed_title: "All errors have been fixed",
     summary_all_fixed_desc: "You can now submit the form.",
     summary_one_error: "One error to fix",
@@ -2022,6 +2024,101 @@
     $2(message).on("classChangeGood", () => {
       state = "good";
       apply();
+    });
+  }
+
+  // modules/theme-dsfr/src/validation/datasecurity.js
+  var CHECKBOX_ID = "datasecurity_accepted";
+  var MESSAGES_ID = "datasecurity_accepted-messages";
+  var ERROR_MESSAGE_ID = "datasecurity_accepted-message-error";
+  function getErrorText() {
+    const serverAlert = document.getElementById("datasecurity_error");
+    const title = serverAlert && serverAlert.querySelector(".fr-alert__title");
+    const custom = title && title.textContent ? title.textContent.trim() : "";
+    return custom || tUI("datasecurity_required");
+  }
+  function addDescribedBy(element, id) {
+    const current = (element.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean);
+    if (current.indexOf(id) === -1) {
+      current.push(id);
+      element.setAttribute("aria-describedby", current.join(" "));
+    }
+  }
+  function removeDescribedBy(element, id) {
+    const current = (element.getAttribute("aria-describedby") || "").split(/\s+/).filter(Boolean);
+    const next = current.filter((value) => value !== id);
+    if (next.length) {
+      element.setAttribute("aria-describedby", next.join(" "));
+    } else {
+      element.removeAttribute("aria-describedby");
+    }
+  }
+  function initDataSecurityConsent() {
+    const checkbox = document.getElementById(CHECKBOX_ID);
+    if (!checkbox) {
+      return;
+    }
+    if (checkbox.dataset.dsfrConsentInitialized) {
+      return;
+    }
+    checkbox.dataset.dsfrConsentInitialized = "true";
+    const group = checkbox.closest(".fr-checkbox-group");
+    const messagesGroup = document.getElementById(MESSAGES_ID);
+    const form = checkbox.closest("form");
+    function showError() {
+      if (group) {
+        group.classList.add("fr-checkbox-group--error");
+      }
+      checkbox.setAttribute("aria-invalid", "true");
+      if (messagesGroup) {
+        let message = document.getElementById(ERROR_MESSAGE_ID);
+        if (!message) {
+          message = document.createElement("p");
+          message.id = ERROR_MESSAGE_ID;
+          message.className = "fr-message fr-message--error";
+          messagesGroup.appendChild(message);
+        }
+        message.textContent = getErrorText();
+        addDescribedBy(checkbox, ERROR_MESSAGE_ID);
+      }
+      checkbox.focus();
+    }
+    function clearError() {
+      if (group) {
+        group.classList.remove("fr-checkbox-group--error");
+      }
+      checkbox.removeAttribute("aria-invalid");
+      const message = document.getElementById(ERROR_MESSAGE_ID);
+      if (message) {
+        message.remove();
+      }
+      removeDescribedBy(checkbox, ERROR_MESSAGE_ID);
+    }
+    checkbox.addEventListener("invalid", (event) => {
+      event.preventDefault();
+      showError();
+    });
+    if (form) {
+      form.addEventListener("submit", (event) => {
+        const submitter = event.submitter || document.activeElement;
+        if (submitter && typeof submitter.hasAttribute === "function" && submitter.hasAttribute("formnovalidate")) {
+          return;
+        }
+        if (checkbox.checked) {
+          return;
+        }
+        event.preventDefault();
+        showError();
+      });
+    }
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) {
+        clearError();
+        const serverAlert = document.getElementById("datasecurity_error");
+        if (serverAlert) {
+          serverAlert.classList.add("ls-js-hidden");
+        }
+      }
     });
   }
 
@@ -3498,6 +3595,7 @@
     safeInit(handleNumericMultiValidation);
     safeInit(handleSimpleQuestionValidation);
     safeInit(transformValidationMessages);
+    safeInit(initDataSecurityConsent);
     setTimeout(() => safeInit(transformValidationMessages), 100);
     setTimeout(() => safeInit(observeNumericMultiSumValidation), DELAY_DOM_STABLE);
     setTimeout(() => safeInit(createErrorSummary), DELAY_EM_MESSAGES);

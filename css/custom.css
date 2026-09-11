@@ -1913,6 +1913,34 @@ textarea,
     margin-right: 0.25rem;
 }
 
+/* Cases à cocher et boutons radio : le ::before du label est le contrôle
+   lui-même — le DSFR y dessine la case (content:"" + background-image +
+   position:absolute, cf. dsfr.min.css). La règle ci-dessus y injectait donc
+   un astérisque À LA PLACE de la case, qui apparaissait cassée et décalée
+   (issue #61, case « politique de confidentialité »). L'ordre de cascade
+   `overrides, theme, dsfr, custom` fait gagner `custom`, d'où l'écrasement.
+   On rend la main au DSFR sur ce pseudo-élément (revert-layer) et l'astérisque
+   passe après le libellé, à droite. */
+.fr-checkbox-group .has-required-field::before,
+.fr-radio-group .has-required-field::before {
+    /* Repli pour les navigateurs sans `revert-layer` : au minimum, plus
+       d'astérisque dans la case (valeurs DSFR reprises telles quelles). */
+    content: "";
+    margin-right: 0.5rem;
+    /* Navigateurs modernes : la main est rendue entièrement à la couche dsfr,
+       sans recopier ses valeurs. */
+    content: revert-layer;
+    margin-right: revert-layer;
+}
+
+.fr-checkbox-group .has-required-field::after,
+.fr-radio-group .has-required-field::after {
+    content: "*";
+    color: var(--text-default-error);
+    font-weight: 700;
+    margin-left: 0.25rem;
+}
+
 /* TODO: Ajouter les styles spécifiques ici au fur et à mesure */
 
 /* Le bloc « LOGO MARIANNE » historique (redéfinition .fr-logo:before/:after
