@@ -26,11 +26,7 @@ pas été publiés.
   « Charger un questionnaire non terminé », « Reprendre plus tard » et
   « Quitter et effacer » portent `formnovalidate` et restent utilisables.
   _Refs #61, #62._
-- Options de thème `container` et `showpopups` retirées : sans effet
-  observable côté DSFR, elles n'étaient qu'une source de confusion dans
-  l'admin. Rendu inchangé (les gabarits retombent sur leur défaut).
-- ZIP de release allégé : `wrap-css-layers.mjs`, `docs/` et les `.md` de
-  la racine n'y figurent plus (documentation consultable sur GitHub).
+- `release.sh` portable (sed BSD macOS / GNU Linux). _#54._
 
 ### Corrigé
 
@@ -47,9 +43,8 @@ pas été publiés.
   l'échelle devient un vrai `<label for>`. _#57._
 - Chronomètre (`time_limit`) disparu après une erreur de validation : le
   stub Bootstrap `Modal` devient un vrai constructeur, ce qui évite
-  l'exception qui tuait le bloc de scripts de fin de page. _#53._
-- `config.xml` : commentaire XML invalide (`--`) qui provoquait une
-  erreur 500 après purge du cache.
+  l'exception qui tuait le bloc de scripts de fin de page (régression
+  révélée par le retrait de `showpopups` en 1.12.0). _#53._
 
 ### Limite connue
 
@@ -58,7 +53,11 @@ pas été publiés.
   `thisstep === '0'` à un entier) : le blocage du thème est une barrière
   d'interface, une requête forgée reste acceptée. À corriger en amont.
 
-## [1.12.0] — 2026-07-01
+## [1.12.0] — 2026-07-01 (retag 2026-07-02)
+
+Le tag a été reposé le 2026-07-02 sur `a9f7d06` (personne n'avait encore
+installé la release) pour y inclure le retrait des options fantômes, le
+ZIP allégé et le correctif XML ci-dessous.
 
 ### Ajouté
 
@@ -76,11 +75,18 @@ pas été publiés.
 - ExpressionManager cassé sur les questions de type tableau (`statFunctions`,
   pertinence) : le thème ne retire plus `radio-item` / `checkbox-item` des
   cellules. _#51._
+- `config.xml` : commentaire XML invalide (`--`) qui provoquait une
+  erreur 500 après purge du cache.
 
 ### Modifié
 
 - URLs du projet (README, CONTRIBUTING, `authorUrl`) basculées vers
   l'organisation `mef-snum-miweb`.
+- Options de thème `container` et `showpopups` retirées : sans effet
+  observable côté DSFR, elles n'étaient qu'une source de confusion dans
+  l'admin. Rendu inchangé (les gabarits retombent sur leur défaut).
+- ZIP de release allégé : `wrap-css-layers.mjs`, `docs/` et les `.md` de
+  la racine n'y figurent plus (documentation consultable sur GitHub).
 
 ## [1.11.0] — 2026-06-13
 
