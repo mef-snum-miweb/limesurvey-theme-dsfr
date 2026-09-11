@@ -5,10 +5,11 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/). L'historique antérieur à
 `1.4.0` est consultable via les tags Git (`git tag`) et les *releases* GitHub.
 
-## [1.13.0] — 2026-09-11
+## [1.14.1] — 2026-09-11
 
 Release **consentement RGPD bloquant + correctifs d'accessibilité et de
-robustesse** accumulés depuis 1.12.0.
+robustesse** accumulés depuis 1.12.0. Les numéros 1.13.x et 1.14.0 n'ont
+pas été publiés.
 
 ### Modifié
 
