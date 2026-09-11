@@ -3,11 +3,15 @@
     Copyright (C) 2007-2018 The LimeSurvey Project Team
     This file render the load or save buttons without javascript needed
 #}
+{# `formnovalidate` : ces boutons soumettent le formulaire principal sans être
+   une progression dans le questionnaire (reprise / sauvegarde). Sans lui, le
+   `required` de la case « politique de confidentialité » (privacy_*.twig, #61)
+   les bloquerait aussi sur l'écran de bienvenue. #}
 {% if aSurveyInfo.aNavigator.load.show == "Y" %}
-    <button {{ aSurveyInfo.attr.loadbutton }} accesskey="l" class="{{ aSurveyInfo.class.loadbutton }} action--ls-button-submit fr-btn fr-btn--secondary">{{ gT("Load unfinished survey") }}</button>
+    <button {{ aSurveyInfo.attr.loadbutton }} formnovalidate accesskey="l" class="{{ aSurveyInfo.class.loadbutton }} action--ls-button-submit fr-btn fr-btn--secondary">{{ gT("Load unfinished survey") }}</button>
 {% endif %}
 {% if aSurveyInfo.aNavigator.save.show == "Y" %}
-<button {{ aSurveyInfo.attr.savebutton }} accesskey="s" class='{{ aSurveyInfo.class.savebutton }} action--ls-button-submit fr-btn fr-btn--secondary'>
+<button {{ aSurveyInfo.attr.savebutton }} formnovalidate accesskey="s" class='{{ aSurveyInfo.class.savebutton }} action--ls-button-submit fr-btn fr-btn--secondary'>
     {{ gT('Resume later') }}
 </button>
 {% endif %}

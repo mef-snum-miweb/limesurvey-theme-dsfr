@@ -15,24 +15,34 @@
 
 #}
 <div class="privacy-block">
-    {% set describeprivacy = "datasecurity_notice" %}
+    {# `describeprivacy` ne doit référencer que des ids RÉELLEMENT rendus :
+       #datasecurity_notice n'existe pas dans ce thème (la notice est rendue
+       dans la modale du pied de page, cf. footer/modals/privacy.twig), le
+       pointer laissait un aria-describedby cassé sur la case. #}
+    {% set describeprivacy = "" %}
 
-    {# Alerte d'erreur si la politique n'est pas acceptée #}
+    {# Alerte d'erreur renvoyée par le serveur (message saisi dans les
+       réglages du questionnaire). Le refus côté client, lui, affiche son
+       message sous la case — cf. src/validation/datasecurity.js. #}
     {% if aSurveyInfo.datasecurity_error %}
     <div class="{{ aSurveyInfo.class.activealert }} fr-alert fr-alert--error fr-my-4w {% if not aSurveyInfo.datasecuritynotaccepted %}ls-js-hidden {% endif %}" role="alert" {{ aSurveyInfo.attr.activealert }} id="datasecurity_error">
         <p class="fr-alert__title">{{ aSurveyInfo.datasecurity_error }}</p>
     </div>
         {% if aSurveyInfo.datasecuritynotaccepted %}
-            {% set describeprivacy = "datasecurity_error " ~ describeprivacy %}
+            {% set describeprivacy = "datasecurity_error" %}
         {% endif %}
     {% endif %}
 
-    {# Checkbox de consentement avec lien vers la modale #}
-    <div class="fr-checkbox-group fr-mt-4w">
-        <input aria-required="true" class="{{ aSurveyInfo.class.privacydataseccheckbox }} fr-checkbox-input" type="checkbox" name="datasecurity_accepted" id="datasecurity_accepted"{% if describeprivacy %} aria-describedby="{{describeprivacy}}" {% endif %}/>
+    {# Consentement obligatoire (#61) : `required` bloque nativement le passage
+       à la page suivante, y compris sans JavaScript ; src/validation/datasecurity.js
+       remplace ensuite la bulle native du navigateur par un message DSFR
+       accessible posé dans #datasecurity_accepted-messages. #}
+    <div class="fr-checkbox-group fr-mt-4w" id="datasecurity_accepted-group">
+        <input aria-required="true" required class="{{ aSurveyInfo.class.privacydataseccheckbox }} fr-checkbox-input" type="checkbox" name="datasecurity_accepted" id="datasecurity_accepted"{% if getPost('datasecurity_accepted') %} checked{% endif %}{% if describeprivacy %} aria-describedby="{{ describeprivacy }}"{% endif %}/>
         <label for="datasecurity_accepted" class="fr-label {{ aSurveyInfo.class.privacydataseccheckboxlabel }}">
             <strong>{{ aSurveyInfo.datasecurity_notice_label }}</strong>
         </label>
+        <div class="fr-messages-group" id="datasecurity_accepted-messages" aria-live="polite"></div>
     </div>
     <div class="fr-my-2w">
         <a href="#privacy-modal" class="fr-link" data-fr-opened="false" aria-controls="privacy-modal">
@@ -40,24 +50,3 @@
         </a>
     </div>
 </div>
-<script>
-$(function() {
-    $("#ls-button-submit").on("click", function() {
-        if(!$('#datasecurity_accepted').prop('checked')) {
-            /* dynamic show error */
-            $('#datasecurity_error').removeClass("ls-js-hidden");
-            if($('#datasecurity_error').length) {
-                /* add it in aria and role */
-                $('#datasecurity_error').attr("role", "alert");
-                $('#datasecurity_accepted').attr("aria-describedby", "datasecurity_error {{ datasecuritynotice }}");
-            }
-        }
-    });
-});
-$("#datasecurity_accepted").on("change", function() {
-    if($('#datasecurity_accepted').prop('checked')) {
-        /* dynamic hide error */
-        $('#datasecurity_error').addClass("ls-js-hidden");
-    }
-});
-</script>

@@ -9,5 +9,8 @@
         <input {{ aSurveyInfo.attr.clearallconfirm }} id="confirm-clearall" class="{{ aSurveyInfo.class.clearallconfirm }}">
         <label class="fr-label {{ aSurveyInfo.class.clearalllabel }}" for="confirm-clearall">{{ gT("Please confirm you want to clear your response?") }}</label>
     </div>
-    <button {{ aSurveyInfo.attr.clearallbutton }} class="{{ aSurveyInfo.class.clearallbutton }} fr-btn fr-btn--tertiary-no-outline" title="{{ gT("This action need to be confirmed.") }}">{{ gT("Exit and clear survey") }}</button>
+    {# `formnovalidate` : quitter et effacer n'est pas une progression dans le
+       questionnaire — sans lui, le `required` de la case « politique de
+       confidentialité » (privacy_*.twig, #61) bloquerait aussi la sortie. #}
+    <button {{ aSurveyInfo.attr.clearallbutton }} formnovalidate class="{{ aSurveyInfo.class.clearallbutton }} fr-btn fr-btn--tertiary-no-outline" title="{{ gT("This action need to be confirmed.") }}">{{ gT("Exit and clear survey") }}</button>
 </div>
