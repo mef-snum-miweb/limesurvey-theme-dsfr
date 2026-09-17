@@ -63,9 +63,11 @@ case "${2:-}" in
     *)              error "Option inconnue : ${2}" ;;
 esac
 
-# Valider le format semver
-if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-    error "Version invalide : '$VERSION'. Format attendu : X.Y.Z (ex: 1.1.0)"
+# Valider le format semver, pré-releases comprises (1.15.0-rc1, 1.15.0-beta.2) :
+# elles servent à valider la chaîne de publication sans exposer la version aux
+# instances tierces (la release GitHub est alors marquée --prerelease).
+if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$'; then
+    error "Version invalide : '$VERSION'. Format attendu : X.Y.Z ou X.Y.Z-suffixe (ex: 1.1.0, 1.15.0-rc1)"
 fi
 
 # Vérifier qu'on est bien dans le repo git du thème
