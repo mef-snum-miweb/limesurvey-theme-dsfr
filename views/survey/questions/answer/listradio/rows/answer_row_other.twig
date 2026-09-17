@@ -15,6 +15,13 @@
  */
 #}
 
+{# LS6-COMPAT — à retirer après bascule 7.x (ADR-129, theme#70).
+   LS7 renomme le champ « Autre » : {name}other → {name}_Cother. C'est un NOM
+   de champ POST : un nom 6.x envoyé à un core 7.x est ignoré silencieusement.
+   Détection par le format du fieldname (SGQA en 6.x, Q<qid> en 7.x). #}
+{% set lsOtherSuffix = name matches '/^\\d+X\\d+X\\d+/' ? 'other' : '_Cother' %}
+
+
 <!-- answer_row_other DSFR -->
 <div class="fr-fieldset__element radio-item answer-item" {{ sDisplayStyle }}>
     <div id='javatbd{{ myfname }}' class="fr-radio-group">
@@ -45,7 +52,7 @@
             type="text"
             class="fr-input {{ kpclass }}"
             id="answer{{ name }}othertext"
-            name="{{ name }}other"
+            name="{{ name }}{{ lsOtherSuffix }}"
             title="{{ _ifOtherSpecify }}"
             {{ answer_other }}
             {% if numbers_only %} data-number="1" {% endif %}

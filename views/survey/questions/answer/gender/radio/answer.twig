@@ -14,6 +14,13 @@
  */
 #}
 
+{# LS6-COMPAT — à retirer après bascule 7.x (ADR-129, theme#67).
+   LS7 préfixe les ids d'items : javatbd{name}Y → javatbd{name}_CY. La version
+   n'étant pas exposée aux templates, on la déduit du format du fieldname :
+   SGQA `282267X4X21` en 6.x, `Q21` en 7.x. #}
+{% set lsIsSix = name matches '/^\\d+X\\d+X\\d+/' %}
+
+
 <!--Gender question, radio display -->
 
 <!-- answer -->
@@ -21,7 +28,7 @@
     <legend class="fr-fieldset__legend fr-sr-only">{{ gT("Choose one of the following answers") }}</legend>
     <div class="fr-fieldset__content">
         <!-- Female -->
-        <div class="fr-radio-group answer-item radio-item" id="javatbd{{ name }}F">
+        <div class="fr-radio-group answer-item radio-item" id="javatbd{{ name }}{{ lsIsSix ? 'F' : '_CF' }}">
             <input
                 type="radio"
                 name="{{ name }}"
@@ -35,7 +42,7 @@
         </div>
 
         <!-- Male -->
-        <div class="fr-radio-group answer-item radio-item" id="javatbd{{ name }}M">
+        <div class="fr-radio-group answer-item radio-item" id="javatbd{{ name }}{{ lsIsSix ? 'M' : '_CM' }}">
             <input
                 type="radio"
                 name="{{ name }}"

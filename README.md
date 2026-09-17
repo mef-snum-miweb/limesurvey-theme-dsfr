@@ -78,23 +78,59 @@ Le repo [`mef-snum-miweb/limesurvey-dsfr-suite`](https://github.com/mef-snum-miw
 
 ## Compatibilité LimeSurvey
 
-**Version testée et supportée : LimeSurvey 6.16.16** (image `martialblog/limesurvey:6-apache`).
+**Versions supportées : LimeSurvey 6.16.16 (référence) et 7.1.0.**
 
 Le thème étant autonome (sans `<extends>`), il duplique les conventions de nommage des
-champs du core (noms POST, ids `javatbd*`, `data-value` du ranking). Vérifié sur 6.16.16 :
-le thème est strictement aligné (`{name}other`, `{fileid}_filecount`, `javatbd{name}Y/N`,
-`javatbd{rankingName}{code}`).
+champs du core (noms POST, ids `javatbd*`, `data-value` du ranking). Or **LimeSurvey 7 a
+renommé ces conventions** : `{name}other` → `{name}_Cother`, `{fileid}_filecount` →
+`{fileid}_Cfilecount`, `javatbd{name}Y` → `javatbd{name}_CY`,
+`javatbd{rankingName}{code}` → `javatbd{rankingName}_S{sqid}`, et le rendu du ranking
+expose désormais `title`/`sqid` au lieu de `code`. Ce sont des **noms de champs POST** :
+un nom 6.x envoyé à un core 7.x est ignoré silencieusement.
 
-> ⚠️ **Breaking change à venir** : le master LimeSurvey (futures 6.x/7.x) renomme ces
-> champs avec un infixe `_C`/`_S` (`{name}_Cother`, `{fileid}_Cfilecount`,
-> `javatbd{name}_CY`, `javatbd{rankingName}_S{sqid}`…). Avant toute montée de version,
-> vérifier ces conventions dans `application/views/survey/questions/answer/` de la
-> version cible — sans adaptation du thème, **le texte « autre » et le compteur
-> d'upload ne seraient plus enregistrés**. Recommandation : épingler le tag Docker sur
-> une version vérifiée (ex. `martialblog/limesurvey:6.16-apache`) plutôt que `6-apache`.
->
-> À la montée de version, porter aussi les fonctionnalités **introduites après 6.16.16**
-> (absentes du thème comme du vanilla 6.16.16, vérifié dans le conteneur) :
+### Pattern de compatibilité (ADR-129)
+
+Le thème supporte les deux cores **sur une seule branche**, le temps de la transition.
+Deux règles :
+
+1. **Jamais de test de version.** Le numéro de version de LimeSurvey n'est pas exposé
+   aux templates Twig (aucun helper dans `LS_Twig_Extension`, sandbox Twig). On détecte
+   donc *ce qui change*, pas *la version* :
+
+   ```twig
+   {# présence d'une variable propre à 7.x #}
+   {% set rankValue = ansrow.code|default(ansrow.title) %}
+   {% set itemId = ansrow.sqid is defined ? ... %}
+
+   {# ou format du fieldname : SGQA `282267X4X21` en 6.x, `Q21` en 7.x #}
+   {% set lsIsSix = name matches '/^\\d+X\\d+X\\d+/' %}
+   ```
+
+2. **Tout bloc de transition est marqué** pour que son retrait soit mécanique :
+
+   ```twig
+   {# LS6-COMPAT — à retirer après bascule 7.x (ADR-129, theme#NN) #}
+   ```
+
+   `grep -rn "LS6-COMPAT" views/` donne la liste exhaustive de ce qui disparaîtra quand
+   le support 6.x sera abandonné.
+
+Côté JS, la même logique est centralisée dans l'abstraction des fieldnames
+(`src/utils/fieldname.js`) — pas de test dispersé dans les modules.
+
+### Gate double
+
+Toute modification doit passer la suite sur **les deux cores** :
+
+```bash
+LS_CORE=6 ./run_tests.sh --full   # 6.16.16, port 8081
+LS_CORE=7 ./run_tests.sh --full   # 7.1.0,  port 8082
+```
+
+Les deux stacks cohabitent (conteneurs, ports et volumes distincts). Épingler le tag
+Docker sur une version vérifiée (jamais `6-apache` / `7-apache` flottants).
+
+> À la montée de version, porter aussi les fonctionnalités **introduites après 6.16.16** :
 > politique de confidentialité sur les pages code d'accès et inscription
 > (`showtokenpolicy`/`showregisterpolicy` + partials `token_privacy`/`register_privacy`),
 > attributs d'inscription typés liste/date (`DD`/`DP`), confirmation d'opt-out en POST

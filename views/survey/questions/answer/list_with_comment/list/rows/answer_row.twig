@@ -15,7 +15,10 @@
 #}
 <!-- answer_row DSFR -->
 <div class="fr-fieldset__element radio-item answer-item">
-    <div id='javatbd{{ name }}{{ value }}' class="fr-radio-group">
+    {# LS6-COMPAT — à retirer après bascule 7.x (ADR-129, theme#67) :
+   LS7 identifie l'item par la sous-question (`_S{{aid}}`) et non par la valeur. #}
+{% set lsItemSuffix = aid is defined ? '_S' ~ aid : value %}
+<div id='javatbd{{ name }}{{ lsItemSuffix }}' class="fr-radio-group">
         <input
             type="radio"
             name="{{ name }}"

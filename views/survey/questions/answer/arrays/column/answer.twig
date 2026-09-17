@@ -50,7 +50,7 @@
         <tbody>
             {% for ansrow in labels %}
                 <tr id="javatbd{{ ansrow.myfname }}" class="answers-list dsfr-answers">
-                    <th scope="row" id="label-{{ ansrow.code }}" class="answertext fr-text--bold{% if answerwidth==0 %} fr-sr-only{% endif %}">
+                    <th scope="row" id="label-{{ basename }}-{{ ansrow.code }}" class="answertext fr-text--bold{% if answerwidth==0 %} fr-sr-only{% endif %}">
                         {{ processString(ansrow.answer) }}
                     </th>
                     {% for i, ld in anscode %}
@@ -61,7 +61,7 @@
                                 name="{{ aQuestions[i].myfname }}"
                                 value="{{ ansrow.code }}"
                                 id="answer{{ aQuestions[i].myfname }}-{{ ansrow.code }}"
-                                aria-labelledby="label-{{ ansrow.code }} answertext{{ aQuestions[i].myfname }}"
+                                aria-labelledby="label-{{ basename }}-{{ ansrow.code }} answertext{{ aQuestions[i].myfname }}"
                                 {{ checked[ansrow.code][ld] }}
                             />
                             {# Label visible en mode linéarisé mobile. aria-hidden :
