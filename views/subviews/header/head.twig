@@ -25,65 +25,86 @@
 {# Utiliser POS_HEAD pour charger très tôt #}
 {{ registerScript('bootstrapStubsHead',"
     (function(){
-        // Intercepter les erreurs TempusDominus (No element was provided)
-        window.addEventListener('error', function(e) {
-            if (e.message && (e.message.includes('No element was provided') || e.message.includes('TD:'))) {
-                e.preventDefault();
-                e.stopPropagation();
-                return true;
-            }
-        }, true);
-
-        // Wrapper pour TempusDominus qui gère l'absence d'élément
-        var originalTD = null;
-        Object.defineProperty(window, 'TempusDominus', {
-            get: function() { return originalTD; },
-            set: function(val) {
-                if (val && typeof val === 'function') {
-                    originalTD = function(element, options) {
-                        if (!element) {
-                            // Retourner un objet stub si pas d'élément
-                            return {
-                                dates: { picked: [] },
-                                updateOptions: function() {},
-                                dispose: function() {},
-                                show: function() {},
-                                hide: function() {},
-                                toggle: function() {},
-                                clear: function() {},
-                                subscribe: function() {},
-                                unsubscribe: function() {}
-                            };
-                        }
-                        try {
-                            return new val(element, options);
-                        } catch(err) {
-                            console.warn('TempusDominus error caught:', err.message);
-                            return {
-                                dates: { picked: [] },
-                                updateOptions: function() {},
-                                dispose: function() {},
-                                show: function() {},
-                                hide: function() {},
-                                toggle: function() {},
-                                clear: function() {},
-                                subscribe: function() {},
-                                unsubscribe: function() {}
-                            };
-                        }
-                    };
-                    // Copier les propriétés statiques
-                    for (var key in val) {
-                        if (val.hasOwnProperty(key)) {
-                            originalTD[key] = val[key];
-                        }
+        // theme#60 — Le core initialise le datetimepicker dans le bloc POSTSCRIPT,
+        // via le constructeur du namespace tempusDominus, sur un élément récupéré
+        // par id. Quand la question date n'est pas sur la page courante, il renvoie
+        // null, le constructeur jette, et TOUS les scripts suivants du même bloc CDATA
+        // ne s'exécutent jamais (doRatingSlider / doRatingStar des questions type 5,
+        // init EM…). On garde donc le namespace `tempusDominus` (celui qu'appelle le
+        // core) et non `window.TempusDominus` : le constructeur ne jette plus jamais,
+        // il rend un stub inerte quand l'élément manque.
+        // Le stub doit exposer la surface que le core manipule JUSTE APRÈS la
+        // construction (cf. DateTimePicker::getMomentJsOverrideString) :
+        //   picker.dates.formatInput = …  puis  picker.dates.setFromInput('…')
+        //   picker.optionsStore.options.localization.locale / .restrictions / .viewdate
+        // Sans elles, la ligne suivante jette à son tour et on n'a rien réglé.
+        var tdStub = function() {
+            return {
+                dates: {
+                    picked: [],
+                    formatInput: function() { return null; },
+                    setFromInput: function() {},
+                    setValue: function() {}
+                },
+                optionsStore: {
+                    options: {
+                        localization: { locale: (document.documentElement.lang || 'fr') },
+                        restrictions: {},
+                        viewdate: null
                     }
-                } else {
-                    originalTD = val;
+                },
+                updateOptions: function() {},
+                dispose: function() {},
+                show: function() {},
+                hide: function() {},
+                toggle: function() {},
+                clear: function() {},
+                subscribe: function() {},
+                unsubscribe: function() {}
+            };
+        };
+
+        var wrapNamespace = function(ns) {
+            if (!ns || typeof ns.TempusDominus !== 'function' || ns.__dsfrGuarded) {
+                return ns;
+            }
+            var Original = ns.TempusDominus;
+            var Guarded = function(element, options) {
+                if (!element) {
+                    console.warn('[DSFR] TempusDominus : élément absent de la page, init ignorée');
+                    return tdStub();
                 }
-            },
-            configurable: true
-        });
+                try {
+                    return new Original(element, options);
+                } catch (err) {
+                    console.warn('[DSFR] TempusDominus : init en échec —', err.message);
+                    return tdStub();
+                }
+            };
+            for (var key in Original) {
+                if (Object.prototype.hasOwnProperty.call(Original, key)) {
+                    Guarded[key] = Original[key];
+                }
+            }
+            Guarded.prototype = Original.prototype;
+            ns.TempusDominus = Guarded;
+            ns.__dsfrGuarded = true;
+            return ns;
+        };
+
+        // Le bundle du core fait `(…).tempusDominus = factory()` : on intercepte
+        // l'affectation pour poser la garde avant tout usage.
+        var tdNamespace = wrapNamespace(window.tempusDominus);
+        try {
+            Object.defineProperty(window, 'tempusDominus', {
+                get: function() { return tdNamespace; },
+                set: function(ns) { tdNamespace = wrapNamespace(ns); },
+                configurable: true
+            });
+        } catch (e) {
+            // Navigateur qui refuse la redéfinition : on se rabat sur la garde directe.
+            window.tempusDominus = wrapNamespace(window.tempusDominus);
+        }
 
         function initStubs() {
             if (typeof jQuery !== 'undefined' && jQuery.fn) {
