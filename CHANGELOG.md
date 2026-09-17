@@ -5,6 +5,56 @@ Format inspiré de [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/) ;
 versionnage [SemVer](https://semver.org/lang/fr/). L'historique antérieur à
 `1.4.0` est consultable via les tags Git (`git tag`) et les *releases* GitHub.
 
+## [1.15.0] — 2026-09-17
+
+Release **compatibilité LimeSurvey 7.x** : le thème supporte désormais
+**6.16.16 et 7.1.0 sur une même version**, sans branche parallèle
+(cf. ADR-129). Aucune rupture pour les instances 6.x — options, rendu et
+comportement sont inchangés, et vérifiés identiques par comparaison visuelle
+des deux cores (108 captures, zéro écart).
+
+### Ajouté
+
+- **Support de LimeSurvey 7.x.** LimeSurvey 7 a renommé plusieurs conventions
+  que le thème doit suivre : noms de champs POST (`{name}_Cother`,
+  `{fileid}_Cfilecount`), ids d'items (`javatbd{name}_CY`, `_S{sqid}`),
+  structure de la liste de réponses (`<div>` → `<ul>/<li>`), et rendu du
+  ranking (`ansrow.code` → `title`/`sqid`). Le thème détecte **ce qui change**
+  — présence d'une variable, format du fieldname — jamais la version, qui
+  n'est pas exposée aux templates Twig. Chaque bloc de transition porte le
+  marqueur `LS6-COMPAT` (`grep -rn "LS6-COMPAT" views/`), pour un retrait
+  mécanique le jour où le support 6.x sera abandonné.
+
+### Corrigé
+
+- **Ranking inutilisable sous 7.x** : sans ce correctif, aucun classement
+  n'était enregistrable et toute page suivant une question de classement
+  devenait inatteignable.
+- **Init du datetimepicker** : la parade existante gardait
+  `window.TempusDominus` alors que le cœur appelle `tempusDominus.TempusDominus`
+  — elle ne s'appliquait donc jamais, et masquait l'erreur au lieu de la
+  corriger. Conséquence : quand une question date n'était pas sur la page
+  courante, **tous les scripts suivants du même bloc étaient perdus**, dont
+  l'initialisation des questions type 5 (étoiles / emoji).
+- **Attribut `headers` des tableaux double échelle** : l'index des colonnes ne
+  comptait que les `<th>`, alors que les cellules du corps sont repérées par
+  position — `right-header` se retrouvait référencé sur la première cellule de
+  chaque ligne.
+- **Mise en page sous 7.x** : marge par défaut du `<ul>` de réponses
+  (16 px parasites par question) et `padding-left` perdu par les boutons
+  `bootstrap_buttons` (décalage de 4 px).
+
+### Réserves connues
+
+- L'**upload de fichier** n'est couvert par aucun test E2E alors que son champ
+  compteur a été renommé en 7.x : vérification manuelle recommandée avant une
+  mise en production sur 7.x.
+- `show_noanswer=1` sur la double échelle n'est exercé par aucun questionnaire
+  de test.
+- Le **catalogue français de LimeSurvey 7.1 est incomplet** (des `msgid` ont
+  changé en amont) : sans le rattrapage appliqué côté suite, des messages de
+  validation s'affichent en anglais.
+
 ## [1.14.1] — 2026-09-11
 
 Release **consentement RGPD bloquant + correctifs d'accessibilité et de
