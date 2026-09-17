@@ -1834,6 +1834,22 @@ textarea,
    RADIO BUTTONS - DSFR Conformité
    ============================================ */
 
+/* LS7 — le core rend désormais la liste de réponses en <ul> (c'était un <div>
+   en 6.16) : la marge par défaut du navigateur ajoutait 16 px de hauteur à
+   chaque question à choix unique. Neutre en 6.x (le <div> n'a pas de marge).
+   Cf. ADR-129 / theme#47. */
+ul.ls-answers.answers-list {
+    margin-block: 0;
+}
+
+/* LS7 — les items de la liste de réponses passent de <div> à <li> : ils
+   héritent alors des règles de liste ci-dessous (padding-left: 0), ce qui
+   décalait les boutons bootstrap_buttons de 4 px vers la gauche par rapport
+   au rendu 6.16. On rétablit le padding symétrique. Cf. ADR-129 / theme#47. */
+ul.ls-answers li.bootstrap-buttons-div {
+    padding-left: 4px !important;
+}
+
 /* Masquer les puces sur les listes de radios (si elles existent encore) */
 .radio-list,
 .answers-list.radio-list {

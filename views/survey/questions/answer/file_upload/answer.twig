@@ -29,7 +29,10 @@
 
     {# Hidden fields for LimeSurvey compatibility #}
     <input type="hidden" id="java{{ fileid }}" name="{{ fileid }}" value="{{ value|escape('html_attr') }}" />
-    <input type="hidden" id="java{{ fileid }}_filecount" name="{{ fileid }}_filecount" value="{{ filecountvalue }}" />
+    {# LS6-COMPAT — à retirer après bascule 7.x (ADR-129, theme#70) :
+       LS7 renomme le compteur de fichiers {fileid}_filecount → {fileid}_Cfilecount. #}
+    {% set lsFileCountSuffix = fileid matches '/^\\d+X\\d+X\\d+/' ? '_filecount' : '_Cfilecount' %}
+    <input type="hidden" id="java{{ fileid }}{{ lsFileCountSuffix }}" name="{{ fileid }}{{ lsFileCountSuffix }}" value="{{ filecountvalue }}" />
 
     {# Upload restrictions info - conditional display #}
     {# Sans modification du core PHP, seul maxFiles est passé directement #}
@@ -124,7 +127,7 @@
     var filesListUl = document.getElementById('files-list-' + fieldname);
     var filesTitle = document.getElementById('files-title-' + fieldname);
     var hiddenValue = document.getElementById('java' + fieldname);
-    var hiddenCount = document.getElementById('java' + fieldname + '_filecount');
+    var hiddenCount = document.getElementById('java' + fieldname + '{{ lsFileCountSuffix }}');
 
     // Parse uploadurl to get parameters (minfiles, maxfiles are in URL)
     var fullUrl = fileInput.dataset.fullurl || '';

@@ -11,6 +11,13 @@
  */
 #}
 
+{# LS6-COMPAT — à retirer après bascule 7.x (ADR-129, theme#70).
+   LS7 renomme le champ « Autre » : {name}other → {name}_Cother. C'est un NOM
+   de champ POST : un nom 6.x envoyé à un core 7.x est ignoré silencieusement.
+   Détection par le format du fieldname (SGQA en 6.x, Q<qid> en 7.x). #}
+{% set lsOtherSuffix = name matches '/^\\d+X\\d+X\\d+/' ? 'other' : '_Cother' %}
+
+
 <!-- Other text field - DSFR -->
 {# `t` n'est pas propagé dans ce sous-template rendu par LimeSurvey hors scope de layout_global.twig.
    On replie sur la langue active du questionnaire avec un libellé explicite (RGAA 11.1 label non vide). #}
@@ -24,7 +31,7 @@
         type="text"
         class="fr-input"
         id="othertext{{ name }}"
-        name="{{ name }}other"
+        name="{{ name }}{{ lsOtherSuffix }}"
         value="{{ value }}"
     />
 </div>
