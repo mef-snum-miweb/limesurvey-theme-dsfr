@@ -35,15 +35,20 @@ export function fixTableAccessibility() {
         const hasRowHeaders = table.querySelectorAll('tbody th[id]').length > 0;
 
         if (hasColHeaders && hasRowHeaders) {
+            // L'index est celui de la CELLULE, pas celui du <th> : le <thead> des
+            // tableaux double échelle intercale des <td> vides (colonne des
+            // libellés, séparateur inter-échelles). N'indexer que les <th>
+            // décalait la correspondance — `right-header` se retrouvait
+            // référencé sur la première cellule de chaque ligne (#58).
             const colHeaderIds = [];
             const headerRow = table.querySelector('thead tr:last-child');
             if (headerRow) {
-                let thIndex = 0;
-                headerRow.querySelectorAll('th').forEach(function (th) {
-                    if (th.id) {
-                        colHeaderIds[thIndex] = th.id;
+                let cellIndex = 0;
+                headerRow.querySelectorAll('th, td').forEach(function (cell) {
+                    if (cell.tagName === 'TH' && cell.id) {
+                        colHeaderIds[cellIndex] = cell.id;
                     }
-                    thIndex++;
+                    cellIndex++;
                 });
             }
 

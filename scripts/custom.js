@@ -235,12 +235,12 @@
         const colHeaderIds = [];
         const headerRow = table.querySelector("thead tr:last-child");
         if (headerRow) {
-          let thIndex = 0;
-          headerRow.querySelectorAll("th").forEach(function(th) {
-            if (th.id) {
-              colHeaderIds[thIndex] = th.id;
+          let cellIndex = 0;
+          headerRow.querySelectorAll("th, td").forEach(function(cell) {
+            if (cell.tagName === "TH" && cell.id) {
+              colHeaderIds[cellIndex] = cell.id;
             }
-            thIndex++;
+            cellIndex++;
           });
         }
         tbodyRows.forEach(function(tr) {
